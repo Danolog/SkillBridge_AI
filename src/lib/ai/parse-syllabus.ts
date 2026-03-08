@@ -26,7 +26,7 @@ Wymagania:
 
 	const cleaned = text
 		.trim()
-		.replace(/^```json?\n?/, "")
+		.replace(/^```(?:json)?\n?/, "")
 		.replace(/\n?```$/, "");
 	return JSON.parse(cleaned) as string[];
 }

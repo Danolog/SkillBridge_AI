@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillBridge AI — Mikro-kurs (Widok)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fafaf9;--sidebar:#0b0e14;--card:white;
+  --text:#0f172a;--text-muted:#475569;--text-dim:#94a3b8;
+  --primary:#6366f1;--accent:#22d3ee;
+  --gradient:linear-gradient(135deg,#6366f1 0%,#22d3ee 100%);
+  --radius:24px;--radius-sm:16px;--radius-pill:9999px;
+  --border:rgba(99,102,241,0.06);
+  --shadow:0 1px 3px rgba(0,0,0,0.06);
+  --shadow-hover:0 12px 40px rgba(99,102,241,0.14);
+  --font-heading:'Nunito',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* Sidebar (same as list) */
+.sidebar{width:260px;background:var(--sidebar);padding:24px 0;flex-shrink:0;display:flex;flex-direction:column}
+.sidebar-logo{padding:0 20px 28px;display:flex;align-items:center;gap:10px;text-decoration:none}
+.sidebar-logo-icon{width:36px;height:36px;background:var(--gradient);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.sidebar-logo-icon svg{color:white}
+.sidebar-logo-text{font-family:var(--font-heading);font-weight:800;font-size:17px;color:white}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 12px}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:rgba(248,250,252,0.6);font-size:14px;font-weight:500;text-decoration:none;transition:all .2s}
+.sidebar-item:hover{background:rgba(255,255,255,0.06);color:rgba(248,250,252,0.85)}
+.sidebar-item.active{background:rgba(99,102,241,0.12);color:#a5b4fc;position:relative}
+.sidebar-item.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--gradient);border-radius:0 3px 3px 0}
+
+.main{flex:1;padding:32px 40px;max-width:900px}
+
+/* Back link */
+.mc-back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--text-muted);text-decoration:none;margin-bottom:20px;transition:color .2s}
+.mc-back:hover{color:var(--primary)}
+
+/* Course header */
+.mc-view-header{background:white;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden}
+.mc-view-header::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient)}
+.mc-view-title{font-family:var(--font-heading);font-weight:800;font-size:24px;color:var(--text);margin-bottom:8px}
+.mc-view-meta{display:flex;gap:20px;flex-wrap:wrap}
+.mc-view-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)}
+.mc-view-meta-item svg{flex-shrink:0}
+.mc-view-competency{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:var(--radius-pill);font-size:11px;font-weight:700;background:rgba(99,102,241,0.08);color:var(--primary);border:1px solid rgba(99,102,241,0.15)}
+
+/* Steps accordion */
+.mc-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.mc-step{background:white;border-radius:var(--radius-sm);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;transition:border-color .2s}
+.mc-step.open{border-color:rgba(99,102,241,0.15)}
+.mc-step-header{display:flex;align-items:center;gap:14px;padding:18px 24px;cursor:pointer;transition:background .15s}
+.mc-step-header:hover{background:rgba(99,102,241,0.02)}
+.mc-step-number{width:32px;height:32px;background:rgba(99,102,241,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:600;font-size:13px;color:var(--primary);flex-shrink:0}
+.mc-step.open .mc-step-number{background:var(--gradient);color:white}
+.mc-step-title{flex:1;font-family:var(--font-heading);font-weight:700;font-size:15px;color:var(--text)}
+.mc-step-chevron{width:20px;height:20px;color:var(--text-dim);transition:transform .25s ease;flex-shrink:0}
+.mc-step.open .mc-step-chevron{transform:rotate(180deg);color:var(--primary)}
+
+.mc-step-body{display:none;padding:0 24px 24px;padding-left:70px}
+.mc-step.open .mc-step-body{display:block}
+.mc-step-content{font-size:14px;line-height:1.7;color:var(--text-muted)}
+.mc-step-content p{margin-bottom:12px}
+.mc-step-content code{background:rgba(99,102,241,0.06);padding:2px 6px;border-radius:6px;font-family:var(--font-mono);font-size:13px;color:var(--primary)}
+.mc-step-content ul{margin:8px 0 12px 20px}
+.mc-step-content li{margin-bottom:6px}
+
+.mc-step-exercise{margin-top:16px;padding:16px 20px;background:rgba(34,211,238,0.04);border:1px solid rgba(34,211,238,0.12);border-radius:12px}
+.mc-step-exercise-label{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.mc-step-exercise-text{font-size:14px;line-height:1.6;color:var(--text-muted)}
+
+/* Resources */
+.mc-resources{background:white;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:24px 28px;margin-bottom:24px}
+.mc-resources-title{font-family:var(--font-heading);font-weight:700;font-size:17px;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.mc-resources-list{display:flex;flex-direction:column;gap:10px}
+.mc-resource{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px;background:rgba(99,102,241,0.02);border:1px solid rgba(99,102,241,0.06);text-decoration:none;transition:all .2s}
+.mc-resource:hover{background:rgba(99,102,241,0.05);border-color:rgba(99,102,241,0.12);transform:translateX(4px)}
+.mc-resource-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mc-resource-icon.video{background:rgba(239,68,68,0.08);color:#ef4444}
+.mc-resource-icon.article{background:rgba(99,102,241,0.08);color:var(--primary)}
+.mc-resource-icon.docs{background:rgba(34,197,94,0.08);color:#16a34a}
+.mc-resource-icon.interactive{background:rgba(245,158,11,0.08);color:#d97706}
+.mc-resource-info{flex:1;min-width:0}
+.mc-resource-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.mc-resource-type{font-size:11px;color:var(--text-dim);text-transform:uppercase;font-weight:600;letter-spacing:.04em}
+.mc-resource-arrow{color:var(--text-dim);flex-shrink:0}
+
+/* Mini-project */
+.mc-project{background:white;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden}
+.mc-project::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient)}
+.mc-project-title{font-family:var(--font-heading);font-weight:700;font-size:17px;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.mc-project-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.mc-project-desc{font-size:14px;line-height:1.7;color:var(--text-muted);margin-bottom:16px}
+.mc-project-tools{display:flex;gap:8px;flex-wrap:wrap}
+.mc-project-tool{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:var(--radius-pill);background:rgba(99,102,241,0.06);color:var(--primary);font-size:12px;font-weight:600;border:1px solid rgba(99,102,241,0.1)}
+
+/* Complete button */
+.mc-complete-section{text-align:center;padding:8px 0 24px}
+.mc-complete-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 40px;background:var(--gradient);color:white;border:none;border-radius:var(--radius-pill);font-size:15px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:all .25s;box-shadow:0 0 20px rgba(99,102,241,0.25)}
+.mc-complete-btn:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(99,102,241,0.35)}
+.mc-complete-btn.done{background:#16a34a;box-shadow:0 0 20px rgba(34,197,94,0.25);cursor:default}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{padding:20px 16px}
+  .mc-view-title{font-size:20px}
+  .mc-step-body{padding-left:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <a href="#" class="sidebar-logo">
+    <div class="sidebar-logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+    <span class="sidebar-logo-text">SkillBridge AI</span>
+  </a>
+  <div class="sidebar-nav">
+    <a href="#" class="sidebar-item">Dashboard</a>
+    <a href="#" class="sidebar-item">Mapa Kompetencji</a>
+    <a href="#" class="sidebar-item">Gap Analysis</a>
+    <a href="01-course-list.html" class="sidebar-item active">Mikro-kursy</a>
+    <a href="#" class="sidebar-item">Paszport</a>
+  </div>
+</nav>
+
+<main class="main">
+  <!-- Back -->
+  <a href="01-course-list.html" class="mc-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Powrot do kursow
+  </a>
+
+  <!-- Course header -->
+  <div class="mc-view-header">
+    <h1 class="mc-view-title">Wizualizacja danych w Tableau</h1>
+    <div class="mc-view-meta">
+      <span class="mc-view-competency">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Tableau
+      </span>
+      <span class="mc-view-meta-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        ~20 minut
+      </span>
+      <span class="mc-view-meta-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        4 kroki
+      </span>
+      <span class="mc-view-meta-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        5 zasobow
+      </span>
+    </div>
+  </div>
+
+  <!-- Steps accordion -->
+  <div class="mc-steps">
+    <!-- Step 1: OPEN -->
+    <div class="mc-step open" onclick="this.classList.toggle('open')">
+      <div class="mc-step-header">
+        <div class="mc-step-number">1</div>
+        <div class="mc-step-title">Czym jest Tableau i dlaczego warto?</div>
+        <svg class="mc-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="mc-step-body">
+        <div class="mc-step-content">
+          <p>Tableau to jedno z najpopularniejszych narzedzi do wizualizacji danych na swiecie. Pozwala tworzyc interaktywne dashboardy bez pisania kodu.</p>
+          <p>W tym kroku poznasz:</p>
+          <ul>
+            <li>Interfejs Tableau Public (darmowa wersja)</li>
+            <li>Roznice miedzy Tableau Public, Desktop i Server</li>
+            <li>Jak zaladowac dane z pliku CSV</li>
+          </ul>
+          <p>Tableau uzywa podejscia <code>drag-and-drop</code>, co oznacza, ze tworzysz wykresy przeciagajac pola na polotno.</p>
+        </div>
+        <div class="mc-step-exercise">
+          <div class="mc-step-exercise-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            Cwiczenie
+          </div>
+          <div class="mc-step-exercise-text">
+            Otworz Tableau Public (link w zasobach), zaloguj sie darmowym kontem i zaladuj przykladowy dataset "Superstore" dostepny w Tableau.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: closed -->
+    <div class="mc-step" onclick="this.classList.toggle('open')">
+      <div class="mc-step-header">
+        <div class="mc-step-number">2</div>
+        <div class="mc-step-title">Tworzenie pierwszego wykresu</div>
+        <svg class="mc-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="mc-step-body">
+        <div class="mc-step-content">
+          <p>Teraz stworzymy pierwszy wykres slupkowy pokazujacy sprzedaz w kategoriach produktow.</p>
+          <p>Przeciagnij pole <code>Category</code> na os X (Columns) i <code>Sales</code> na os Y (Rows). Tableau automatycznie stworzy wykres slupkowy.</p>
+        </div>
+        <div class="mc-step-exercise">
+          <div class="mc-step-exercise-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            Cwiczenie
+          </div>
+          <div class="mc-step-exercise-text">Stworz wykres slupkowy sprzedazy wedlug regionow. Dodaj kolor wedlug kategorii (przeciagnij Category na Color).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: closed -->
+    <div class="mc-step" onclick="this.classList.toggle('open')">
+      <div class="mc-step-header">
+        <div class="mc-step-number">3</div>
+        <div class="mc-step-title">Filtry i interaktywnosc</div>
+        <svg class="mc-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="mc-step-body">
+        <div class="mc-step-content">
+          <p>Interaktywne filtry to klucz do efektywnych dashboardow. Uzytkownicy moga filtrowac dane bez edycji arkusza.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: closed -->
+    <div class="mc-step" onclick="this.classList.toggle('open')">
+      <div class="mc-step-header">
+        <div class="mc-step-number">4</div>
+        <div class="mc-step-title">Budowanie dashboardu</div>
+        <svg class="mc-step-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="mc-step-body">
+        <div class="mc-step-content">
+          <p>Polacz swoje wykresy w jeden interaktywny dashboard. Wybierz rozdzielczosc i ukladaj elementy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resources -->
+  <div class="mc-resources">
+    <h2 class="mc-resources-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      Zasoby
+    </h2>
+    <div class="mc-resources-list">
+      <a href="#" class="mc-resource">
+        <div class="mc-resource-icon video">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="mc-resource-info">
+          <div class="mc-resource-name">Tableau dla poczatkujacych — kurs YT (45 min)</div>
+          <div class="mc-resource-type">Video</div>
+        </div>
+        <svg class="mc-resource-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#" class="mc-resource">
+        <div class="mc-resource-icon docs">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="mc-resource-info">
+          <div class="mc-resource-name">Dokumentacja Tableau Public</div>
+          <div class="mc-resource-type">Docs</div>
+        </div>
+        <svg class="mc-resource-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#" class="mc-resource">
+        <div class="mc-resource-icon article">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        </div>
+        <div class="mc-resource-info">
+          <div class="mc-resource-name">10 najlepszych praktyk wizualizacji danych</div>
+          <div class="mc-resource-type">Article</div>
+        </div>
+        <svg class="mc-resource-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#" class="mc-resource">
+        <div class="mc-resource-icon interactive">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="mc-resource-info">
+          <div class="mc-resource-name">Tableau Public — cwicz online za darmo</div>
+          <div class="mc-resource-type">Interactive</div>
+        </div>
+        <svg class="mc-resource-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#" class="mc-resource">
+        <div class="mc-resource-icon video">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="mc-resource-info">
+          <div class="mc-resource-name">Jak stworzyc dashboard w 10 minut</div>
+          <div class="mc-resource-type">Video</div>
+        </div>
+        <svg class="mc-resource-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Mini-project -->
+  <div class="mc-project">
+    <div class="mc-project-label">Mini-projekt</div>
+    <h2 class="mc-project-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Dashboard sprzedazowy
+    </h2>
+    <div class="mc-project-desc">
+      Stworz interaktywny dashboard w Tableau Public, ktory pokazuje sprzedaz w podziale na regiony, kategorie produktow i czas. Dashboard powinien zawierac co najmniej 3 wykresy i 1 filtr interaktywny.
+    </div>
+    <div class="mc-project-tools">
+      <span class="mc-project-tool">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Tableau Public
+      </span>
+      <span class="mc-project-tool">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+        Dataset Superstore (CSV)
+      </span>
+    </div>
+  </div>
+
+  <!-- Complete button -->
+  <div class="mc-complete-section">
+    <button class="mc-complete-btn" onclick="this.classList.add('done');this.innerHTML='<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M22 11.08V12a10 10 0 11-5.93-9.14\'/><polyline points=\'22 4 12 14.01 9 11.01\'/></svg>Ukonczone!'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Ukoncz kurs
+    </button>
+  </div>
+</main>
+
+</body>
+</html>

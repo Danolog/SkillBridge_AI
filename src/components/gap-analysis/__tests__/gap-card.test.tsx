@@ -119,7 +119,7 @@ describe("GapCard", () => {
 
 		expect(screen.getByText("Generuję wyjaśnienie...")).toBeInTheDocument();
 
-		resolvePromise!({
+		resolvePromise?.({
 			ok: true,
 			json: () => Promise.resolve({ whyImportant: "Tekst." }),
 		});

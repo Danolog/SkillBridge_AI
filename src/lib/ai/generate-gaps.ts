@@ -68,7 +68,7 @@ Zasady:
 
 	const cleaned = text
 		.trim()
-		.replace(/^```json?\n?/, "")
+		.replace(/^```(?:json)?\n?/, "")
 		.replace(/\n?```$/, "");
 	const result = JSON.parse(cleaned) as GapResult;
 

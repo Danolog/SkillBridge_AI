@@ -76,8 +76,6 @@ describe("generateWhyImportant", () => {
 	it("propagates AI SDK errors", async () => {
 		mockGenerateText.mockRejectedValue(new Error("API error"));
 
-		await expect(generateWhyImportant("Python", "Data Analyst", 78)).rejects.toThrow(
-			"API error",
-		);
+		await expect(generateWhyImportant("Python", "Data Analyst", 78)).rejects.toThrow("API error");
 	});
 });

@@ -104,10 +104,7 @@ describe("GapList", () => {
 		render(<GapList gaps={mockGaps} stats={defaultStats} />);
 		const closeLinks = screen.getAllByText("Zamknij lukę");
 		expect(closeLinks).toHaveLength(3);
-		expect(closeLinks[0].closest("a")).toHaveAttribute(
-			"href",
-			"/micro-courses?generate=g1",
-		);
+		expect(closeLinks[0].closest("a")).toHaveAttribute("href", "/micro-courses?generate=g1");
 	});
 
 	it("renders 'Dlaczego to ważne?' buttons", () => {
