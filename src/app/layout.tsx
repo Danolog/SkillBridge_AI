@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Link in Bio Page Builder",
-	description: "Create your personal link-in-bio page",
+	title: "SkillBridge AI",
+	description: "SkillBridge AI",
 };
 
 export default function RootLayout({

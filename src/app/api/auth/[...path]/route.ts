@@ -1,3 +1,4 @@
-import { authApiHandler } from "@neondatabase/auth/next/server";
+import { auth } from "@/lib/auth/server";
+import { toNextJsHandler } from "better-auth/next-js";
 
-export const { GET, POST } = authApiHandler();
+export const { GET, POST, PATCH, PUT, DELETE } = toNextJsHandler(auth);
