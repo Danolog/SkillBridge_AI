@@ -1,806 +1,491 @@
-# Product Requirements Document: Link-in-Bio Page Builder
+# SkillBridge AI — Product Requirements Document
 
 ## 1. Executive Summary
 
-Link-in-Bio Page Builder is a self-hosted, multi-user Linktree alternative that enables users to create a personal landing page with their name, bio, avatar, and a curated list of links. Users select from layout-varying visual themes, receive a shareable public URL based on their chosen slug (e.g., `/cole`), and access a dedicated analytics dashboard tracking clicks per link over time.
-
-The application is built as a full-stack Next.js app deployed on Vercel, backed by Neon serverless Postgres with Neon Auth for authentication. The editor features a live preview with side-by-side layout on desktop and a toggle mode on mobile, with full drag-and-drop link reordering. Public pages are server-rendered for optimal SEO and social sharing.
-
-**MVP Goal:** Deliver a fully functional, production-ready link-in-bio platform across 4 sequential phases — from profile editing through theming, public URLs with SEO, and click analytics — with comprehensive E2E testing validating every user journey.
+SkillBridge AI to platforma edtech, która w czasie rzeczywistym mapuje kompetencje studentów uczelni wyższych na wymagania rynku pracy, automatycznie wykrywa luki kompetencyjne i generuje spersonalizowane mikro-ścieżki nauki. Głównym użytkownikiem jest student (18–26 lat) sfrustrowany brakiem połączenia między programem studiów a oczekiwaniami pracodawców. Drugorzędnym użytkownikiem jest wykładowca/dziekan, który potrzebuje danych o aktualności swojego programu vs. rynek. Produkt powstaje w kontekście konkursowym (Grupa Merito — 14 uczelni, 100k+ studentów, 11 miast w Polsce) i łączy trzy elementy, których nikt dotąd nie połączył: przenośny Paszport Kompetencji (osobisty asset studenta), real-time market intelligence oparty o AI, oraz auto-generowane mikro-kursy zamykające luki kompetencyjne. Sukces MVP oznacza, że student przechodzi pełny flow od uploadu sylabusa do wygenerowania Paszportu Kompetencji i podzielenia się nim z potencjalnym pracodawcą.
 
 ---
 
-## 2. Mission
+## 2. Problem Statement
 
-**Mission Statement:** Provide creators and professionals with a beautiful, self-hosted link-in-bio page they fully control — no vendor lock-in, no premium paywalls for basic features, and complete ownership of their data and analytics.
+### Konkretny problem
 
-**Core Principles:**
+Studenci uczelni wyższych nie rozumieją związku między tym, czego się uczą, a tym, czego oczekuje rynek pracy. Pytanie „po co mi to?" zabija zaangażowanie i prowadzi do drop-outu. Jednocześnie uczelnie aktualizują programy co 3–5 lat, a rynek (szczególnie w branży tech/AI) zmienia się co kwartał.
 
-1. **Simplicity first** — The editor should be intuitive enough that a user can create and publish their page in under 2 minutes.
-2. **Visual quality** — Public pages should look polished and professional out of the box, rivaling paid alternatives.
-3. **Performance** — Server-rendered public pages load fast, score well on Lighthouse, and render correctly for social media crawlers.
-4. **Self-service** — No admin intervention needed. Users sign up, build, publish, and track analytics independently.
-5. **Test-driven confidence** — Every user journey is validated with E2E tests using agent-browser. No feature ships without comprehensive test coverage.
+### Kto tego doświadcza
+
+Studenci kierunków informatycznych, biznesowych i technicznych w Polsce (18–26 lat), szczególnie na uczelniach Grupy Merito. Doświadczają tego problemu codziennie — przy wyborze przedmiotów, planowaniu kariery, szukaniu staży i pierwszej pracy.
+
+### Jak radzą sobie dziś
+
+Studenci samodzielnie przeglądają oferty pracy na JustJoin.it czy Pracuj.pl, próbując ręcznie dopasować swoje umiejętności. Wykładowcy nie mają żadnego narzędzia do porównania programu z rynkiem — opierają się na intuicji i własnym doświadczeniu. Oba podejścia są czasochłonne, subiektywne i nieaktualne.
+
+### Dlaczego teraz
+
+Trzy czynniki tworzą okno możliwości. Po pierwsze, AI (Claude API) pozwala na automatyczne parsowanie sylabusów i analizę ofert pracy w skali, która wcześniej wymagała zespołu analityków. Po drugie, trend „skills-based hiring" powoduje, że pracodawcy coraz częściej patrzą na konkretne kompetencje zamiast nazwy dyplomu. Po trzecie, kontekst konkursowy (EduTech Masters / Grupa Merito) daje dostęp do 100k+ potencjalnych użytkowników i waliduje product-market fit.
+
+### Dowody
+
+- 65% studentów w Polsce deklaruje brak zrozumienia, jak ich program łączy się z rynkiem pracy (badania Deloitte, „First Steps into the Labour Market").
+- Dyplomy tracą na wartości — 72% rekruterów IT w Polsce bardziej ceni portfolio/certyfikaty niż tytuł uczelni (raport Bulldogjob 2024).
+- Uczelnie Grupy Merito prowadzą 1000+ kierunków w 11 miastach — skala problemu jest ogromna.
 
 ---
 
 ## 3. Target Users
 
-### Primary Persona: Content Creators & Professionals
+### Persona 1: Student — „Kasia, studentka 3. semestru Informatyki"
 
-- **Who:** Social media creators, freelancers, small business owners, developers, designers — anyone who needs a single link to share across platforms.
-- **Technical comfort:** Low to medium. They can fill out forms and pick themes but shouldn't need to write code or manage infrastructure.
-- **Key needs:**
-  - A single URL to put in their Instagram/TikTok/Twitter bio
-  - A page that looks professional without design skills
-  - Knowing which links get clicked and when
-  - Ability to quickly update links as their content/projects change
+- **Rola**: Studentka uczelni Merito w Warszawie, 20 lat
+- **Kontekst**: Korzysta z aplikacji na laptopie i telefonie, głównie wieczorami po zajęciach lub w weekendy. Szuka stażu na lato, czuje się zagubiona w wyborze specjalizacji.
+- **Cel główny**: Chce wiedzieć, czy to, czego się uczy, przygotowuje ją do pracy jako Data Analyst, i co musi dorobić we własnym zakresie.
+- **Pain points**: Nie wie, które przedmioty naprawdę się przydadzą. Przeglądanie ofert pracy ręcznie jest frustrujące — nie rozumie połowy wymagań. Nie ma jednego miejsca, gdzie mogłaby pokazać pracodawcy swoje kompetencje poza CV.
 
-### Secondary Persona: Self-Hosters / Developers
+### Persona 2: Wykładowca — „dr Tomasz, kierownik katedry informatyki"
 
-- **Who:** Developers who want to run their own Linktree alternative rather than depend on a SaaS.
-- **Technical comfort:** High. They'll deploy to Vercel, configure Neon, and potentially customize themes.
-- **Key needs:**
-  - Full data ownership
-  - Open-source codebase they can fork and extend
-  - Clean, well-structured code they can understand and modify
+- **Rola**: Wykładowca i członek rady programowej na uczelni Merito w Poznaniu, 45 lat
+- **Kontekst**: Korzysta z panelu na komputerze stacjonarnym w biurze. Raz na semestr przegląda aktualność programu nauczania.
+- **Cel główny**: Chce wiedzieć, czy program jego kierunku jest aktualny vs. rynek pracy i jakie moduły powinien dodać/zmienić.
+- **Pain points**: Brak danych — bazuje na intuicji i anegdotach. Proces akredytacji wymaga dowodów na aktualność programu, ale nie ma narzędzia, które by je dostarczało.
 
 ---
 
-## 4. MVP Scope
+## 4. Product Vision & Goals
 
-### In Scope
+### Wizja produktu
 
-**Core Functionality:**
-- ✅ User registration with username/slug selection
-- ✅ Email/password authentication
-- ✅ Google OAuth authentication
-- ✅ Profile editor (name, bio, avatar URL)
-- ✅ Link management (add, remove, reorder via drag-and-drop)
-- ✅ Header and divider items between links
-- ✅ Live preview alongside editor
-- ✅ 4 layout-varying themes with instant preview
-- ✅ Slug-based public pages (`/<username>`)
-- ✅ OG meta tags for social sharing
-- ✅ Click tracking per link with timestamps
-- ✅ Analytics dashboard with click counts and time-series charts
-- ✅ Marketing landing page at `/`
+SkillBridge AI daje każdemu studentowi spersonalizowaną, opartą na danych odpowiedź na pytanie „po co mi to?" — i konkretną ścieżkę do zamknięcia luk między jego wiedzą a wymaganiami rynku.
 
-**Technical:**
-- ✅ Server-side rendering for public pages
-- ✅ Responsive design (mobile-first)
-- ✅ TypeScript strict mode throughout
-- ✅ Biome for linting and formatting
-- ✅ Vitest for unit testing
-- ✅ agent-browser for E2E testing of all user journeys
-- ✅ Basic rate limiting on API routes
-- ✅ Explicit save button (no auto-save)
+### Czym ten produkt NIE jest
 
-**Deployment:**
-- ✅ Vercel deployment
-- ✅ Neon serverless Postgres
-- ✅ Neon Auth integration
-- ✅ Environment-based configuration
-
-### Out of Scope
-
-- ❌ Admin panel / moderation tools
-- ❌ File upload for avatars (URL-only for MVP)
-- ❌ Custom domains per user
-- ❌ Embed support (YouTube, Spotify, etc.)
-- ❌ Monetization features (tipping, paid links)
-- ❌ Email notifications / transactional emails
-- ❌ Auto-save / draft vs published states
-- ❌ Link scheduling (show/hide by date)
-- ❌ Geographic analytics (IP-based location data)
-- ❌ Referrer tracking
-- ❌ Custom CSS / theme editor per user
-- ❌ Team/organization accounts
-- ❌ API access for third-party integrations
-- ❌ Mobile app
-- ❌ Bot protection beyond basic rate limiting
+- **Nie jest platformą kursową** (jak Udemy/Coursera) — mikro-kursy są mostem do istniejących zasobów, nie zamiennikiem platform edukacyjnych.
+- **Nie jest portalem pracy** (jak JustJoin.it) — nie pośredniczy w rekrutacji, analizuje rynek jako źródło danych o kompetencjach.
+- **Nie jest systemem LMS** (jak Moodle) — nie zarządza zajęciami, ocenami ani materiałami dydaktycznymi uczelni.
+- **Nie jest narzędziem do tworzenia CV** — Paszport Kompetencji to portfolio umiejętności, nie formatka CV.
 
 ---
 
-## 5. User Stories
+## 5. Success Metrics
 
-### Registration & Authentication
+### Leading Indicators (mierzalne w ciągu dni/tygodni od launchu)
 
-**US-1:** As a new user, I want to sign up with my email and choose a unique username, so that I get a personal URL like `/cole` for my link page.
-> *Example: User visits `/`, clicks "Get Started", enters name, email, password, and desired slug `cole`. System checks slug availability in real-time. On success, user lands on the editor.*
+| Metryka | Target | Metoda pomiaru | Checkpoint |
+|---------|--------|----------------|------------|
+| Rejestracje studentów | 50 w pierwszym tygodniu (w kontekście konkursu) | Liczba rekordów w tabeli `students` | Dzień 7 |
+| Activation rate (ukończony onboarding + wygenerowana Skill Map) | >60% zarejestrowanych | Stosunek studentów z ≥1 skill map do zarejestrowanych | Dzień 14 |
+| Generowanie mikro-kursów | Średnio ≥2 mikro-kursy na aktywnego studenta | Liczba wpisów w `micro_courses` / aktywni studenci | Dzień 14 |
+| Share rate Paszportu | >20% studentów udostępnia publiczny link | Unikalne wizyty na `/passport/[id]` vs. liczba paszportów | Dzień 21 |
+| Task completion: onboarding | >80% użytkowników kończy 3-krokowy formularz | Drop-off rate między krokami | Dzień 7 |
 
-**US-2:** As a returning user, I want to log in with my email/password or Google account, so that I can quickly access my editor.
-> *Example: User clicks "Sign In", chooses "Continue with Google", authenticates via OAuth, and is redirected to their editor dashboard.*
+### Lagging Indicators (tygodnie/miesiące)
 
-### Profile Editing
-
-**US-3:** As a logged-in user, I want to edit my name, bio, and avatar URL with a live preview, so that I can see exactly how my page will look before saving.
-> *Example: User types in the bio field "Designer & coffee enthusiast" and the preview panel on the right instantly updates to show the new bio text.*
-
-**US-4:** As a logged-in user, I want to add, remove, and reorder links using drag-and-drop, so that I can organize my page the way I want.
-> *Example: User has 5 links. They grab the drag handle on "My Portfolio" and drag it from position 4 to position 1. The preview updates immediately. They click "Save" to persist the change.*
-
-**US-5:** As a logged-in user, I want to add section headers and dividers between my links, so that I can visually group related links.
-> *Example: User adds a header "Social Media" above their Twitter and Instagram links, and a divider before their "Projects" section.*
-
-### Themes
-
-**US-6:** As a logged-in user, I want to pick from 4 visual themes and see the result instantly in the preview, so that I can choose the look that best represents me.
-> *Example: User clicks the "Colorful" theme thumbnail. The preview immediately switches to a vibrant gradient background with rounded, colorful link buttons. They try "Professional" next — the preview shifts to a clean, muted layout with serif typography.*
-
-### Public Pages
-
-**US-7:** As a visitor, I want to view someone's link page at their public URL and click their links, so that I can find their content.
-> *Example: Visitor opens `example.com/cole` in their browser. They see Cole's avatar, bio, and list of links rendered with the "Dark" theme. They click "My YouTube Channel" and are redirected to YouTube.*
-
-### Analytics
-
-**US-8:** As a logged-in user, I want to see how many times each of my links has been clicked and view click trends over time, so that I can understand what content resonates with my audience.
-> *Example: User navigates to their analytics dashboard. They see a bar chart showing "YouTube: 342 clicks, Portfolio: 128 clicks, Twitter: 89 clicks" and a line chart showing daily clicks over the past 30 days.*
+| Metryka | Target | Metoda pomiaru | Checkpoint |
+|---------|--------|----------------|------------|
+| Retencja 7-dniowa | >30% wraca w ciągu tygodnia | Session tracking (Vercel Analytics) | Miesiąc 1 |
+| Ukończenie mikro-kursów | >40% rozpoczętych kursów oznaczonych jako ukończone | Stosunek `completed: true` do total w `micro_courses` | Miesiąc 1 |
+| NPS od studentów | >40 | Prosty formularz po 7 dniach użytkowania | Miesiąc 1 |
+| Zainteresowanie uczelni | ≥3 wykładowców aktywnie używa panelu | Unikalne loginy do `/faculty` | Miesiąc 2 |
 
 ---
 
-## 6. Core Architecture & Patterns
+## 6. User Stories
 
-### High-Level Architecture
+### Student
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                        Vercel                           │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │                   Next.js App                     │  │
-│  │                                                   │  │
-│  │  ┌─────────────┐  ┌──────────┐  ┌─────────────┐  │  │
-│  │  │  SSR Public  │  │   API    │  │  SPA Editor  │  │  │
-│  │  │   Pages      │  │  Routes  │  │  + Dashboard │  │  │
-│  │  │  /<slug>     │  │ /api/*   │  │  /editor     │  │  │
-│  │  └─────────────┘  └──────────┘  └─────────────┘  │  │
-│  │                        │                          │  │
-│  └────────────────────────┼──────────────────────────┘  │
-│                           │                             │
-└───────────────────────────┼─────────────────────────────┘
-                            │
-                  ┌─────────┴─────────┐
-                  │   Neon Postgres   │
-                  │  + Neon Auth      │
-                  │  (Serverless)     │
-                  └───────────────────┘
-```
+| # | User Story | Priorytet |
+|---|-----------|-----------|
+| S1 | Jako student chcę wgrać sylabus swojego kierunku, żeby system automatycznie rozpoznał moje kompetencje. | Must Have |
+| S2 | Jako student chcę zobaczyć interaktywną mapę kompetencji (Skill Map), żeby zrozumieć, co umiem, czego się uczę i czego mi brakuje. | Must Have |
+| S3 | Jako student chcę zobaczyć analizę luk kompetencyjnych posortowaną wg priorytetów, żeby wiedzieć, co uzupełnić w pierwszej kolejności. | Must Have |
+| S4 | Jako student chcę otrzymać spersonalizowany mikro-kurs zamykający lukę kompetencyjną, żeby mieć konkretną ścieżkę nauki, a nie tylko listę braków. | Must Have |
+| S5 | Jako student chcę mieć Paszport Kompetencji z unikalnym linkiem, żeby podzielić się nim z potencjalnym pracodawcą. | Must Have |
+| S6 | Jako student chcę eksportować Paszport do PDF, żeby załączyć go do aplikacji o staż/pracę. | Should Have |
+| S7 | Jako student chcę przy każdym przedmiocie z sylabusa zobaczyć wyjaśnienie „dlaczego to ważne" z konkretnymi ofertami pracy, żeby czuć motywację do nauki. | Should Have |
+| S8 | Jako student chcę widzieć listę trending skills, żeby wiedzieć, w co warto inwestować czas. | Could Have |
+| S9 | Jako student chcę oznaczać mikro-kursy jako ukończone, żeby widzieć swój postęp w Paszporcie. | Must Have |
+| S10 | Jako student chcę edytować listę rozpoznanych kompetencji po parsowaniu sylabusa, żeby poprawić ewentualne błędy AI. | Should Have |
 
-### Directory Structure
+### Wykładowca
 
-```
-link-in-bio-page-builder/
-├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── (marketing)/              # Marketing/landing route group
-│   │   │   └── page.tsx              # Landing page at /
-│   │   ├── (auth)/                   # Auth route group
-│   │   │   ├── login/page.tsx
-│   │   │   └── signup/page.tsx
-│   │   ├── (dashboard)/              # Authenticated route group
-│   │   │   ├── editor/page.tsx       # Profile editor + live preview
-│   │   │   ├── analytics/page.tsx    # Analytics dashboard
-│   │   │   └── settings/page.tsx     # Account settings (slug change, etc.)
-│   │   ├── [slug]/page.tsx           # Public profile pages (SSR)
-│   │   ├── api/
-│   │   │   ├── auth/[...all]/route.ts  # Neon Auth handlers
-│   │   │   ├── profile/route.ts      # Profile CRUD
-│   │   │   ├── links/route.ts        # Link management
-│   │   │   ├── links/reorder/route.ts
-│   │   │   ├── click/route.ts        # Click tracking endpoint
-│   │   │   └── analytics/route.ts    # Analytics data
-│   │   ├── layout.tsx                # Root layout
-│   │   └── globals.css
-│   ├── components/
-│   │   ├── ui/                       # shadcn/ui components
-│   │   ├── editor/                   # Editor-specific components
-│   │   │   ├── profile-form.tsx
-│   │   │   ├── link-list.tsx
-│   │   │   ├── link-item.tsx
-│   │   │   ├── add-link-dialog.tsx
-│   │   │   └── theme-picker.tsx
-│   │   ├── preview/                  # Live preview components
-│   │   │   └── preview-panel.tsx
-│   │   ├── themes/                   # Theme layout components
-│   │   │   ├── minimal.tsx
-│   │   │   ├── dark.tsx
-│   │   │   ├── colorful.tsx
-│   │   │   └── professional.tsx
-│   │   ├── analytics/                # Analytics components
-│   │   │   ├── click-chart.tsx
-│   │   │   ├── top-links.tsx
-│   │   │   └── time-series.tsx
-│   │   └── marketing/                # Landing page components
-│   │       ├── hero.tsx
-│   │       └── features.tsx
-│   ├── lib/
-│   │   ├── auth.ts                   # Neon Auth server instance
-│   │   ├── db/
-│   │   │   ├── index.ts              # Drizzle client
-│   │   │   ├── schema.ts             # Drizzle schema definitions
-│   │   │   └── migrations/           # Drizzle migrations
-│   │   ├── rate-limit.ts             # Rate limiting utility
-│   │   └── utils.ts                  # Shared utilities
-│   ├── hooks/                        # Custom React hooks
-│   │   ├── use-profile.ts
-│   │   └── use-analytics.ts
-│   └── types/                        # Shared TypeScript types
-│       └── index.ts
-├── tests/
-│   ├── unit/                         # Vitest unit tests
-│   │   ├── lib/
-│   │   └── components/
-│   └── e2e/                          # agent-browser E2E tests
-│       ├── auth.test.ts
-│       ├── editor.test.ts
-│       ├── public-page.test.ts
-│       └── analytics.test.ts
-├── public/                           # Static assets
-├── drizzle.config.ts                 # Drizzle configuration
-├── biome.json                        # Biome linter/formatter config
-├── next.config.ts                    # Next.js configuration
-├── tailwind.config.ts
-├── tsconfig.json
-├── vitest.config.ts
-└── package.json
-```
-
-### Key Design Patterns
-
-1. **Route Groups** — Use Next.js route groups `(marketing)`, `(auth)`, `(dashboard)` to organize layouts without affecting URL structure.
-2. **Server Components by default** — All pages and layouts are React Server Components unless they need interactivity. Client Components are used only in the editor, theme picker, and analytics charts.
-3. **Server Actions for mutations** — Use Next.js Server Actions for profile saves, link CRUD, and settings changes. API routes for click tracking (called from public pages) and analytics data fetching.
-4. **Optimistic UI** — The editor preview updates instantly on the client; the save button persists to the database.
-5. **SSR for public pages** — The `[slug]` dynamic route fetches profile data server-side and renders the full HTML with OG meta tags.
+| # | User Story | Priorytet |
+|---|-----------|-----------|
+| W1 | Jako wykładowca chcę zobaczyć heatmapę dopasowania mojego kierunku do wymagań rynku, żeby wiedzieć, które przedmioty są aktualne. | Must Have |
+| W2 | Jako wykładowca chcę zobaczyć top 5 brakujących kompetencji na moim kierunku, żeby wiedzieć, co dodać do programu. | Must Have |
+| W3 | Jako wykładowca chcę otrzymać sugestie AI o brakujących modułach, żeby mieć konkretne argumenty na radzie programowej. | Should Have |
+| W4 | Jako wykładowca chcę widzieć dane agregowane (zanonimizowane) z Paszportów studentów mojego kierunku. | Could Have |
 
 ---
 
-## 7. Features
+## 7. Feature Specification
 
-### 7.1 Marketing Landing Page
+### 7.1 Onboarding — Profil studenta + Parser sylabusa
 
-**Route:** `/`
+- **Description**: Trzystopniowy formularz rejestracji studenta z automatycznym parsowaniem sylabusa przez AI.
+- **User stories**: S1, S10
+- **Priority**: Must Have
+- **Acceptance criteria**:
+  - Given student otwiera `/onboarding`, when wypełnia krok 1 (imię, email, uczelnia z dropdown Merito, kierunek, semestr), then dane walidowane (email poprawny, semestr 1–10) i przechodzi do kroku 2.
+  - Given student jest w kroku 2, when wybiera cel kariery z dropdown (np. Data Analyst, Frontend Developer, UX Designer + pole custom), then przechodzi do kroku 3.
+  - Given student jest w kroku 3, when wkleja tekst sylabusa lub uploaduje PDF (max 10 MB), then AI parsuje dokument i zwraca listę 15–40 kompetencji w <30 sekund.
+  - Given AI zwróciło listę kompetencji, when student przegląda wyniki, then może dodać, usunąć lub edytować nazwy kompetencji przed zatwierdzeniem.
+  - Given student zatwierdza kompetencje, when klika „Zapisz", then profil + kompetencje zapisują się do bazy, student zostaje przekierowany do `/dashboard`.
+  - Given student uploaduje plik nie-PDF lub >10 MB, when system go wykryje, then wyświetla czytelny komunikat błędu.
+  - Given Claude API nie odpowiada w ciągu 60s, when timeout nastąpi, then student widzi „Spróbuj ponownie za chwilę" z przyciskiem retry.
+- **Notes**: Upload PDF wymaga server-side text extraction. W MVP wystarczy textarea jako alternatywa. Cele kariery w dropdown: Data Analyst, Data Scientist, Frontend Developer, Backend Developer, Full-stack Developer, UX/UI Designer, Project Manager, DevOps Engineer, Cybersecurity Analyst + „Inne (wpisz)".
 
-A public homepage that explains the product and drives signups.
+### 7.2 Skill Map — Interaktywna wizualizacja kompetencji
 
-- Hero section with tagline, description, and CTA buttons ("Get Started" / "Sign In")
-- Brief feature highlights (themes, analytics, custom URL)
-- Example preview showing what a link page looks like
-- Footer with minimal links
+- **Description**: Interaktywny graf (React Flow) mapujący kompetencje studenta (z sylabusa) vs. wymagania rynku pracy. Węzły kolorowane wg statusu, kliknięcie otwiera panel szczegółów.
+- **User stories**: S2
+- **Priority**: Must Have
+- **Acceptance criteria**:
+  - Given student otwiera Skill Map, when dane są załadowane, then wyświetla się graf z minimum 15 węzłami.
+  - Given węzeł ma status `acquired`, when jest renderowany, then jest zielony. `in_progress` → żółty. `missing` → czerwony.
+  - Given student klika na węzeł, when panel boczny się otwiera, then widzi: nazwę kompetencji, źródło (sylabus/rynek), % ofert pracy wymagających tej kompetencji, listę przykładowych ofert (tytuł, firma, widełki).
+  - Given student klika na czerwony węzeł, when panel się otwiera, then widzi przycisk „Zamknij tę lukę" prowadzący do generatora mikro-kursu.
+  - Given graf ma >30 węzłów, when student używa zoom/pan/minimap, then nawigacja jest płynna (>30 FPS).
+  - Given student otwiera Skill Map na telefonie, when ekran jest <768px, then graf automatycznie się skaluje (lub przełącza na widok listy).
+- **Notes**: Krawędzie między węzłami reprezentują powiązania kompetencyjne (np. „Python" → „pandas" → „Analiza danych"). Powiązania generowane przez AI w momencie tworzenia Skill Map. React Flow obsługuje custom nodes, zoom, pan i minimap out-of-the-box.
 
-### 7.2 Authentication
+### 7.3 Gap Analysis — Analiza luk kompetencyjnych
 
-**Routes:** `/login`, `/signup`
+- **Description**: Lista brakujących kompetencji posortowana wg priorytetów (critical / important / nice-to-have) z kontekstem rynkowym i linkami do mikro-kursów.
+- **User stories**: S3, S7
+- **Priority**: Must Have
+- **Acceptance criteria**:
+  - Given student otwiera Gap Analysis, when dane są załadowane, then widzi minimum 5 luk kompetencyjnych.
+  - Given luka ma priorytet `critical`, when jest wyświetlana, then ma czerwone oznaczenie i jest na górze listy.
+  - Given każda luka, when jest wyświetlana, then zawiera: nazwę kompetencji, priorytet, „wymaga tego X% ofert na stanowisko [cel kariery]", szacowany czas nauki w godzinach, przycisk „Zamknij tę lukę".
+  - Given student klika „Dlaczego to ważne?" przy przedmiocie z sylabusa, when AI generuje odpowiedź, then tekst zawiera min. 3 konkretne zawody, 3 zadania w pracy i widełki płacowe. Tekst po polsku, 150–250 słów.
+  - Given dane nie są jeszcze gotowe (AI pracuje), when student widzi stronę, then wyświetla się skeleton loader z komunikatem „Analizujemy Twoje dane — to może potrwać do 30 sekund…"
+- **Notes**: Gap Analysis zależy od dwóch źródeł: kompetencji studenta (z parsera sylabusa) i wymagań rynku (z market intelligence). Oba muszą być gotowe.
 
-Powered by Neon Auth (built on Better Auth).
+### 7.4 Generator mikro-kursów
 
-- **Signup flow:**
-  1. User enters display name, email, password, and desired username/slug
-  2. Real-time slug availability check (debounced API call)
-  3. Slug validation: lowercase alphanumeric + hyphens, 3-30 characters, no reserved words
-  4. On success → redirect to `/editor`
-- **Login flow:**
-  1. Email/password form OR "Continue with Google" button
-  2. On success → redirect to `/editor`
-- **Reserved slugs:** `login`, `signup`, `editor`, `analytics`, `settings`, `api`, `admin`, `about`, `help`, etc.
+- **Description**: Dla każdej luki kompetencyjnej AI generuje spersonalizowany mikro-kurs (15–30 min) z krokami, ćwiczeniami, zasobami i mini-projektem.
+- **User stories**: S4, S9
+- **Priority**: Must Have
+- **Acceptance criteria**:
+  - Given student klika „Zamknij tę lukę" w Gap Analysis, when AI generuje mikro-kurs, then kurs zawiera 3–5 kroków (każdy max 200 słów), min. 3 linki do darmowych zasobów, 1 mini-projekt i szacowany czas.
+  - Given mikro-kurs jest wyświetlony, when student przegląda kroki, then każdy krok ma tytuł, treść (markdown), opcjonalne ćwiczenie praktyczne.
+  - Given zasoby w mikro-kursie, when student je przegląda, then każdy link prowadzi do realnego, darmowego zasobu (YouTube, dokumentacja, Google Colab).
+  - Given student oznacza mikro-kurs jako „ukończony", when status się zmieni, then kompetencja w Paszporcie zmienia kolor z czerwonego na żółty (lub zielony, jeśli to jedyny brakujący element).
+  - Given student ma kilka mikro-kursów, when otwiera listę kursów, then widzi progress bar i stosunek ukończonych do wszystkich.
+  - Given Claude API zwraca błąd przy generowaniu kursu, when student widzi komunikat, then jest przycisk retry.
+- **Notes**: Mikro-kursy generowane on-demand (nie pre-generowane). Jakość zależy od system promptu — prompt uwzględnia kontekst studenta (semestr, pokrewne kompetencje, cel kariery). Ćwiczenia muszą być wykonywalne bez instalowania oprogramowania (Google Colab, CodePen, online IDE).
 
-### 7.3 Profile Editor + Live Preview
+### 7.5 Paszport Kompetencji
 
-**Route:** `/editor`
+- **Description**: Cyfrowy, żywy dokument studenta — profil z listą kompetencji, progress bar pokrycia rynku, eksport PDF i publiczny link do udostępniania.
+- **User stories**: S5, S6, S9
+- **Priority**: Must Have
+- **Acceptance criteria**:
+  - Given student otwiera Paszport, when dane są załadowane, then widzi: imię, uczelnia, kierunek, semestr, cel kariery, progress bar „X% pokrycia wymagań rynkowych", listę kompetencji z badge'ami (zielony/żółty/czerwony).
+  - Given student klika „Eksportuj PDF", when PDF się generuje, then plik ma profesjonalny layout z: nagłówkiem (SkillBridge AI), danymi studenta, listą kompetencji z kolorami, datą wygenerowania.
+  - Given student klika „Kopiuj link", when link jest skopiowany, then prowadzi do `/passport/[uuid]` — publiczny, read-only widok.
+  - Given pracodawca otwiera publiczny link Paszportu, when strona się ładuje, then widzi kompetencje studenta BEZ nawigacji dashboardu, z profesjonalnym layoutem i logo SkillBridge AI.
+  - Given student ukończył mikro-kurs, when Paszport się odświeża, then badge zmienia kolor i progress bar się aktualizuje.
+- **Notes**: UUID w linku publicznym — nie ujawnia danych wewnętrznych. Publiczny widok nie wymaga logowania.
 
-The core editing experience for building a link page.
+### 7.6 Panel Uczelni
 
-**Editor Panel (left side on desktop):**
-- **Profile section:**
-  - Display name (text input, max 50 chars)
-  - Bio (textarea, max 160 chars, with character counter)
-  - Avatar URL (text input with URL validation, small preview thumbnail)
-- **Links section:**
-  - List of current links with drag handles (dnd-kit)
-  - Each link item shows: drag handle, title, URL, delete button
-  - "Add Link" button opens inline form (title + URL fields)
-  - "Add Header" button adds a text header item
-  - "Add Divider" button adds a visual divider item
-  - Items are sortable via drag-and-drop
-- **Save button** at the bottom — disabled when no changes, shows loading state during save, success/error feedback via toast notification
-
-**Preview Panel (right side on desktop):**
-- Renders the public page exactly as it will appear
-- Updates in real-time as the user types/reorders (client-side state, not DB)
-- Displayed inside a phone-frame mockup for context
-- Shows the currently selected theme
-
-**Layout Modes:**
-- **Desktop (≥1024px):** Side-by-side with resizable panels. Toggle buttons in toolbar to: show both panels, show editor only, show preview only.
-- **Mobile (<1024px):** Tab toggle between "Edit" and "Preview" views.
-
-### 7.4 Theme System
-
-**Accessible from:** Theme picker in the editor (above or within the editor panel)
-
-4 themes that vary in both visual style and layout structure:
-
-| Theme | Vibe | Layout Notes |
-|---|---|---|
-| **Minimal** | Clean, white/light gray, sans-serif, lots of whitespace | Centered single-column, simple rectangular link buttons, small avatar |
-| **Dark** | Dark backgrounds, light text, neon/accent colors, modern feel | Centered column, rounded pill-shaped link buttons, larger avatar with glow effect |
-| **Colorful** | Vibrant gradients, playful, rounded shapes, bold typography | Wider card-based links, avatar with colored border ring, gradient background |
-| **Professional** | Muted tones, serif headings, structured, business-card feel | Two-column layout on desktop (avatar/bio left, links right), subtle shadows, traditional buttons |
-
-**Theme Picker UI:**
-- Horizontal row of theme thumbnail cards
-- Clicking a theme instantly updates the preview panel
-- Selected theme is visually highlighted
-- Theme selection is saved with the profile
-
-### 7.5 Public Pages + SEO
-
-**Route:** `/[slug]` (dynamic, server-rendered)
-
-- Fetches user profile, links, and theme from the database at request time
-- Renders the full page server-side with the selected theme component
-- Injects OG meta tags into `<head>`:
-  - `og:title` → User's display name
-  - `og:description` → User's bio
-  - `og:image` → User's avatar URL (or a generated fallback)
-  - `og:url` → Full canonical URL
-  - `twitter:card` → `summary`
-- Each link is a clickable `<a>` tag that:
-  1. Fires a click-tracking request to `/api/click` (via `navigator.sendBeacon` or fetch)
-  2. Then navigates to the target URL
-- Returns 404 for non-existent slugs with a friendly "Page not found" message
-
-### 7.6 Click Analytics
-
-**Tracking endpoint:** `POST /api/click`
-
-- Accepts: `{ linkId: string }`
-- Records: link ID, timestamp, (IP hash for rate limiting — not stored for analytics)
-- Rate limited: max 1 click per link per IP per 10 seconds (prevent spam)
-
-**Dashboard route:** `/analytics`
-
-- **Summary cards:** Total clicks (all time), clicks this week, number of active links
-- **Top links table:** Ranked list of links by total clicks, showing title, URL, click count
-- **Time-series chart:** Line chart showing total clicks per day over the last 30 days
-  - Toggle between 7-day / 30-day / 90-day views
-  - Uses a lightweight chart library (e.g., Recharts, which works well with shadcn)
-- **Per-link breakdown:** Expandable rows in the top links table showing that link's daily clicks
+- **Description**: Dashboard dla wykładowców z heatmapą dopasowania programu do rynku, listą brakujących kompetencji i sugestiami AI.
+- **User stories**: W1, W2, W3, W4
+- **Priority**: Must Have (uproszczona wersja)
+- **Acceptance criteria**:
+  - Given wykładowca otwiera `/faculty/login`, when wpisuje poprawne hasło (shared password z env), then dostaje dostęp do panelu.
+  - Given wykładowca jest w panelu, when dane są załadowane, then widzi heatmapę: lista przedmiotów kierunku × % pokrycia wymagań rynkowych (zielony >70%, żółty 40–70%, czerwony <40%).
+  - Given heatmapa jest wyświetlona, when wykładowca przegląda dane, then widzi też „Top 5 brakujących kompetencji" z % ofert wymagających każdej.
+  - Given sugestie AI, when są wyświetlone, then każda zawiera: „Rozważ dodanie modułu o [temat] — X% ofert na stanowisko [Y] tego wymaga."
+  - Given mniej niż 3 studentów na kierunku, when dane są niewystarczające, then panel wyświetla komunikat „Za mało danych — zachęć studentów do korzystania z SkillBridge".
+  - Given wykładowca wpisuje złe hasło, when klika „Zaloguj", then widzi komunikat „Nieprawidłowe hasło".
+- **Notes**: Dane agregowane i zanonimizowane. W MVP wystarczy shared password — po konkursie migracja do OAuth. Heatmapa oparta na Recharts.
 
 ---
 
-## 8. Technology Stack
+## 8. User Flows
 
-### Core Framework
-| Technology | Version | Purpose |
-|---|---|---|
-| **Next.js** | 15.x | Full-stack React framework (App Router, SSR, API Routes) |
-| **React** | 19.x | UI library |
-| **TypeScript** | 5.x | Type safety (strict mode) |
+### Flow 1: Onboarding nowego studenta
 
-### Styling & UI
-| Technology | Purpose |
-|---|---|
-| **Tailwind CSS** 4.x | Utility-first CSS framework |
-| **shadcn/ui** | Accessible, customizable component library |
-| **CSS Transitions** | Animations (no extra motion libraries) |
+**Trigger**: Student klika „Stwórz swój Paszport" na landing page.
 
-### Database & Auth
-| Technology | Purpose |
-|---|---|
-| **Neon** | Serverless Postgres (database hosting) |
-| **Neon Auth** | Managed authentication (Better Auth-based) |
-| **@neondatabase/auth** | Neon Auth SDK for Next.js |
-| **Drizzle ORM** | Type-safe database queries and migrations |
-| **drizzle-kit** | Schema migration tooling |
+**Steps**:
+1. Student widzi ekran powitalny z krótkim opisem procesu (3 kroki, ~5 minut) → klika „Zaczynamy".
+2. Student wypełnia krok 1: imię, email, uczelnia (dropdown z 14 uczelni Merito), kierunek (tekst), semestr (1–10) → klika „Dalej".
+3. Student wypełnia krok 2: cel kariery (dropdown z popularnymi stanowiskami + pole custom) → klika „Dalej".
+4. Student wypełnia krok 3: wkleja tekst sylabusa do textarea LUB uploaduje PDF → klika „Analizuj sylabus".
+5. System wyświetla loader „Analizujemy Twój sylabus…" (do 30 sekund).
+6. System wyświetla listę rozpoznanych kompetencji (15–40). Student może dodać/usunąć/edytować → klika „Zatwierdź i utwórz Paszport".
+7. System zapisuje dane → redirect do `/dashboard`.
 
-### Key Libraries
-| Library | Purpose |
-|---|---|
-| **@dnd-kit/core** + **@dnd-kit/sortable** | Drag-and-drop link reordering |
-| **Recharts** | Charts for analytics dashboard |
-| **zod** | Runtime schema validation (forms, API inputs) |
+**Success state**: Student ma profil, kompetencje z sylabusa i wygenerowany Paszport.
 
-### Dev Tooling
-| Tool | Purpose |
-|---|---|
-| **Biome** | Linting + formatting (replaces ESLint + Prettier) |
-| **Vitest** | Unit testing |
-| **agent-browser** | E2E testing (Playwright-based CLI) |
+**Error states**: Upload PDF >10 MB → komunikat o limicie. AI timeout → retry button. Pusty sylabus → komunikat „Wklej tekst sylabusa lub prześlij PDF".
 
-### Deployment
-| Service | Purpose |
-|---|---|
-| **Vercel** | Hosting, CI/CD, edge functions |
-| **Neon** | Managed Postgres (serverless, auto-scaling) |
+### Flow 2: Analiza luk i zamykanie ich mikro-kursem
 
----
+**Trigger**: Student otwiera „Gap Analysis" w dashboardzie.
 
-## 9. Security & Configuration
+**Steps**:
+1. Student widzi listę luk kompetencyjnych posortowaną wg priorytetów (critical na górze).
+2. Student klika na lukę → widzi szczegóły: nazwa, % ofert wymagających, szacowany czas, kontekst rynkowy.
+3. Student klika „Dlaczego to ważne?" → AI generuje wyjaśnienie z konkretnymi zawodami i ofertami.
+4. Student klika „Zamknij tę lukę" → system generuje mikro-kurs (loader 10–20 sekund).
+5. Student przegląda mikro-kurs: kroki z ćwiczeniami, zasoby, mini-projekt.
+6. Student realizuje ćwiczenia (w zewnętrznych narzędziach — Google Colab, CodePen).
+7. Student klika „Ukończ kurs" → kompetencja w Paszporcie zmienia status.
 
-### Authentication & Authorization
+**Success state**: Luka kompetencyjna zamknięta, Paszport zaktualizowany.
 
-- **Neon Auth** handles all authentication flows:
-  - Email/password registration and login
-  - Google OAuth (using Neon Auth's built-in Google credentials for dev, custom credentials for production)
-  - Session management via signed cookies (cached for 5 minutes by default)
-- **Authorization:** Middleware protects `/editor`, `/analytics`, `/settings` routes — redirects to `/login` if unauthenticated
-- **Data isolation:** All queries filter by the authenticated user's ID. Users can only read/write their own profile and links.
+**Error states**: AI nie może wygenerować kursu → retry + komunikat. Student nie ma żadnych luk (edge case) → komunikat „Gratulacje! Twój profil pokrywa wymagania rynku w X%".
 
-### Rate Limiting
+### Flow 3: Udostępnianie Paszportu pracodawcy
 
-- **API routes:** Simple in-memory rate limiting (or Vercel KV if needed)
-  - `/api/click`: 60 requests/minute per IP
-  - `/api/profile`, `/api/links`: 30 requests/minute per user
-  - `/api/auth/*`: 10 requests/minute per IP (login/signup)
-- **Click deduplication:** Ignore duplicate clicks on the same link from the same IP within 10 seconds
+**Trigger**: Student otwiera zakładkę „Paszport" w dashboardzie.
 
-### Configuration (Environment Variables)
+**Steps**:
+1. Student widzi swój Paszport: dane osobowe, progress bar, lista kompetencji z badge'ami.
+2. Student klika „Kopiuj link" → link `/passport/[uuid]` skopiowany do schowka, toast „Link skopiowany!".
+3. Student wkleja link w email/LinkedIn/CV do pracodawcy.
+4. Pracodawca otwiera link → widzi profesjonalny, read-only widok Paszportu bez logowania.
+5. Alternatywnie: student klika „Eksportuj PDF" → plik się pobiera.
 
-```env
-# Neon Database
-DATABASE_URL=                    # Neon Postgres connection string
+**Success state**: Pracodawca widzi kompetencje studenta w czytelnym formacie.
 
-# Neon Auth
-NEON_AUTH_BASE_URL=              # Neon Auth endpoint URL
-NEON_AUTH_COOKIE_SECRET=         # Secret for signing session cookies
+**Error states**: Nieprawidłowy UUID → strona 404 „Paszport nie został znaleziony". Paszport bez kompetencji → komunikat „Ten paszport nie ma jeszcze kompetencji".
 
-# Google OAuth (production)
-GOOGLE_CLIENT_ID=                # Google OAuth client ID
-GOOGLE_CLIENT_SECRET=            # Google OAuth client secret
+### Flow 4: Wykładowca przegląda panel uczelni
 
-# App
-NEXT_PUBLIC_APP_URL=             # Public app URL (e.g., https://yourdomain.com)
-```
+**Trigger**: Wykładowca otwiera `/faculty/login`.
 
-### Security Scope
+**Steps**:
+1. Wykładowca wpisuje shared password → klika „Zaloguj".
+2. System weryfikuje hasło → redirect do `/faculty`.
+3. Wykładowca widzi heatmapę: lista przedmiotów swojego kierunku z % pokrycia rynku.
+4. Wykładowca scrolluje do „Top 5 brakujących kompetencji" → widzi konkretne sugestie.
+5. Wykładowca czyta sugestie AI: „Rozważ dodanie modułu o [temat]…"
 
-**In scope:**
-- ✅ Input sanitization (XSS prevention on bio, link titles/URLs)
-- ✅ URL validation for links (must be valid HTTP/HTTPS URLs)
-- ✅ Slug validation (alphanumeric + hyphens only)
-- ✅ CSRF protection (built into Neon Auth / Next.js)
-- ✅ Rate limiting on all API endpoints
+**Success state**: Wykładowca ma dane do decyzji o aktualizacji programu.
 
-**Out of scope for MVP:**
-- ❌ Content moderation / link scanning
-- ❌ Two-factor authentication
-- ❌ IP allowlisting
-- ❌ Advanced bot protection (CAPTCHA, etc.)
+**Error states**: Złe hasło → „Nieprawidłowe hasło" + retry. Brak danych studentów → „Za mało danych — zachęć studentów do korzystania z SkillBridge".
 
 ---
 
-## 10. Database Schema
+## 9. Screen Descriptions
 
-### Tables
+### Screen: Landing Page (`/`)
 
-```sql
--- Users table is managed by Neon Auth (neon_auth schema)
--- It provides: id, email, name, image, created_at, updated_at
+- **Purpose**: Przedstawienie produktu i konwersja do rejestracji.
+- **Key elements**: Nagłówek z logo SkillBridge AI, hero section z jednozdaniowym pitchem, 3 ikony prezentujące kluczowe wartości (Paszport, Market Intelligence, Mikro-kursy), sekcja „Jak to działa" (3 kroki), CTA button „Stwórz swój Paszport", footer z informacjami.
+- **User actions**: Kliknięcie CTA → przejście do `/onboarding`.
+- **Navigation**: Header z linkami: Strona główna, Jak to działa, Panel Uczelni, Zaloguj się.
+- **States**: Brak stanów specjalnych — strona statyczna.
 
--- Profiles (extends Neon Auth user)
-CREATE TABLE profiles (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       TEXT NOT NULL UNIQUE REFERENCES neon_auth.users(id) ON DELETE CASCADE,
-  slug          TEXT NOT NULL UNIQUE,
-  display_name  TEXT NOT NULL DEFAULT '',
-  bio           TEXT NOT NULL DEFAULT '',
-  avatar_url    TEXT NOT NULL DEFAULT '',
-  theme         TEXT NOT NULL DEFAULT 'minimal',
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+### Screen: Onboarding (`/onboarding`)
 
-CREATE UNIQUE INDEX idx_profiles_slug ON profiles(slug);
-CREATE INDEX idx_profiles_user_id ON profiles(user_id);
+- **Purpose**: Zebranie danych studenta i sylabusa w 3 krokach.
+- **Key elements**: Progress bar (krok 1/3, 2/3, 3/3), formularz z walidacją, przyciski „Wstecz"/„Dalej", w kroku 3 textarea + opcja upload PDF, po analizie — edytowalna lista kompetencji.
+- **User actions**: Wypełnianie pól, nawigacja między krokami, upload/wklejanie sylabusa, edycja listy kompetencji, zatwierdzenie.
+- **Navigation**: Wstecz do poprzedniego kroku, po zatwierdzeniu → `/dashboard`.
+- **States**: Loading (analiza sylabusa — skeleton + komunikat), Error (AI timeout — retry button), Empty (brak kompetencji po parsowaniu — komunikat + sugestia wklejenia innego sylabusa).
 
--- Link items (links, headers, dividers)
-CREATE TABLE link_items (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  type          TEXT NOT NULL DEFAULT 'link',  -- 'link' | 'header' | 'divider'
-  title         TEXT NOT NULL DEFAULT '',
-  url           TEXT NOT NULL DEFAULT '',       -- empty for headers/dividers
-  sort_order    INTEGER NOT NULL DEFAULT 0,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+### Screen: Dashboard — Strona główna (`/dashboard`)
 
-CREATE INDEX idx_link_items_profile_id ON link_items(profile_id);
+- **Purpose**: Centralny hub studenta z podsumowaniem i nawigacją do sekcji.
+- **Key elements**: Karta powitalna (imię, kierunek, cel kariery), mini progress bar Paszportu (X% completion), 4 kafelki nawigacyjne: Skill Map, Gap Analysis, Mikro-kursy, Paszport — każdy z liczbą (np. „5 luk", „2 ukończone kursy").
+- **User actions**: Kliknięcie na kafelek → przejście do sekcji.
+- **Navigation**: Sidebar lub top nav z linkami do wszystkich sekcji dashboardu.
+- **States**: Loading (skeleton dla kafelków), Empty (nowy student — „Twoja Skill Map jest generowana, poczekaj chwilę…").
 
--- Click events
-CREATE TABLE click_events (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  link_item_id  UUID NOT NULL REFERENCES link_items(id) ON DELETE CASCADE,
-  clicked_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+### Screen: Skill Map (`/dashboard/skill-map`)
 
-CREATE INDEX idx_click_events_link_item_id ON click_events(link_item_id);
-CREATE INDEX idx_click_events_clicked_at ON click_events(clicked_at);
-```
+- **Purpose**: Wizualne przedstawienie kompetencji studenta vs. wymagania rynku.
+- **Key elements**: Interaktywny graf React Flow (węzły kolorowane + krawędzie), minimap w rogu, panel boczny (sheet/drawer) ze szczegółami wybranego węzła, legenda kolorów (zielony = masz, żółty = uczysz się, czerwony = brakuje).
+- **User actions**: Zoom, pan, kliknięcie na węzeł (otwiera panel boczny), kliknięcie „Zamknij tę lukę" w panelu → generowanie mikro-kursu.
+- **Navigation**: Powrót do dashboard, link do Gap Analysis z panelu bocznego.
+- **States**: Loading (skeleton grafu), Error (AI błąd — retry), Empty (brak kompetencji — redirect do onboardingu).
 
-### Drizzle Schema (TypeScript)
+### Screen: Gap Analysis (`/dashboard/gap-analysis`)
 
-The above SQL will be represented as Drizzle schema definitions in `src/lib/db/schema.ts`, using `pgTable`, with proper TypeScript types inferred via `InferSelectModel` and `InferInsertModel`.
+- **Purpose**: Lista luk kompetencyjnych z priorytetami i akcjami.
+- **Key elements**: Lista kart, każda karta zawiera: nazwę luki, priorytet (badge critical/important/nice-to-have), „X% ofert wymaga", szacowany czas, przycisk „Zamknij tę lukę", rozwijana sekcja „Dlaczego to ważne?".
+- **User actions**: Przeglądanie listy, rozwijanie „Dlaczego to ważne?", kliknięcie „Zamknij tę lukę" → generowanie mikro-kursu.
+- **Navigation**: Powrót do dashboard, link do mikro-kursu po wygenerowaniu.
+- **States**: Loading (skeleton kart), Error (AI błąd — retry), Empty (brak luk — komunikat gratulacyjny z % pokrycia).
 
----
+### Screen: Mikro-kurs (`/dashboard/micro-courses` + widok kursu)
 
-## 11. API Specification
+- **Purpose**: Przeglądanie i realizacja wygenerowanych mikro-kursów.
+- **Key elements**: Lista kursów z progress bar i statusem (nie rozpoczęty / w trakcie / ukończony), widok pojedynczego kursu: kroki (accordion lub stepper), treść markdown, ćwiczenie, zasoby (lista linków), mini-projekt, przycisk „Ukończ kurs".
+- **User actions**: Wybór kursu z listy, przeglądanie kroków, kliknięcie linków do zasobów, oznaczenie jako ukończony.
+- **Navigation**: Powrót do listy kursów, powrót do Gap Analysis.
+- **States**: Loading (generowanie kursu — loader), Empty (brak kursów — „Przejdź do Gap Analysis, żeby wygenerować pierwszy mikro-kurs").
 
-### Profile
+### Screen: Paszport Kompetencji (`/dashboard/passport`)
 
-**GET `/api/profile`** — Get current user's profile
-- Auth: Required
-- Response: `{ profile: Profile, links: LinkItem[] }`
+- **Purpose**: Przeglądanie, eksport i udostępnianie Paszportu.
+- **Key elements**: Karta profilu (imię, uczelnia, kierunek, cel kariery), progress bar completion, lista kompetencji z badge'ami (zielony/żółty/czerwony), przyciski „Eksportuj PDF" i „Kopiuj link".
+- **User actions**: Przeglądanie, eksport PDF, kopiowanie linku, kliknięcie na kompetencję → szczegóły.
+- **Navigation**: Powrót do dashboard.
+- **States**: Loading (skeleton), Empty (brak kompetencji — redirect do onboardingu).
 
-**PUT `/api/profile`** — Update current user's profile
-- Auth: Required
-- Body: `{ displayName: string, bio: string, avatarUrl: string, theme: string }`
-- Validation: Zod schema
-- Response: `{ profile: Profile }`
+### Screen: Publiczny widok Paszportu (`/passport/[id]`)
 
-### Links
+- **Purpose**: Read-only widok dla pracodawców.
+- **Key elements**: Logo SkillBridge AI, dane studenta (imię, uczelnia, kierunek), lista kompetencji z badge'ami, progress bar, data wygenerowania. BEZ nawigacji dashboardu, BEZ opcji edycji.
+- **User actions**: Przeglądanie (read-only).
+- **Navigation**: Link „Stwórz swój Paszport" na dole (CTA dla pracodawców/nowych studentów).
+- **States**: 404 (nieprawidłowy UUID — „Paszport nie został znaleziony").
 
-**POST `/api/links`** — Add a new link item
-- Auth: Required
-- Body: `{ type: 'link' | 'header' | 'divider', title?: string, url?: string }`
-- Response: `{ link: LinkItem }`
+### Screen: Panel Uczelni — Login (`/faculty/login`)
 
-**DELETE `/api/links/[id]`** — Remove a link item
-- Auth: Required
-- Response: `{ success: true }`
+- **Purpose**: Autoryzacja wykładowcy.
+- **Key elements**: Logo, pole hasła, przycisk „Zaloguj".
+- **User actions**: Wpisanie hasła, kliknięcie „Zaloguj".
+- **Navigation**: Po sukcesie → `/faculty`.
+- **States**: Error (złe hasło — komunikat „Nieprawidłowe hasło").
 
-**PUT `/api/links/reorder`** — Reorder all link items
-- Auth: Required
-- Body: `{ items: { id: string, sortOrder: number }[] }`
-- Response: `{ success: true }`
+### Screen: Panel Uczelni — Dashboard (`/faculty`)
 
-### Click Tracking
-
-**POST `/api/click`** — Record a link click (called from public pages)
-- Auth: None (public)
-- Body: `{ linkId: string }`
-- Rate limited: 60/min per IP, 10-second dedup per link per IP
-- Response: `{ success: true }`
-
-### Analytics
-
-**GET `/api/analytics`** — Get analytics for current user's links
-- Auth: Required
-- Query params: `?period=7d|30d|90d`
-- Response:
-```json
-{
-  "summary": {
-    "totalClicks": 1234,
-    "clicksThisWeek": 89,
-    "activeLinks": 8
-  },
-  "topLinks": [
-    { "id": "...", "title": "YouTube", "url": "...", "clicks": 342 }
-  ],
-  "timeSeries": [
-    { "date": "2026-02-19", "clicks": 45 },
-    { "date": "2026-02-20", "clicks": 52 }
-  ]
-}
-```
-
-### Slug Availability
-
-**GET `/api/slug/check?slug=cole`** — Check if slug is available
-- Auth: None (used during signup)
-- Response: `{ available: boolean }`
+- **Purpose**: Przegląd aktualności programu kierunku vs. rynek.
+- **Key elements**: Heatmapa (Recharts) — przedmioty × % pokrycia rynku (zielony >70%, żółty 40–70%, czerwony <40%), sekcja „Top 5 brakujących kompetencji", sekcja „Sugestie AI" z kartami rekomendacji.
+- **User actions**: Przeglądanie heatmapy, czytanie sugestii, ewentualnie filtrowanie po kierunku/stanowisku.
+- **Navigation**: Logout, powrót do landing page.
+- **States**: Loading (skeleton), Empty (za mało danych — komunikat).
 
 ---
 
-## 12. Success Criteria
+## 10. Non-Functional Requirements
 
-### MVP Success Definition
+### Wydajność
 
-The MVP is complete when a user can sign up, build a link page with a chosen theme, share their public URL, and view click analytics — all validated by passing E2E tests covering every user journey.
+- Landing page: First Contentful Paint <1.5s, Lighthouse Performance Score >80.
+- Parsowanie sylabusa (AI): response time <30s (z timeoutem 60s).
+- Generowanie mikro-kursu (AI): response time <30s.
+- Skill Map: płynna interakcja (>30 FPS) przy grafie do 50 węzłów.
+- Eksport PDF: generowanie <5s.
+- Publiczny widok Paszportu: ładowanie <2s.
 
-### Functional Requirements
+### Bezpieczeństwo i prywatność
 
-- ✅ User can sign up with email/password and choose a unique slug
-- ✅ User can sign in with Google OAuth
-- ✅ User can edit display name, bio, and avatar URL
-- ✅ User can add, remove, and reorder links via drag-and-drop
-- ✅ User can add section headers and dividers
-- ✅ User can select from 4 themes with instant live preview
-- ✅ Editor shows side-by-side layout on desktop with toggle options
-- ✅ Editor shows toggle mode on mobile
-- ✅ Saving profile persists all changes to database
-- ✅ Public page at `/<slug>` renders with selected theme (SSR)
-- ✅ Public page includes correct OG meta tags
-- ✅ Clicking a link on the public page tracks the click
-- ✅ Analytics dashboard shows click counts per link
-- ✅ Analytics dashboard shows time-series chart (7d/30d/90d)
-- ✅ Marketing landing page exists at `/`
-- ✅ All protected routes redirect to login when unauthenticated
-- ✅ Rate limiting prevents abuse on API endpoints
+- RODO/GDPR: dane studentów przechowywane w EU (Neon region: eu-central-1).
+- Hasła hashowane (bcrypt) — nigdy przechowywane w plaintext.
+- Publiczny widok Paszportu pod UUID — nie da się zgadnąć linku.
+- Panel wykładowcy: dane studenckie anonimizowane (brak imion/emaili).
+- HTTPS enforced na Vercel.
+- Zmienne środowiskowe (API keys, database URL) nigdy w kodzie — tylko `.env.local` / Vercel env.
 
-### Quality Indicators
+### Dostępność
 
-- TypeScript strict mode with zero type errors
-- Biome passes with zero lint/format warnings
-- Vitest unit test coverage on all utility functions and API logic
-- agent-browser E2E tests pass for every user journey
-- Lighthouse performance score ≥ 90 on public pages
-- All pages responsive from 320px to 1920px
+- WCAG 2.1 Level AA (podstawowe wymagania): kontrast kolorów, alt text na obrazkach, nawigacja klawiaturą.
+- Kolorystyka Skill Map: oprócz kolorów, badge'e mają tekst statusu (dla daltonistów).
 
-### User Experience Goals
+### Platformy i urządzenia
 
-- Signup-to-published page in under 2 minutes
-- Theme switching feels instant (no loading states)
-- Drag-and-drop reordering is smooth and intuitive
-- Public page loads in under 1 second (server-rendered)
+- Web-first: Chrome, Firefox, Safari, Edge (ostatnie 2 wersje).
+- Responsive: mobile (360px+), tablet, desktop.
+- Brak natywnej aplikacji mobilnej w MVP.
 
 ---
 
-## 13. Implementation Phases
+## 11. Dependencies & Timeline
 
-### Phase 1: Profile Editor + Live Preview
+### Hard deadlines
 
-**Goal:** Users can sign up, log in, and build their link page with a live preview.
+- **Konkurs EduTech Masters**: **19 marca 2026** — 12 dni od dziś (7 marca).
 
-**Deliverables:**
-- ✅ Project scaffolding (Next.js + Tailwind + shadcn/ui + Biome + Vitest)
-- ✅ Neon database setup + Drizzle schema + migrations
-- ✅ Neon Auth integration (email/password + Google OAuth)
-- ✅ Signup page with slug selection and real-time availability check
-- ✅ Login page (email/password + Google OAuth)
-- ✅ Auth middleware protecting dashboard routes
-- ✅ Profile editor form (name, bio, avatar URL)
-- ✅ Link management (add, remove, reorder with dnd-kit)
-- ✅ Header and divider support
-- ✅ Live preview panel (default "Minimal" theme)
-- ✅ Side-by-side layout (desktop) with editor-only/preview-only toggles
-- ✅ Toggle mode (mobile)
-- ✅ Explicit save button with toast feedback
-- ✅ Unit tests for validation logic, API handlers
-- ✅ E2E tests: signup flow, login flow, profile editing, link CRUD, drag-and-drop reorder
+### Zespół
 
-**Validation:**
-- User can sign up, add 5 links + 1 header + 1 divider, reorder them, save, refresh, and see persisted data
-- Preview updates in real-time without saving
-- All E2E tests pass via agent-browser
+- **Darek — solo developer z Claude Code** (agent teams, 4 równoległe LANE'y). Nie jest zawodowym programistą, ale aktywnie buduje SaaS-y z AI-assisted development.
 
----
+### Zależności zewnętrzne
 
-### Phase 2: Theme System
+- **Anthropic Claude API**: Konto z API key i budżet ~$5–15 na MVP.
+- **Neon**: Darmowy tier (0.5 GB storage, 190h compute).
+- **Vercel**: Darmowy tier (wystarczający na demo/konkurs).
+- **Dataset ofert pracy**: Jednorazowy run Apify scrapera JustJoin.it (~$5) lub ręczny scraping.
+- **Syllabusy Merito**: Minimum 3–5 przykładowych sylabusów do testowania parsera. **⚠️ OPEN QUESTION: Czy mamy dostęp do realnych sylabusów?**
 
-**Goal:** Users can choose from 4 distinct, layout-varying themes with instant preview.
+### Sugerowany fazowanie
 
-**Deliverables:**
-- ✅ 4 theme components: Minimal, Dark, Colorful, Professional
-- ✅ Each theme has its own layout structure and visual style
-- ✅ Theme picker UI with thumbnail previews
-- ✅ Instant theme switching in the live preview
-- ✅ Theme selection persisted to database
-- ✅ All themes responsive (320px – 1920px)
-- ✅ Smooth CSS transitions between themes
-- ✅ Unit tests for theme rendering logic
-- ✅ E2E tests: theme selection, preview updates, persistence after save and reload
-
-**Validation:**
-- Switching between all 4 themes updates the preview instantly
-- Theme persists after save → reload
-- Each theme looks correct and distinct on mobile and desktop
-- All E2E tests pass via agent-browser
+| Faza | Czas | Zakres |
+|------|------|--------|
+| **Faza 1 — Fundament** | Dzień 1–3 | Setup projektu, schema bazy, CRUD API, auth, formularz onboardingu, parser sylabusa |
+| **Faza 2 — Market Intelligence** | Dzień 4–6 | Dataset ofert, Skill Map (React Flow), Gap Analysis, „Dlaczego to ważne?" |
+| **Faza 3 — Mikro-kursy + Paszport** | Dzień 7–9 | Generator mikro-kursów, widok kursów, Paszport (view + PDF + public link) |
+| **Faza 4 — Panel Uczelni + Polish** | Dzień 10–11 | Dashboard wykładowcy, responsive, error handling, SEO |
+| **Faza 5 — Testy + Deploy** | Dzień 12–13 | Testy z użytkownikami, fix bugów, deploy na Vercel, dokumentacja |
 
 ---
 
-### Phase 3: Public URLs + SEO
+## 12. Risks & Open Questions
 
-**Goal:** Each user gets a public page at `/<slug>` with proper SEO and social sharing support.
+### Known Risks
 
-**Deliverables:**
-- ✅ Dynamic `[slug]` route with server-side rendering
-- ✅ Public page renders profile + links with the selected theme
-- ✅ OG meta tags (`og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`)
-- ✅ 404 handling for non-existent slugs
-- ✅ Reserved slug protection (prevent registration of system routes)
-- ✅ Marketing landing page at `/` (hero, features, CTAs)
-- ✅ Slug change in user settings
-- ✅ Canonical URL in `<head>`
-- ✅ Unit tests for slug validation, OG tag generation
-- ✅ E2E tests: public page rendering, correct theme display, OG tag verification, 404 page, landing page navigation, slug change flow
+| Ryzyko | Impact | Mitygacja |
+|--------|--------|-----------|
+| Jakość parsowania sylabusów przez AI — syllabusy Merito mogą mieć niestandardowy format | High | Przygotować 5+ przykładowych sylabusów do tuningu promptu. Dać studentowi opcję edycji wyników. |
+| Koszty Claude API mogą rosnąć przy dużej liczbie użytkowników | Medium | Cache AI (tabela `ai_cache` z hash promptu). Nie generować tego samego dwa razy. Budget cap w Anthropic dashboard. |
+| Statyczny dataset ofert pracy szybko się dezaktualizuje | Medium | Jasna komunikacja w UI: „Dane rynkowe z [miesiąc/rok]". Post-MVP: cron job z Apify co tydzień. |
+| React Flow performance przy dużych grafach (>100 węzłów) | Low | Limitować graf do 50 węzłów (top kompetencje). Lazy loading szczegółów. |
+| Studenci nie wrócą po pierwszym użyciu (niska retencja) | High | Mikro-kursy + tracking postępów jako hook do powrotu. Opcjonalnie: email reminder z postępem. |
 
-**Validation:**
-- Visiting `/<slug>` renders the correct profile with the correct theme
-- Sharing the URL on social media shows correct preview (OG tags)
-- Non-existent slugs show a 404 page
-- Landing page loads and CTAs navigate correctly
-- All E2E tests pass via agent-browser
+### Open Questions
 
----
+| Pytanie | Owner | Blocking? |
+|---------|-------|-----------|
+| ~~Jaka jest dokładna data deadline konkursu EduTech Masters?~~ | Darek | ✅ RESOLVED — **19 marca 2026** |
+| ~~Kto buduje MVP — Darek solo z Claude Code czy jest zespół?~~ | Darek | ✅ RESOLVED — Solo z Claude Code |
+| Czy mamy dostęp do realnych sylabusów uczelni Merito do testów? | Darek | YES — bez tego parser nie będzie przetestowany |
+| Czy lepiej NextAuth v5 czy better-auth? (better-auth lżejsze, lepsze DX z Drizzle) | Engineering | NO — można zdecydować w trakcie Fazy 1 |
+| Czy potrzebujemy dark mode w MVP? | Darek | NO — nice-to-have |
+| Jak wygląda formularz zgłoszeniowy EduTech Masters? Jakie materiały potrzebujemy? | Darek | NO — ale dobrze wiedzieć wcześniej |
 
-### Phase 4: Click Analytics
+### Parking Lot (dobre pomysły, ale poza MVP)
 
-**Goal:** Track clicks on public page links and display analytics in a dashboard.
-
-**Deliverables:**
-- ✅ Click tracking endpoint (`POST /api/click`)
-- ✅ Click recording on public page link clicks (via `sendBeacon` or fetch)
-- ✅ Rate limiting on click endpoint (60/min per IP, 10-sec dedup)
-- ✅ Analytics API endpoint with period filtering
-- ✅ Analytics dashboard page (`/analytics`)
-- ✅ Summary cards (total clicks, this week, active links)
-- ✅ Top links table with click counts
-- ✅ Time-series line chart (7d / 30d / 90d toggle)
-- ✅ Per-link daily breakdown (expandable rows)
-- ✅ Unit tests for analytics aggregation queries, rate limiting logic
-- ✅ E2E tests: click tracking fires on public page, analytics dashboard shows correct data, period toggle works, chart renders
-
-**Validation:**
-- Clicking links on a public page increments the count
-- Analytics dashboard reflects clicks accurately
-- Time-series chart displays correctly for all period options
-- Rate limiting prevents click spam
-- All E2E tests pass via agent-browser
+- Real-time scraping ofert pracy (cron job co tydzień)
+- OAuth (Google/Microsoft) zamiast credentials
+- Integracja z LMS (Moodle, Canvas)
+- Mobile app (React Native)
+- AI chat „zapytaj o swoją karierę"
+- Gamification (achievements, leaderboard)
+- API dla pracodawców do weryfikacji Paszportów
+- Blockchain-based credential verification
+- A/B testing mikro-kursów
+- Wielojęzyczność (EN, DE, ES)
 
 ---
 
-## 14. Future Considerations
+## 13. MVP Scope Recommendation
 
-### Post-MVP Enhancements
-- **File upload for avatars** — Use Vercel Blob or Cloudflare R2 for image storage
-- **Custom domains** — Allow users to point their own domain to their page
-- **Embed support** — YouTube, Spotify, SoundCloud embeds inline in the link list
-- **Auto-save with draft/publish** — Auto-save changes as draft, explicit publish to go live
-- **Link scheduling** — Show/hide links based on date ranges
-- **More themes** — Community-contributed themes, custom color overrides
+### Phase 1 — MVP (13 dni, kontekst konkursowy)
 
-### Integration Opportunities
-- **Social login expansion** — GitHub, Twitter/X, Discord OAuth
-- **Analytics export** — CSV/JSON download of click data
-- **Webhook notifications** — Notify external services on click milestones
-- **API access** — Public API for programmatic profile management
+Budujemy najwęższy scope, który waliduje core hypothesis: **„Studenci chcą widzieć związek między swoim programem a rynkiem pracy, i są skłonni używać narzędzia, które ten związek pokazuje i pomaga zamykać luki."**
 
-### Advanced Features
-- **Admin panel** — User management, content moderation, system stats
-- **A/B testing** — Test different link orders or themes for click optimization
-- **Rich analytics** — Referrer tracking, geographic data, device breakdown
-- **Custom CSS** — Per-user CSS overrides for advanced customization
-- **Team accounts** — Shared pages managed by multiple users
+MVP zawiera:
 
----
+- Onboarding z parserem sylabusa (AI)
+- Skill Map — interaktywny graf kompetencji (React Flow)
+- Gap Analysis z priorytetami + „Dlaczego to ważne?"
+- Generator mikro-kursów (on-demand, AI)
+- Paszport Kompetencji (view + PDF + public link)
+- Panel Uczelni (uproszczony, shared password)
 
-## 15. Risks & Mitigations
+### Phase 2 — Post-konkurs (1–2 miesiące)
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| **Neon Auth is relatively new** — Less community support and documentation compared to established auth solutions. | Medium | Neon Auth is built on Better Auth, which has extensive docs. Fall back to Better Auth docs when Neon-specific docs are sparse. Keep auth logic isolated so it can be swapped if needed. |
-| **Click tracking volume** — Popular pages could generate high write volume to the `click_events` table. | Medium | Use `navigator.sendBeacon` (non-blocking). Rate limit aggressively. Consider batching writes or a summary table for high-volume pages in a future phase. Neon's serverless auto-scaling helps absorb bursts. |
-| **Slug collisions with app routes** — User-chosen slugs could conflict with app routes like `/login` or `/api`. | High | Maintain a strict reserved-slugs list checked at signup. The `[slug]` catch-all route should be the lowest priority in Next.js routing (place it last). |
-| **Theme layout complexity** — 4 themes with different layouts is significantly more work than CSS-only themes. | Medium | Start with shared base components and have each theme compose them differently. Define a clear `ThemeProps` interface so all themes receive the same data. Build Minimal first as the reference, then diverge. |
-| **E2E test reliability** — Browser-based E2E tests can be flaky, especially with auth flows and drag-and-drop. | Medium | Use agent-browser's `wait` commands extensively. Isolate test data per run. For drag-and-drop, test the reorder API directly as a unit test and use E2E only for the happy path. |
+- Real-time scraping ofert (Vercel cron + Apify)
+- Pełna auth z OAuth
+- Rozbudowany panel uczelni (filtrowanie, eksport raportów)
+- Email notifications (postęp, nowe luki, trending skills)
+- Testowanie z większą grupą (50+ studentów)
 
----
+### Phase 3 — Skalowanie (3–6 miesięcy)
 
-## 16. Appendix
+- Elementy z parking lot
+- Integracja z LMS
+- API dla pracodawców
+- Mobile app
 
-### Key Dependencies
+### Dlaczego ten podział
 
-| Package | Docs |
-|---|---|
-| Next.js | https://nextjs.org/docs |
-| Tailwind CSS | https://tailwindcss.com/docs |
-| shadcn/ui | https://ui.shadcn.com |
-| Drizzle ORM | https://orm.drizzle.team/docs |
-| Neon | https://neon.com/docs |
-| Neon Auth | https://neon.com/docs/auth/overview |
-| dnd-kit | https://dndkit.com |
-| Recharts | https://recharts.org |
-| Zod | https://zod.dev |
-| Biome | https://biomejs.dev |
-| Vitest | https://vitest.dev |
-
-### Reference Implementations
-
-- [LinkStack](https://linkstack.org/) — Full-featured self-hosted Linktree alternative (PHP/Laravel)
-- [LittleLink-Server](https://github.com/techno-tim/littlelink-server) — Lightweight Node.js alternative
-- [LibreLinks](https://github.com/urdadx/librelinks) — Open-source Next.js link-in-bio tool
-- [OpenBento](https://github.com/syntax-syndicate/openbento-linkedin-bio-builder) — Bento-grid style bio page builder
+MVP celuje w jedno: **zrobić wrażenie na jury konkursu (deadline: 19 marca) i zebrać feedback od realnych studentów**. Wszystkie 4 warstwy (Paszport, Market Intelligence, Mikro-kursy, Panel Uczelni) są obecne, ale w minimalnej formie. Statyczny dataset ofert zamiast real-time scrapingu. Shared password zamiast OAuth. Generowanie on-demand zamiast pre-generowanych kursów. Buduje jedna osoba (Darek) z Claude Code i agent teams — to pozwala na 4 równoległe LANE'y pracy, co daje efektywność zbliżoną do małego zespołu. 12 dni do deadline — tight, ale realne z AI-assisted development.
