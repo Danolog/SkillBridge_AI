@@ -2,9 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/client";
 
 export function LoginForm() {
@@ -26,49 +23,55 @@ export function LoginForm() {
 			});
 
 			if (authError) {
-				setError("Invalid email or password");
+				setError("Nieprawidłowy email lub hasło");
 				setLoading(false);
 				return;
 			}
 
 			router.push("/dashboard");
 		} catch {
-			setError("Something went wrong. Please try again.");
+			setError("Coś poszło nie tak. Spróbuj ponownie.");
 			setLoading(false);
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			<div className="space-y-2">
-				<Label htmlFor="email">Email</Label>
-				<Input
+		<form onSubmit={handleSubmit} className="auth-form">
+			<div className="auth-field">
+				<label htmlFor="email" className="auth-label">
+					Email
+				</label>
+				<input
 					id="email"
 					type="email"
-					placeholder="you@example.com"
+					className="auth-input"
+					placeholder="twoj@email.com"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
-					aria-label="Email"
+					required
 				/>
 			</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="password">Password</Label>
-				<Input
+			<div className="auth-field">
+				<label htmlFor="password" className="auth-label">
+					Hasło
+				</label>
+				<input
 					id="password"
 					type="password"
-					placeholder="Your password"
+					className="auth-input"
+					placeholder="Twoje hasło"
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
-					aria-label="Password"
+					required
 				/>
 			</div>
 
-			{error && <p className="text-sm text-destructive text-center">{error}</p>}
+			{error && <p className="auth-error">{error}</p>}
 
-			<Button type="submit" className="w-full" disabled={loading}>
-				{loading ? "Signing in..." : "Sign In"}
-			</Button>
+			<button type="submit" className="auth-btn-primary" disabled={loading}>
+				{loading ? "Logowanie..." : "Zaloguj się"}
+			</button>
 		</form>
 	);
 }

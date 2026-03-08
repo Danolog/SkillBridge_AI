@@ -2,9 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/client";
 
 export function SignupForm() {
@@ -23,49 +20,67 @@ export function SignupForm() {
 		const { error: authError } = await authClient.signUp.email({ email, password, name });
 
 		if (authError) {
-			setError(authError.message || "Failed to create account");
+			setError(authError.message || "Nie udało się utworzyć konta");
 			setLoading(false);
 			return;
 		}
 
-		router.push("/");
+		router.push("/dashboard");
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			<div className="space-y-2">
-				<Label htmlFor="name">Name</Label>
-				<Input
+		<form onSubmit={handleSubmit} className="auth-form">
+			<div className="auth-field">
+				<label htmlFor="name" className="auth-label">
+					Imię i nazwisko
+				</label>
+				<input
 					id="name"
-					placeholder="Your name"
+					type="text"
+					className="auth-input"
+					placeholder="Jan Kowalski"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
+					required
 				/>
 			</div>
-			<div className="space-y-2">
-				<Label htmlFor="email">Email</Label>
-				<Input
+
+			<div className="auth-field">
+				<label htmlFor="email" className="auth-label">
+					Email
+				</label>
+				<input
 					id="email"
 					type="email"
-					placeholder="you@example.com"
+					className="auth-input"
+					placeholder="twoj@email.com"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
+					required
 				/>
 			</div>
-			<div className="space-y-2">
-				<Label htmlFor="password">Password</Label>
-				<Input
+
+			<div className="auth-field">
+				<label htmlFor="password" className="auth-label">
+					Hasło
+				</label>
+				<input
 					id="password"
 					type="password"
-					placeholder="At least 8 characters"
+					className="auth-input"
+					placeholder="Minimum 8 znaków"
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
+					required
+					minLength={8}
 				/>
 			</div>
-			{error && <p className="text-sm text-destructive text-center">{error}</p>}
-			<Button type="submit" className="w-full" disabled={loading}>
-				{loading ? "Creating Account..." : "Create Account"}
-			</Button>
+
+			{error && <p className="auth-error">{error}</p>}
+
+			<button type="submit" className="auth-btn-primary" disabled={loading}>
+				{loading ? "Tworzenie konta..." : "Utwórz konto"}
+			</button>
 		</form>
 	);
 }
