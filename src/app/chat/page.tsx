@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Message = { id: string; role: "user" | "assistant"; content: string };
 
 export default function ChatPage() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -13,7 +13,7 @@ export default function ChatPage() {
 		e.preventDefault();
 		if (!input.trim() || streaming) return;
 
-		const userMessage: Message = { role: "user", content: input };
+		const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: input };
 		const history = [...messages, userMessage];
 		setMessages(history);
 		setInput("");
@@ -25,17 +25,19 @@ export default function ChatPage() {
 			body: JSON.stringify({ messages: history }),
 		});
 
-		const reader = res.body!.getReader();
+		const reader = res.body?.getReader();
+		if (!reader) return;
 		const decoder = new TextDecoder();
 		let reply = "";
 
-		setMessages([...history, { role: "assistant", content: "" }]);
+		const assistantId = crypto.randomUUID();
+		setMessages([...history, { id: assistantId, role: "assistant", content: "" }]);
 
 		while (true) {
 			const { done, value } = await reader.read();
 			if (done) break;
 			reply += decoder.decode(value, { stream: true });
-			setMessages([...history, { role: "assistant", content: reply }]);
+			setMessages([...history, { id: assistantId, role: "assistant", content: reply }]);
 		}
 
 		setStreaming(false);
@@ -46,9 +48,11 @@ export default function ChatPage() {
 			<h1 className="text-2xl font-bold mb-4">Chat</h1>
 
 			<div className="flex-1 overflow-y-auto space-y-4 mb-4">
-				{messages.map((m, i) => (
-					<div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-						<div className={`px-4 py-2 rounded-2xl max-w-[80%] whitespace-pre-wrap ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+				{messages.map((m) => (
+					<div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+						<div
+							className={`px-4 py-2 rounded-2xl max-w-[80%] whitespace-pre-wrap ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+						>
 							{m.content}
 						</div>
 					</div>

@@ -35,15 +35,32 @@ export function SignupForm() {
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div className="space-y-2">
 				<Label htmlFor="name">Name</Label>
-				<Input id="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+				<Input
+					id="name"
+					placeholder="Your name"
+					value={name}
+					onChange={(e) => setName(e.target.value)}
+				/>
 			</div>
 			<div className="space-y-2">
 				<Label htmlFor="email">Email</Label>
-				<Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+				<Input
+					id="email"
+					type="email"
+					placeholder="you@example.com"
+					value={email}
+					onChange={(e) => setEmail(e.target.value)}
+				/>
 			</div>
 			<div className="space-y-2">
 				<Label htmlFor="password">Password</Label>
-				<Input id="password" type="password" placeholder="At least 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} />
+				<Input
+					id="password"
+					type="password"
+					placeholder="At least 8 characters"
+					value={password}
+					onChange={(e) => setPassword(e.target.value)}
+				/>
 			</div>
 			{error && <p className="text-sm text-destructive text-center">{error}</p>}
 			<Button type="submit" className="w-full" disabled={loading}>
