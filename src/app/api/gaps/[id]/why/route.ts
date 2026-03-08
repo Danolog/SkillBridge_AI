@@ -1,0 +1,44 @@
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
+import { generateWhyImportant } from "@/lib/ai/generate-why";
+import { auth } from "@/lib/auth/server";
+import { db } from "@/lib/db";
+import { gaps, students } from "@/lib/db/schema";
+
+export const maxDuration = 60;
+
+export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+	const session = await auth.api.getSession({ headers: await headers() });
+	if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+	const { id: gapId } = await params;
+
+	const student = await db.query.students.findFirst({
+		where: eq(students.userId, session.user.id),
+	});
+	if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
+
+	const gap = await db.query.gaps.findFirst({
+		where: eq(gaps.id, gapId),
+	});
+	if (!gap || gap.studentId !== student.id) {
+		return NextResponse.json({ error: "Gap not found" }, { status: 404 });
+	}
+
+	// Return cached value if already generated
+	if (gap.whyImportant) {
+		return NextResponse.json({ whyImportant: gap.whyImportant });
+	}
+
+	// Generate and save
+	const whyImportant = await generateWhyImportant(
+		gap.competencyName,
+		student.careerGoal,
+		gap.marketPercentage,
+	);
+
+	await db.update(gaps).set({ whyImportant }).where(eq(gaps.id, gapId));
+
+	return NextResponse.json({ whyImportant });
+}
