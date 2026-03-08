@@ -87,12 +87,7 @@ describe("Seed data — demand percentages", () => {
 
 describe("Seed data — salary ranges format", () => {
 	it("salary ranges follow PLN format", () => {
-		const samples = [
-			"8000-15000 PLN",
-			"9000-16000 PLN",
-			"10000-18000 PLN",
-			"12000-25000 PLN",
-		];
+		const samples = ["8000-15000 PLN", "9000-16000 PLN", "10000-18000 PLN", "12000-25000 PLN"];
 		const regex = /^\d+-\d+ PLN$/;
 		for (const s of samples) {
 			expect(s, `"${s}" should match PLN format`).toMatch(regex);
