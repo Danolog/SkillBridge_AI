@@ -1,26 +1,24 @@
-# Link-in-Bio Page Builder
+# SkillBridge AI
 
-A full-stack link-in-bio page builder where users can create a personalized page with links, headers, and dividers — similar to Linktree. Built with Next.js 15, React 19, and Neon Postgres.
+Polish edtech platform that maps students' competencies (from university syllabus) to job market requirements, detects competency gaps, and generates personalized AI micro-courses. Built for the EduTech Masters competition by Grupa Merito (deadline: 19 March 2026).
 
 ## Features
 
-- **Email/Password Authentication** — Sign up, log in, and session management via Neon Auth
-- **Profile Editor** — Edit display name, bio, and avatar URL with a live phone-frame preview
-- **Link Management** — Add links, section headers, and dividers
-- **Drag-and-Drop Reorder** — Rearrange items with dnd-kit drag handles
-- **Live Preview** — Real-time preview panel that mirrors the public page layout
-- **Responsive Layout** — Side-by-side editor/preview on desktop, tab toggle on mobile
-- **Save with Feedback** — Explicit save button with toast notifications
+- **Onboarding + Syllabus Parser** — 3-step wizard, AI parses university syllabus to extract competencies
+- **Skill Map** — React Flow graph visualizing competencies vs. job market requirements
+- **Gap Analysis** — AI detects missing skills with "why important" explanations
+- **Micro-Courses** — AI-generated personalized courses to close competency gaps
+- **Competency Passport** — Shareable public page with student's skill profile
+- **Faculty Panel** — Aggregated dashboard showing program vs. market alignment (anonymized)
 
 ## Tech Stack
 
 - **Framework:** Next.js 15 (App Router, `src/` directory)
-- **UI:** React 19, Tailwind CSS v4, shadcn/ui, Lucide icons
-- **Database:** Neon Postgres + Drizzle ORM
-- **Auth:** Neon Auth (`@neondatabase/auth`)
-- **Drag-and-Drop:** dnd-kit
-- **Validation:** Zod
-- **Testing:** Vitest (unit), agent-browser (E2E)
+- **UI:** React 19, Tailwind CSS v4, shadcn/ui, Lucide icons, Recharts
+- **Database:** PostgreSQL (Docker locally, Neon on production) + Drizzle ORM
+- **Auth:** Better Auth (email+password, Google OAuth)
+- **AI:** Vercel AI SDK + Anthropic Claude (claude-sonnet-4-6)
+- **Testing:** Vitest (unit), Playwright (E2E)
 - **Linting/Formatting:** Biome
 
 ## Getting Started
@@ -28,14 +26,15 @@ A full-stack link-in-bio page builder where users can create a personalized page
 ### Prerequisites
 
 - Node.js 18+
-- A [Neon](https://neon.tech) project with Auth enabled
+- pnpm
+- PostgreSQL (Docker: `docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres`)
 
 ### Setup
 
 1. **Install dependencies:**
 
    ```bash
-   npm install --legacy-peer-deps
+   pnpm install
    ```
 
 2. **Configure environment variables:**
@@ -44,57 +43,34 @@ A full-stack link-in-bio page builder where users can create a personalized page
    cp .env.example .env.local
    ```
 
-   Fill in your Neon database URL, auth base URL, and cookie secret.
+   Fill in your database URL, Better Auth secret, and API keys.
 
 3. **Push the database schema:**
 
    ```bash
-   npm run db:push
+   pnpm db:push
    ```
 
 4. **Start the dev server:**
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-> **Note:** Do not use `--turbopack` — middleware does not execute with Turbopack in Next.js 15.
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── (auth)/          # Signup + Login pages
-│   ├── (dashboard)/     # Editor page
-│   └── api/             # Profile, links, links/reorder, slug/check routes
-├── components/
-│   ├── auth/            # Signup/login forms, slug input
-│   ├── editor/          # Link list, link item, add button, profile form, toolbar
-│   ├── preview/         # Phone-frame preview panel
-│   ├── themes/          # Minimal theme (reusable for public pages)
-│   └── ui/              # shadcn/ui primitives
-├── db/                  # Drizzle schema + connection
-├── hooks/               # useProfile data fetching hook
-├── lib/                 # Validations, rate limiter, utils
-├── middleware.ts        # Route protection for /editor, /analytics, /settings
-└── types/               # Shared TypeScript types
-```
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build |
-| `npm run lint` | Lint with Biome |
-| `npm run lint:fix` | Auto-fix lint issues |
-| `npm run format` | Format with Biome |
-| `npm run test` | Run unit tests (watch mode) |
-| `npm run test:run` | Run unit tests once |
-| `npm run test:e2e` | Run E2E tests |
-| `npm run db:push` | Push schema to database |
-| `npm run db:generate` | Generate Drizzle migrations |
-| `npm run db:studio` | Open Drizzle Studio |
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm lint` | Lint with Biome |
+| `pnpm lint:fix` | Auto-fix lint issues |
+| `pnpm format` | Format with Biome |
+| `pnpm test` | Run unit tests (watch mode) |
+| `pnpm test:run` | Run unit tests once |
+| `pnpm test:e2e` | Run E2E tests |
+| `pnpm db:push` | Push schema to database |
+| `pnpm db:generate` | Generate Drizzle migrations |
+| `pnpm db:studio` | Open Drizzle Studio |
