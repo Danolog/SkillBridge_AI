@@ -6,7 +6,12 @@ import { skillMaps } from "@/lib/db/schema";
 
 interface SkillNode {
 	id: string;
-	data: { label: string; status: string; category: string };
+	data: {
+		label: string;
+		status: "acquired" | "in_progress" | "missing";
+		category: string;
+		marketPercentage?: number;
+	};
 	position: { x: number; y: number };
 	type: string;
 }
@@ -40,7 +45,7 @@ Zwróć JSON:
   "nodes": [
     {
       "id": "skill-1",
-      "data": { "label": "Python", "status": "acquired", "category": "programming" },
+      "data": { "label": "Python", "status": "acquired", "category": "programming", "marketPercentage": 55 },
       "position": { "x": 0, "y": 0 },
       "type": "skillNode"
     }
@@ -53,6 +58,8 @@ Zwróć JSON:
 Zasady:
 - Każda kompetencja studenta = 1 node ze status "acquired"
 - Dodaj 5-10 brakujących kompetencji ze status "missing" (na podstawie wymagań rynku dla ${careerGoal})
+- Możesz też oznaczyć kompetencje "in_progress" (student ma podstawy, ale wymaga rozwoju)
+- marketPercentage: procent ofert pracy wymagających tej kompetencji (0-100)
 - Kategorie: "programming", "data", "tools", "soft_skills", "frameworks", "devops"
 - Pozycje: grupuj po kategoriach, rozstaw x co 220px, y co 100px
 - Krawędzie: łącz powiązane kompetencje (np. Python→Pandas, SQL→Bazy danych)

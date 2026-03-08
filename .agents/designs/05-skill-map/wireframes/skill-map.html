@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillBridge AI — Skill Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & TOKENS ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-primary: #6366F1;
+  --color-primary-rgb: 99, 102, 241;
+  --color-secondary: #22D3EE;
+  --color-secondary-rgb: 34, 211, 238;
+  --color-accent: #10B981;
+  --color-accent-rgb: 16, 185, 129;
+
+  /* Status colors */
+  --color-acquired: #10B981;
+  --color-acquired-rgb: 16, 185, 129;
+  --color-in-progress: #F59E0B;
+  --color-in-progress-rgb: 245, 158, 11;
+  --color-missing: #EF4444;
+  --color-missing-rgb: 239, 68, 68;
+
+  /* Sidebar / Dark */
+  --color-dark: #0B0E14;
+  --color-dark-2: #161B22;
+  --color-dark-border: #30363D;
+
+  /* Light surfaces */
+  --color-bg: #FAFAF9;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F8FAFC;
+
+  /* Text */
+  --color-text: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+  --color-text-light: rgba(248, 250, 252, 0.92);
+  --color-text-light-muted: rgba(248, 250, 252, 0.55);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #6366F1 0%, #22D3EE 100%);
+  --gradient-accent: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+
+  /* Typography */
+  --font-display: 'Nunito', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Shapes */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(99,102,241,0.10);
+  --shadow-lg: 0 8px 32px rgba(99,102,241,0.18);
+
+  /* Layout */
+  --sidebar-width: 260px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ===== LAYOUT SHELL ===== */
+.app-shell {
+  display: flex;
+  height: 100vh;
+}
+
+/* ===== SIDEBAR (identical to dashboard) ===== */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--color-dark);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 50;
+  border-right: 1px solid var(--color-dark-border);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-logo-icon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.sidebar-logo-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-light-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  color: var(--color-text-light);
+  background: rgba(255,255,255,0.06);
+}
+
+.nav-item.active {
+  color: var(--color-text-light);
+  background: rgba(99, 102, 241, 0.12);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--gradient-primary);
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.nav-item.active svg {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.4));
+}
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+}
+
+.sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-user-email {
+  font-size: 11px;
+  color: var(--color-text-light-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-logout {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-light-muted);
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+.sidebar-logout:hover {
+  color: #F87171;
+  background: rgba(248, 113, 113, 0.08);
+}
+.sidebar-logout svg { width: 18px; height: 18px; }
+
+/* ===== MAIN CONTENT (full-bleed for map) ===== */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== TOP BAR (skill map header) ===== */
+.map-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.map-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.map-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+}
+.map-header-icon svg { width: 20px; height: 20px; }
+
+.map-header-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--color-text);
+}
+.map-header-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.map-header-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.stat-pill.acquired {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-acquired);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.stat-pill.in-progress {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-in-progress);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.stat-pill.missing {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-missing);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.stat-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.stat-pill.acquired .dot { background: var(--color-acquired); }
+.stat-pill.in-progress .dot { background: var(--color-in-progress); }
+.stat-pill.missing .dot { background: var(--color-missing); }
+
+/* ===== CANVAS AREA ===== */
+.canvas-area {
+  flex: 1;
+  position: relative;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Dot grid background */
+.canvas-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== NODES ===== */
+.node {
+  position: absolute;
+  min-width: 150px;
+  max-width: 180px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  text-align: center;
+  border: 2px solid transparent;
+  backdrop-filter: blur(8px);
+}
+
+.node:hover {
+  transform: translateY(-3px) scale(1.03);
+  z-index: 5;
+}
+
+.node.selected {
+  transform: scale(1.05);
+  z-index: 10;
+  ring: 2px;
+}
+
+/* Acquired — green */
+.node.acquired {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.15);
+}
+.node.acquired:hover, .node.acquired.selected {
+  box-shadow: 0 4px 24px rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.7);
+}
+
+/* In progress — yellow */
+.node.in-progress {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.15);
+}
+.node.in-progress:hover, .node.in-progress.selected {
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.7);
+}
+
+/* Missing — red */
+.node.missing {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.15);
+}
+.node.missing:hover, .node.missing.selected {
+  box-shadow: 0 4px 24px rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.7);
+}
+
+@keyframes pulse-missing {
+  0%, 100% { box-shadow: 0 2px 12px rgba(239, 68, 68, 0.15); }
+  50% { box-shadow: 0 2px 20px rgba(239, 68, 68, 0.35); }
+}
+.node.missing {
+  animation: pulse-missing 3s ease-in-out infinite;
+}
+.node.missing:hover, .node.missing.selected {
+  animation: none;
+}
+
+.node-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.node-status {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.node.acquired .node-status { color: var(--color-acquired); }
+.node.in-progress .node-status { color: var(--color-in-progress); }
+.node.missing .node-status { color: var(--color-missing); }
+
+.node-market {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* Nodes container — centered in canvas */
+.nodes-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nodes-inner {
+  position: relative;
+  width: 780px;
+  height: 680px;
+}
+
+/* Connection lines (SVG) */
+.connections-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.connections-layer line {
+  stroke: rgba(99, 102, 241, 0.15);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.connections-layer line.animated {
+  animation: dash-flow 1.5s linear infinite;
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -20; }
+}
+
+/* ===== LEGEND ===== */
+.legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  display: flex;
+  gap: 16px;
+  z-index: 20;
+  box-shadow: var(--shadow-md);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.legend-dot.acquired { background: var(--color-acquired); box-shadow: 0 0 6px rgba(16, 185, 129, 0.4); }
+.legend-dot.in-progress { background: var(--color-in-progress); box-shadow: 0 0 6px rgba(245, 158, 11, 0.4); }
+.legend-dot.missing { background: var(--color-missing); box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+
+/* ===== CONTROLS (zoom/fit) ===== */
+.controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 20;
+}
+
+.control-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+.control-btn:hover {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+.control-btn svg { width: 18px; height: 18px; }
+
+.control-separator {
+  width: 100%;
+  height: 1px;
+  background: rgba(99, 102, 241, 0.1);
+  margin: 2px 0;
+}
+
+/* ===== MINIMAP ===== */
+.minimap {
+  position: absolute;
+  bottom: 72px;
+  right: 20px;
+  width: 160px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-md);
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  padding: 6px;
+}
+
+.minimap-node {
+  position: absolute;
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+}
+.minimap-node.acquired { background: var(--color-acquired); opacity: 0.7; }
+.minimap-node.in-progress { background: var(--color-in-progress); opacity: 0.7; }
+.minimap-node.missing { background: var(--color-missing); opacity: 0.7; }
+
+.minimap-viewport {
+  position: absolute;
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  border-radius: 3px;
+  background: rgba(99, 102, 241, 0.05);
+}
+
+/* ===== DETAIL PANEL (slide-in from right) ===== */
+.detail-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  background: var(--color-surface);
+  border-left: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.detail-panel.open {
+  transform: translateX(0);
+}
+
+.panel-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+  position: relative;
+}
+.panel-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.panel-header.acquired::before { background: var(--color-acquired); }
+.panel-header.in-progress::before { background: var(--color-in-progress); }
+.panel-header.missing::before { background: var(--color-missing); }
+
+.panel-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.panel-close:hover {
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+.panel-close svg { width: 20px; height: 20px; }
+
+.panel-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.panel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+.panel-badge.acquired {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-acquired);
+}
+.panel-badge.in-progress {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-in-progress);
+}
+.panel-badge.missing {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-missing);
+}
+
+.panel-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.panel-badge.acquired .panel-badge-dot { background: var(--color-acquired); }
+.panel-badge.in-progress .panel-badge-dot { background: var(--color-in-progress); }
+.panel-badge.missing .panel-badge-dot { background: var(--color-missing); }
+
+.panel-body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.panel-section {
+  margin-bottom: 24px;
+}
+
+.panel-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.panel-market-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 32px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.panel-market-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.panel-market-bar {
+  height: 8px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-top: 10px;
+}
+.panel-market-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+  transition: width 0.8s ease;
+}
+
+.panel-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.panel-description {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.panel-connections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.panel-connection-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--color-bg);
+  border: 1px solid rgba(0,0,0,0.06);
+  color: var(--color-text-secondary);
+}
+
+/* Panel footer CTA */
+.panel-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(99, 102, 241, 0.08);
+}
+
+.btn-close-gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+  color: white;
+}
+.btn-close-gap.missing-cta {
+  background: var(--gradient-accent);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+}
+.btn-close-gap.missing-cta:hover {
+  box-shadow: 0 0 32px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-close-gap.in-progress-cta {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-in-progress);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.btn-close-gap.in-progress-cta:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.btn-close-gap.acquired-cta {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--color-acquired);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  cursor: default;
+}
+
+.btn-close-gap svg { width: 18px; height: 18px; }
+
+/* ===== LOADING STATE ===== */
+.loading-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 24px;
+  padding: 32px;
+}
+
+.loading-state.active {
+  display: flex;
+}
+
+.loading-spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, var(--color-primary), transparent);
+  padding: 4px;
+  animation: spin 1.2s linear infinite;
+}
+.loading-spinner-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--color-bg);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  text-align: center;
+}
+.loading-text h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+.loading-text p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.loading-skeleton-nodes {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 500px;
+}
+.skeleton-node {
+  width: 140px;
+  height: 60px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, rgba(99,102,241,0.06) 25%, rgba(99,102,241,0.12) 50%, rgba(99,102,241,0.06) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 20px;
+  padding: 32px;
+}
+.empty-state.active {
+  display: flex;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+}
+.empty-icon svg { width: 40px; height: 40px; opacity: 0.6; }
+
+.empty-text {
+  text-align: center;
+}
+.empty-text h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+.empty-text p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  max-width: 360px;
+}
+
+.btn-start-onboarding {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-primary);
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+.btn-start-onboarding:hover {
+  box-shadow: 0 0 32px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+.btn-start-onboarding svg { width: 18px; height: 18px; }
+
+/* ===== MOBILE ===== */
+.mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--color-dark);
+  border-bottom: 1px solid var(--color-dark-border);
+  z-index: 40;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.hamburger {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-light);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.hamburger:hover { background: rgba(255,255,255,0.08); }
+.hamburger svg { width: 24px; height: 24px; }
+
+.mobile-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 45;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ===== STATE SWITCHER (demo only) ===== */
+.state-switcher {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  gap: 6px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(99,102,241,0.1);
+  box-shadow: var(--shadow-md);
+}
+
+.state-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+.state-btn.active {
+  background: var(--color-primary);
+  color: white;
+}
+.state-btn:hover:not(.active) {
+  background: rgba(99,102,241,0.08);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .mobile-topbar { display: flex; }
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; height: calc(100vh - 56px); margin-top: 56px; }
+  .map-header { padding: 12px 16px; }
+  .map-header-stats { display: none; }
+  .map-header-title { font-size: 17px; }
+
+  .detail-panel { width: 100%; }
+
+  .legend {
+    bottom: 12px;
+    left: 12px;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .legend-item { font-size: 11px; }
+
+  .minimap { display: none; }
+
+  .controls {
+    bottom: 12px;
+    right: 12px;
+  }
+
+  .state-switcher { bottom: 16px; left: 50%; transform: translateX(-50%); }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nodeAppear {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.node { animation: nodeAppear 0.4s ease forwards; }
+.node:nth-child(1) { animation-delay: 0.05s; }
+.node:nth-child(2) { animation-delay: 0.1s; }
+.node:nth-child(3) { animation-delay: 0.15s; }
+.node:nth-child(4) { animation-delay: 0.2s; }
+.node:nth-child(5) { animation-delay: 0.25s; }
+.node:nth-child(6) { animation-delay: 0.3s; }
+.node:nth-child(7) { animation-delay: 0.35s; }
+.node:nth-child(8) { animation-delay: 0.4s; }
+.node:nth-child(9) { animation-delay: 0.45s; }
+.node:nth-child(10) { animation-delay: 0.5s; }
+.node:nth-child(11) { animation-delay: 0.55s; }
+.node:nth-child(12) { animation-delay: 0.6s; }
+.node:nth-child(13) { animation-delay: 0.65s; }
+.node:nth-child(14) { animation-delay: 0.7s; }
+.node:nth-child(15) { animation-delay: 0.75s; }
+</style>
+</head>
+<body>
+
+<!-- State switcher (demo only) -->
+<div class="state-switcher">
+  <button class="state-btn active" onclick="showState('map')">Mapa</button>
+  <button class="state-btn" onclick="showState('loading')">Ładowanie</button>
+  <button class="state-btn" onclick="showState('empty')">Pusta</button>
+</div>
+
+<!-- Mobile top bar -->
+<div class="mobile-topbar">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+    </svg>
+  </button>
+  <span class="mobile-logo">SkillBridge AI</span>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- App Shell -->
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-text">SkillBridge AI</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item active">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/>
+        </svg>
+        Skill Map
+      </a>
+      <a href="#" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+        </svg>
+        Gap Analysis
+      </a>
+      <a href="#" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+        </svg>
+        Mikro-kursy
+      </a>
+      <a href="#" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0 1 16.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m4.91-.98a48.24 48.24 0 0 0-7.18-.565c-2.445 0-4.848.2-7.18.565M12 2.25c.966 0 1.92.03 2.859.09A6.015 6.015 0 0 1 12 9.04a6.015 6.015 0 0 1-2.86-6.7A48.18 48.18 0 0 1 12 2.25Z"/>
+        </svg>
+        Paszport
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">AK</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Anna Kowalska</div>
+          <div class="sidebar-user-email">anna.k@student.merito.pl</div>
+        </div>
+      </div>
+      <button class="sidebar-logout">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+        </svg>
+        Wyloguj si&#281;
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- Header bar -->
+    <div class="map-header">
+      <div class="map-header-left">
+        <div class="map-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="map-header-title">Skill Map</div>
+          <div class="map-header-subtitle">Mapa kompetencji — Full-stack Developer</div>
+        </div>
+      </div>
+      <div class="map-header-stats">
+        <div class="stat-pill acquired"><span class="dot"></span>8 Masz</div>
+        <div class="stat-pill in-progress"><span class="dot"></span>2 W trakcie</div>
+        <div class="stat-pill missing"><span class="dot"></span>5 Brakuje</div>
+      </div>
+    </div>
+
+    <!-- Canvas area (the map) -->
+    <div class="canvas-area" id="canvasArea">
+
+      <!-- Centered nodes container -->
+      <div class="nodes-container">
+        <div class="nodes-inner" id="nodesInner">
+
+          <!-- SVG connections layer -->
+          <svg class="connections-layer" id="connectionsLayer">
+            <!-- Lines will be drawn by JS -->
+          </svg>
+
+          <!-- ACQUIRED NODES (left zone) -->
+          <div class="node acquired" id="node-js" style="left: 20px; top: 20px;" onclick="selectNode(this, 'JavaScript', 'acquired', 85, 'Frontend')">
+            <div class="node-label">JavaScript</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">85% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-html" style="left: 0px; top: 130px;" onclick="selectNode(this, 'HTML/CSS', 'acquired', 92, 'Frontend')">
+            <div class="node-label">HTML / CSS</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">92% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-python" style="left: 30px; top: 240px;" onclick="selectNode(this, 'Python', 'acquired', 55, 'Backend')">
+            <div class="node-label">Python</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">55% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-git" style="left: 10px; top: 350px;" onclick="selectNode(this, 'Git', 'acquired', 78, 'DevOps')">
+            <div class="node-label">Git</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">78% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-sql" style="left: 30px; top: 460px;" onclick="selectNode(this, 'SQL', 'acquired', 72, 'Backend')">
+            <div class="node-label">SQL</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">72% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-algo" style="left: 10px; top: 570px;" onclick="selectNode(this, 'Algorytmy', 'acquired', 45, 'Fundamenty')">
+            <div class="node-label">Algorytmy</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">45% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-rest" style="left: 200px; top: 75px;" onclick="selectNode(this, 'REST API', 'acquired', 70, 'Backend')">
+            <div class="node-label">REST API</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">70% ofert</div>
+          </div>
+
+          <div class="node acquired" id="node-linux" style="left: 190px; top: 410px;" onclick="selectNode(this, 'Linux', 'acquired', 48, 'DevOps')">
+            <div class="node-label">Linux</div>
+            <div class="node-status">Masz</div>
+            <div class="node-market">48% ofert</div>
+          </div>
+
+          <!-- IN PROGRESS NODES (center zone) -->
+          <div class="node in-progress" id="node-react" style="left: 310px; top: 180px;" onclick="selectNode(this, 'React', 'in_progress', 80, 'Frontend')">
+            <div class="node-label">React</div>
+            <div class="node-status">W trakcie</div>
+            <div class="node-market">80% ofert</div>
+          </div>
+
+          <div class="node in-progress" id="node-ts" style="left: 320px; top: 330px;" onclick="selectNode(this, 'TypeScript', 'in_progress', 75, 'Frontend')">
+            <div class="node-label">TypeScript</div>
+            <div class="node-status">W trakcie</div>
+            <div class="node-market">75% ofert</div>
+          </div>
+
+          <!-- MISSING NODES (right zone) -->
+          <div class="node missing" id="node-nextjs" style="left: 580px; top: 30px;" onclick="selectNode(this, 'Next.js', 'missing', 62, 'Frontend')">
+            <div class="node-label">Next.js</div>
+            <div class="node-status">Brakuje</div>
+            <div class="node-market">62% ofert</div>
+          </div>
+
+          <div class="node missing" id="node-node" style="left: 600px; top: 150px;" onclick="selectNode(this, 'Node.js', 'missing', 68, 'Backend')">
+            <div class="node-label">Node.js</div>
+            <div class="node-status">Brakuje</div>
+            <div class="node-market">68% ofert</div>
+          </div>
+
+          <div class="node missing" id="node-docker" style="left: 570px; top: 280px;" onclick="selectNode(this, 'Docker', 'missing', 58, 'DevOps')">
+            <div class="node-label">Docker</div>
+            <div class="node-status">Brakuje</div>
+            <div class="node-market">58% ofert</div>
+          </div>
+
+          <div class="node missing" id="node-testing" style="left: 600px; top: 410px;" onclick="selectNode(this, 'Testing', 'missing', 52, 'Quality')">
+            <div class="node-label">Testing</div>
+            <div class="node-status">Brakuje</div>
+            <div class="node-market">52% ofert</div>
+          </div>
+
+          <div class="node missing" id="node-ci" style="left: 580px; top: 530px;" onclick="selectNode(this, 'CI/CD', 'missing', 45, 'DevOps')">
+            <div class="node-label">CI/CD</div>
+            <div class="node-status">Brakuje</div>
+            <div class="node-market">45% ofert</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot acquired"></div>
+          Masz
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot in-progress"></div>
+          W trakcie
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot missing"></div>
+          Brakuje
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="control-btn" title="Powi&#281;ksz">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+        </button>
+        <button class="control-btn" title="Pomniejsz">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/>
+          </svg>
+        </button>
+        <div class="control-separator"></div>
+        <button class="control-btn" title="Dopasuj widok">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- MiniMap -->
+      <div class="minimap">
+        <div class="minimap-node acquired" style="left: 12px; top: 10px;"></div>
+        <div class="minimap-node acquired" style="left: 8px; top: 22px;"></div>
+        <div class="minimap-node acquired" style="left: 16px; top: 36px;"></div>
+        <div class="minimap-node acquired" style="left: 8px; top: 48px;"></div>
+        <div class="minimap-node acquired" style="left: 14px; top: 62px;"></div>
+        <div class="minimap-node acquired" style="left: 10px; top: 74px;"></div>
+        <div class="minimap-node acquired" style="left: 44px; top: 16px;"></div>
+        <div class="minimap-node acquired" style="left: 42px; top: 55px;"></div>
+        <div class="minimap-node in-progress" style="left: 62px; top: 30px;"></div>
+        <div class="minimap-node in-progress" style="left: 66px; top: 44px;"></div>
+        <div class="minimap-node missing" style="left: 100px; top: 10px;"></div>
+        <div class="minimap-node missing" style="left: 106px; top: 26px;"></div>
+        <div class="minimap-node missing" style="left: 98px; top: 40px;"></div>
+        <div class="minimap-node missing" style="left: 106px; top: 55px;"></div>
+        <div class="minimap-node missing" style="left: 100px; top: 70px;"></div>
+        <div class="minimap-viewport" style="left: 4px; top: 4px; width: 80px; height: 50px;"></div>
+      </div>
+
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="canvas-area loading-state" id="loadingState">
+      <div class="loading-spinner">
+        <div class="loading-spinner-inner"></div>
+      </div>
+      <div class="loading-text">
+        <h3>Generujemy Twoj&#261; Skill Map...</h3>
+        <p>AI analizuje Twoje kompetencje i dane rynkowe. To zajmie kilka sekund.</p>
+      </div>
+      <div class="loading-skeleton-nodes">
+        <div class="skeleton-node"></div>
+        <div class="skeleton-node"></div>
+        <div class="skeleton-node"></div>
+        <div class="skeleton-node"></div>
+        <div class="skeleton-node"></div>
+        <div class="skeleton-node"></div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="canvas-area empty-state" id="emptyState">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/>
+        </svg>
+      </div>
+      <div class="empty-text">
+        <h3>Twoja Skill Map jest pusta</h3>
+        <p>Najpierw przejd&#378; proces onboardingu — wgraj sylabus, a AI wygeneruje Twoj&#261; map&#281; kompetencji.</p>
+      </div>
+      <a href="/onboarding" class="btn-start-onboarding">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+        </svg>
+        Rozpocznij onboarding
+      </a>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="panel-header" id="panelHeader">
+        <div>
+          <div class="panel-title" id="panelTitle">React</div>
+          <div class="panel-badge" id="panelBadge">
+            <span class="panel-badge-dot"></span>
+            <span id="panelStatusText">W trakcie</span>
+          </div>
+        </div>
+        <button class="panel-close" onclick="closePanel()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="panel-body">
+        <!-- Market demand -->
+        <div class="panel-section">
+          <div class="panel-section-title">Zapotrzebowanie rynkowe</div>
+          <div class="panel-market-value" id="panelMarket">80%</div>
+          <div class="panel-market-label">ofert pracy wymaga tej kompetencji</div>
+          <div class="panel-market-bar">
+            <div class="panel-market-fill" id="panelMarketFill" style="width: 80%;"></div>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="panel-section">
+          <div class="panel-section-title">Kategoria</div>
+          <div class="panel-category" id="panelCategory">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="14" height="14">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z"/>
+            </svg>
+            Frontend
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="panel-section">
+          <div class="panel-section-title">Opis</div>
+          <p class="panel-description" id="panelDescription">
+            Popularna biblioteka JavaScript do budowania interfejs&#243;w u&#380;ytkownika. Kluczowa dla roli Full-stack Developer — wymagana w 80% ofert pracy.
+          </p>
+        </div>
+
+        <!-- Connected competencies -->
+        <div class="panel-section">
+          <div class="panel-section-title">Powi&#261;zane kompetencje</div>
+          <div class="panel-connections" id="panelConnections">
+            <span class="panel-connection-chip">JavaScript</span>
+            <span class="panel-connection-chip">TypeScript</span>
+            <span class="panel-connection-chip">Next.js</span>
+            <span class="panel-connection-chip">HTML/CSS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-footer" id="panelFooter">
+        <!-- CTA depends on status -->
+        <a href="/micro-courses?generate=React" class="btn-close-gap in-progress-cta" id="panelCta">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+          </svg>
+          <span id="panelCtaText">Kontynuuj nauk&#281;</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+// === Connection lines (draw after load) ===
+const connections = [
+  ['node-js', 'node-react'],
+  ['node-js', 'node-ts'],
+  ['node-html', 'node-react'],
+  ['node-react', 'node-nextjs'],
+  ['node-react', 'node-ts'],
+  ['node-ts', 'node-nextjs'],
+  ['node-python', 'node-node'],
+  ['node-rest', 'node-node'],
+  ['node-sql', 'node-node'],
+  ['node-git', 'node-ci'],
+  ['node-linux', 'node-docker'],
+  ['node-docker', 'node-ci'],
+  ['node-node', 'node-testing'],
+  ['node-react', 'node-testing'],
+];
+
+function drawConnections() {
+  const svg = document.getElementById('connectionsLayer');
+  const container = document.getElementById('nodesInner');
+  if (!svg || !container) return;
+
+  const canvasRect = container.getBoundingClientRect();
+  svg.setAttribute('width', container.offsetWidth);
+  svg.setAttribute('height', container.offsetHeight);
+  svg.innerHTML = '';
+
+  connections.forEach(([fromId, toId]) => {
+    const from = document.getElementById(fromId);
+    const to = document.getElementById(toId);
+    if (!from || !to) return;
+
+    const fromRect = from.getBoundingClientRect();
+    const toRect = to.getBoundingClientRect();
+
+    const x1 = fromRect.left - canvasRect.left + fromRect.width / 2;
+    const y1 = fromRect.top - canvasRect.top + fromRect.height / 2;
+    const x2 = toRect.left - canvasRect.left + toRect.width / 2;
+    const y2 = toRect.top - canvasRect.top + toRect.height / 2;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.classList.add('animated');
+    svg.appendChild(line);
+  });
+}
+
+window.addEventListener('load', () => {
+  setTimeout(drawConnections, 100);
+});
+window.addEventListener('resize', drawConnections);
+
+// === Node selection & detail panel ===
+const descriptions = {
+  'JavaScript': 'Podstawowy język programowania webowego. Niezbędny do pracy jako Full-stack Developer — wymagany w praktycznie każdej ofercie.',
+  'HTML/CSS': 'Fundament web developmentu. Każdy developer musi znać HTML i CSS na poziomie zaawansowanym.',
+  'Python': 'Wszechstronny język programowania, popularny w data science i backend. Przydatny jako drugi język.',
+  'Git': 'System kontroli wersji. Standard w każdym zespole deweloperskim — bez niego nie ma współpracy.',
+  'SQL': 'Język zapytań do baz danych. Kluczowy dla pracy z danymi po stronie backendu.',
+  'Algorytmy': 'Podstawy informatyki i rozwiązywania problemów. Ważne na rozmowach rekrutacyjnych.',
+  'REST API': 'Standard komunikacji między frontendem a backendem. Musisz umieć projektować i konsumować API.',
+  'Linux': 'System operacyjny serwerów. Przydatny do deploymentu i pracy z kontenerami.',
+  'React': 'Popularna biblioteka JavaScript do budowania interfejsów użytkownika. Kluczowa dla roli Full-stack Developer.',
+  'TypeScript': 'Nadzbiór JavaScriptu z typowaniem statycznym. Coraz częściej wymagany w ofertach pracy.',
+  'Next.js': 'Framework React do produkcyjnych aplikacji webowych. Server-side rendering, routing, API routes — wszystko w jednym.',
+  'Node.js': 'Runtime JavaScript po stronie serwera. Pozwala pisać backend w tym samym języku co frontend.',
+  'Docker': 'Konteneryzacja aplikacji. Standard w nowoczesnym DevOps — ułatwia deployment i skalowanie.',
+  'Testing': 'Testowanie automatyczne (unit, integration, e2e). Kluczowe dla jakości kodu i CI/CD pipeline.',
+  'CI/CD': 'Continuous Integration / Deployment. Automatyzacja budowania, testowania i wdrażania aplikacji.',
+};
+
+const relatedMap = {
+  'JavaScript': ['HTML/CSS', 'React', 'TypeScript', 'Node.js'],
+  'HTML/CSS': ['JavaScript', 'React', 'Next.js'],
+  'Python': ['SQL', 'Algorytmy', 'REST API'],
+  'Git': ['CI/CD', 'Docker', 'Linux'],
+  'SQL': ['Node.js', 'Python', 'REST API'],
+  'Algorytmy': ['JavaScript', 'Python'],
+  'REST API': ['Node.js', 'JavaScript', 'Next.js'],
+  'Linux': ['Docker', 'CI/CD', 'Git'],
+  'React': ['JavaScript', 'TypeScript', 'Next.js', 'HTML/CSS'],
+  'TypeScript': ['JavaScript', 'React', 'Next.js', 'Node.js'],
+  'Next.js': ['React', 'TypeScript', 'Node.js'],
+  'Node.js': ['JavaScript', 'REST API', 'SQL', 'Docker'],
+  'Docker': ['Linux', 'CI/CD', 'Node.js'],
+  'Testing': ['React', 'Node.js', 'CI/CD'],
+  'CI/CD': ['Docker', 'Git', 'Testing', 'Linux'],
+};
+
+const STATUS_LABELS = {
+  'acquired': 'Masz',
+  'in_progress': 'W trakcie',
+  'missing': 'Brakuje',
+};
+
+const CTA_CONFIG = {
+  'acquired': { text: 'Kompetencja opanowana', class: 'acquired-cta' },
+  'in_progress': { text: 'Kontynuuj naukę', class: 'in-progress-cta' },
+  'missing': { text: 'Zamknij tę lukę', class: 'missing-cta' },
+};
+
+let selectedNodeEl = null;
+
+function selectNode(el, name, status, market, category) {
+  // Deselect previous
+  if (selectedNodeEl) selectedNodeEl.classList.remove('selected');
+  el.classList.add('selected');
+  selectedNodeEl = el;
+
+  // Update panel
+  document.getElementById('panelTitle').textContent = name;
+
+  const header = document.getElementById('panelHeader');
+  header.className = 'panel-header ' + (status === 'in_progress' ? 'in-progress' : status);
+
+  const badge = document.getElementById('panelBadge');
+  badge.className = 'panel-badge ' + (status === 'in_progress' ? 'in-progress' : status);
+  document.getElementById('panelStatusText').textContent = STATUS_LABELS[status];
+
+  document.getElementById('panelMarket').textContent = market + '%';
+  document.getElementById('panelMarketFill').style.width = market + '%';
+  document.getElementById('panelCategory').innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="14" height="14">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z"/>
+    </svg>
+    ${category}
+  `;
+
+  document.getElementById('panelDescription').textContent = descriptions[name] || 'Opis kompetencji.';
+
+  const connContainer = document.getElementById('panelConnections');
+  const related = relatedMap[name] || [];
+  connContainer.innerHTML = related.map(r => `<span class="panel-connection-chip">${r}</span>`).join('');
+
+  const cta = document.getElementById('panelCta');
+  const ctaConfig = CTA_CONFIG[status];
+  cta.className = 'btn-close-gap ' + ctaConfig.class;
+  cta.href = status === 'missing' ? `/micro-courses?generate=${encodeURIComponent(name)}` : '#';
+
+  const ctaIcon = status === 'missing'
+    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/></svg>'
+    : status === 'in_progress'
+    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>';
+
+  document.getElementById('panelCtaText').textContent = ctaConfig.text;
+  cta.querySelector('svg')?.remove();
+  cta.insertAdjacentHTML('afterbegin', ctaIcon);
+
+  // Open panel
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('detailPanel').classList.remove('open');
+  if (selectedNodeEl) {
+    selectedNodeEl.classList.remove('selected');
+    selectedNodeEl = null;
+  }
+}
+
+// Close panel on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// === State switcher (demo) ===
+function showState(state) {
+  document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const canvas = document.getElementById('canvasArea');
+  const loading = document.getElementById('loadingState');
+  const empty = document.getElementById('emptyState');
+
+  canvas.style.display = state === 'map' ? '' : 'none';
+  loading.classList.toggle('active', state === 'loading');
+  empty.classList.toggle('active', state === 'empty');
+
+  // Show/hide header stats based on state
+  document.querySelector('.map-header-stats').style.display = state === 'map' ? '' : 'none';
+}
+
+// === Sidebar toggle (mobile) ===
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+// Nav active state
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    if (item.getAttribute('href') === '#') {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      if (window.innerWidth <= 768) toggleSidebar();
+    }
+  });
+});
+</script>
+</body>
+</html>
