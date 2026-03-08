@@ -202,3 +202,7 @@ export const microCoursesRelations = relations(microCourses, ({ one }) => ({
 	student: one(students, { fields: [microCourses.studentId], references: [students.id] }),
 	gap: one(gaps, { fields: [microCourses.gapId], references: [gaps.id] }),
 }));
+
+export const passportsRelations = relations(passports, ({ one }) => ({
+	student: one(students, { fields: [passports.studentId], references: [students.id] }),
+}));

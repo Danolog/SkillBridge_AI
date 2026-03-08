@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paszport Kompetencji — SkillBridge AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; color: #0f172a; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; color: inherit; }
+
+/* ===== SIDEBAR ===== */
+.db-sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
+  background: #0b0e14; border-right: 1px solid #30363d;
+  display: flex; flex-direction: column; z-index: 100;
+}
+.db-logo { display: flex; align-items: center; gap: 12px; padding: 24px 20px 20px; }
+.db-logo-icon {
+  width: 36px; height: 36px; border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff; font-weight: 800;
+}
+.db-logo-text {
+  font-size: 18px; font-weight: 800; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.db-nav { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+.db-nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: 10px; color: rgba(248,250,252,0.55); font-size: 14px;
+  font-weight: 600; transition: all .2s ease; position: relative; cursor: pointer;
+}
+.db-nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(248,250,252,0.8); }
+.db-nav-item.active { background: rgba(99,102,241,0.12); color: #f8fafc; }
+.db-nav-item.active::before {
+  content: ''; position: absolute; left: -12px; top: 6px; bottom: 6px; width: 3px;
+  background: linear-gradient(180deg, #6366f1, #22d3ee); border-radius: 0 3px 3px 0;
+}
+.db-nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.db-nav-item.active svg { filter: drop-shadow(0 0 6px rgba(99,102,241,0.5)); }
+.db-user {
+  padding: 16px 20px; border-top: 1px solid #30363d;
+  display: flex; align-items: center; gap: 12px;
+}
+.db-user-avatar {
+  width: 36px; height: 36px; border-radius: 9999px;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.db-user-info { flex: 1; }
+.db-user-name { font-size: 13px; font-weight: 700; color: #f8fafc; }
+.db-user-email { font-size: 11px; color: #94a3b8; }
+
+/* ===== MAIN CONTENT ===== */
+.db-main { margin-left: 260px; padding: 32px; min-height: 100vh; background: #fff; }
+
+/* ===== PAGE HEADER ===== */
+.pp-page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.pp-page-title { font-size: 28px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.pp-actions { display: flex; gap: 10px; }
+.pp-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 9999px; font-size: 14px;
+  font-weight: 700; font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: all .25s ease; border: none;
+}
+.pp-btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+  color: #fff; box-shadow: 0 0 16px rgba(99,102,241,0.25);
+}
+.pp-btn-primary:hover { box-shadow: 0 0 24px rgba(99,102,241,0.35); transform: translateY(-1px); }
+.pp-btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.pp-btn-secondary:hover { background: #e2e8f0; transform: translateY(-1px); }
+.pp-btn svg { width: 16px; height: 16px; }
+
+/* ===== PROFILE HERO CARD ===== */
+.pp-hero {
+  background: linear-gradient(135deg, #0b0e14 0%, #1a1040 50%, #0e1628 100%);
+  border-radius: 24px; padding: 40px; position: relative; overflow: hidden;
+  margin-bottom: 20px; color: #f8fafc;
+}
+.pp-hero::before {
+  content: ''; position: absolute; top: -80px; right: -80px; width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%); border-radius: 50%;
+}
+.pp-hero::after {
+  content: ''; position: absolute; bottom: -60px; left: 30%; width: 250px; height: 250px;
+  background: radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%); border-radius: 50%;
+}
+.pp-hero-content { position: relative; z-index: 1; display: flex; align-items: center; gap: 28px; }
+.pp-avatar {
+  width: 96px; height: 96px; border-radius: 9999px;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; font-weight: 800; color: #fff; flex-shrink: 0;
+  box-shadow: 0 0 40px rgba(99,102,241,0.35);
+  border: 3px solid rgba(255,255,255,0.15);
+}
+.pp-hero-info { flex: 1; }
+.pp-hero-name { font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.02em; }
+.pp-hero-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-size: 15px; color: rgba(248,250,252,0.65); margin-bottom: 14px;
+}
+.pp-hero-meta .dot { opacity: 0.4; }
+.pp-career-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-radius: 9999px;
+  background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.3);
+  color: #a5b4fc; font-size: 14px; font-weight: 700;
+}
+.pp-career-pill svg { width: 16px; height: 16px; }
+/* Dot grid on hero */
+.pp-hero-dots {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; opacity: 0.4;
+  background-image: radial-gradient(circle, rgba(99,102,241,0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ===== STATS ROW ===== */
+.pp-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.pp-stat-card {
+  background: #fff; border: 1px solid rgba(99,102,241,0.08); border-radius: 20px;
+  padding: 24px; position: relative; overflow: hidden; transition: all .28s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.pp-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(99,102,241,0.1); }
+.pp-stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  transform: scaleX(0); transition: transform .3s ease; transform-origin: left;
+}
+.pp-stat-card:hover::before { transform: scaleX(1); }
+.pp-stat-card.green::before { background: linear-gradient(90deg, #16a34a, #22d3ee); }
+.pp-stat-card.yellow::before { background: linear-gradient(90deg, #f59e0b, #f97316); }
+.pp-stat-card.red::before { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+.pp-stat-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.pp-stat-icon svg { width: 24px; height: 24px; }
+.pp-stat-icon.green { background: rgba(22,163,74,0.1); color: #16a34a; border: 1px solid rgba(22,163,74,0.15); }
+.pp-stat-icon.yellow { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.15); }
+.pp-stat-icon.red { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.15); }
+
+.pp-stat-value {
+  font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700;
+  color: #0f172a; line-height: 1; margin-bottom: 4px;
+}
+.pp-stat-label { font-size: 14px; color: #64748b; font-weight: 600; }
+.pp-stat-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+
+/* ===== COVERAGE BAR CARD ===== */
+.pp-coverage-card {
+  background: #fff; border: 1px solid rgba(99,102,241,0.08); border-radius: 20px;
+  padding: 28px 32px; margin-bottom: 20px; position: relative; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.pp-coverage-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+}
+.pp-coverage-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.pp-coverage-left { display: flex; align-items: center; gap: 12px; }
+.pp-coverage-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.12);
+  display: flex; align-items: center; justify-content: center; color: #6366f1;
+}
+.pp-coverage-icon svg { width: 22px; height: 22px; }
+.pp-coverage-label { font-size: 16px; font-weight: 700; color: #0f172a; }
+.pp-coverage-sublabel { font-size: 13px; color: #64748b; }
+.pp-coverage-value {
+  font-family: 'JetBrains Mono', monospace; font-size: 42px; font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.pp-progress-track {
+  width: 100%; height: 16px; background: #f1f5f9;
+  border-radius: 9999px; overflow: hidden; position: relative;
+}
+.pp-progress-fill {
+  height: 100%; border-radius: 9999px;
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+  box-shadow: 0 0 16px rgba(99,102,241,0.35);
+  transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+.pp-progress-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 60%, rgba(255,255,255,0.3));
+  border-radius: 9999px;
+}
+.pp-progress-markers {
+  display: flex; justify-content: space-between; margin-top: 8px;
+  font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;
+}
+
+/* ===== COMPETENCIES SECTION ===== */
+.pp-comp-section { margin-bottom: 24px; }
+.pp-comp-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.pp-comp-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 18px; font-weight: 800; color: #0f172a;
+}
+.pp-comp-section-title .section-dot {
+  width: 12px; height: 12px; border-radius: 9999px;
+}
+.pp-comp-section-title .section-dot.green { background: #16a34a; box-shadow: 0 0 8px rgba(22,163,74,0.3); }
+.pp-comp-section-title .section-dot.yellow { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.3); }
+.pp-comp-section-title .section-dot.red { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.3); }
+.pp-comp-count-badge {
+  font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 9999px;
+}
+.pp-comp-count-badge.green { background: rgba(22,163,74,0.08); color: #16a34a; }
+.pp-comp-count-badge.yellow { background: rgba(245,158,11,0.08); color: #d97706; }
+.pp-comp-count-badge.red { background: rgba(239,68,68,0.08); color: #ef4444; }
+
+/* ===== COMPETENCY CARDS GRID ===== */
+.pp-comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+.pp-comp-card {
+  background: #fff; border-radius: 16px; padding: 20px;
+  border: 1px solid #f1f5f9; transition: all .25s ease;
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative; overflow: hidden;
+}
+.pp-comp-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+.pp-comp-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+}
+.pp-comp-card.acquired::before { background: linear-gradient(180deg, #16a34a, #22d3ee); }
+.pp-comp-card.in-progress::before { background: linear-gradient(180deg, #f59e0b, #f97316); }
+.pp-comp-card.missing::before { background: linear-gradient(180deg, #ef4444, #f97316); }
+.pp-comp-card.acquired { border-color: rgba(22,163,74,0.12); }
+.pp-comp-card.in-progress { border-color: rgba(245,158,11,0.12); }
+.pp-comp-card.missing { border-color: rgba(239,68,68,0.12); }
+
+.pp-comp-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.pp-comp-card-name { font-size: 16px; font-weight: 800; color: #0f172a; flex: 1; }
+.pp-comp-status-icon {
+  width: 28px; height: 28px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.pp-comp-status-icon svg { width: 14px; height: 14px; }
+.pp-comp-status-icon.acquired { background: rgba(22,163,74,0.1); color: #16a34a; }
+.pp-comp-status-icon.in-progress { background: rgba(245,158,11,0.1); color: #d97706; }
+.pp-comp-status-icon.missing { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+.pp-comp-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.pp-level-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 8px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+}
+.pp-level-badge.basic { background: #f1f5f9; color: #64748b; }
+.pp-level-badge.intermediate { background: rgba(99,102,241,0.08); color: #6366f1; }
+.pp-level-badge.advanced { background: rgba(147,51,234,0.08); color: #9333ea; }
+
+.pp-level-badge svg { width: 10px; height: 10px; }
+
+.pp-demand-bar {
+  display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; font-weight: 600;
+}
+.pp-demand-track {
+  width: 60px; height: 5px; background: #f1f5f9; border-radius: 9999px; overflow: hidden;
+}
+.pp-demand-fill {
+  height: 100%; border-radius: 9999px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
+}
+.pp-demand-label { font-family: 'JetBrains Mono', monospace; }
+
+/* ===== GENERATED FOOTER ===== */
+.pp-gen-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 0; border-top: 1px solid #f1f5f9; margin-top: 8px;
+}
+.pp-generated { font-size: 12px; color: #94a3b8; font-weight: 500; }
+.pp-generated span { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.pp-powered {
+  font-size: 11px; color: #cbd5e1; display: flex; align-items: center; gap: 4px;
+}
+
+/* ===== TOAST ===== */
+.pp-toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #0f172a; color: #f8fafc; padding: 12px 20px;
+  border-radius: 12px; font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transform: translateY(80px); opacity: 0; transition: all .3s ease;
+  z-index: 1000;
+}
+.pp-toast.show { transform: translateY(0); opacity: 1; }
+.pp-toast svg { width: 18px; height: 18px; color: #16a34a; }
+
+/* ===== MOBILE TOP BAR ===== */
+.db-mobile-bar {
+  display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  background: #0b0e14; border-bottom: 1px solid #30363d;
+  align-items: center; justify-content: space-between; padding: 0 16px; z-index: 200;
+}
+.db-mobile-bar .db-logo { padding: 0; }
+.db-hamburger {
+  width: 40px; height: 40px; border: none; background: rgba(255,255,255,0.06);
+  border-radius: 10px; color: #f8fafc; font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .pp-stats-row { grid-template-columns: repeat(3, 1fr); }
+  .pp-comp-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+@media (max-width: 768px) {
+  .db-sidebar { transform: translateX(-100%); transition: transform .3s ease; }
+  .db-sidebar.open { transform: translateX(0); }
+  .db-mobile-bar { display: flex; }
+  .db-main { margin-left: 0; padding: 72px 16px 24px; }
+  .pp-page-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .pp-actions { width: 100%; }
+  .pp-btn { flex: 1; justify-content: center; }
+  .pp-hero { padding: 28px 20px; }
+  .pp-hero-content { flex-direction: column; text-align: center; gap: 16px; }
+  .pp-hero-meta { justify-content: center; }
+  .pp-stats-row { grid-template-columns: 1fr; }
+  .pp-comp-grid { grid-template-columns: 1fr; }
+  .pp-coverage-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .pp-gen-footer { flex-direction: column; gap: 8px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== MOBILE TOP BAR ===== -->
+<div class="db-mobile-bar">
+  <div class="db-logo">
+    <div class="db-logo-icon">S</div>
+    <span class="db-logo-text">SkillBridge</span>
+  </div>
+  <button class="db-hamburger" onclick="document.querySelector('.db-sidebar').classList.toggle('open')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+  </button>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="db-sidebar">
+  <div class="db-logo">
+    <div class="db-logo-icon">S</div>
+    <span class="db-logo-text">SkillBridge</span>
+  </div>
+  <div class="db-nav">
+    <a class="db-nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="db-nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Mapa Kompetencji
+    </a>
+    <a class="db-nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      Analiza Luk
+    </a>
+    <a class="db-nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Mikro-kursy
+    </a>
+    <a class="db-nav-item active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+      Paszport
+    </a>
+  </div>
+  <div class="db-user">
+    <div class="db-user-avatar">JK</div>
+    <div class="db-user-info">
+      <div class="db-user-name">Jan Kowalski</div>
+      <div class="db-user-email">jan.kowalski@wsb.merito.pl</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="db-main">
+
+  <!-- Page Header -->
+  <div class="pp-page-header">
+    <h1 class="pp-page-title">Paszport Kompetencji</h1>
+    <div class="pp-actions">
+      <button class="pp-btn pp-btn-secondary" onclick="copyLink()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Kopiuj link
+      </button>
+      <button class="pp-btn pp-btn-primary" onclick="exportPDF()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Eksportuj PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== PROFILE HERO ===== -->
+  <div class="pp-hero" id="passport-card">
+    <div class="pp-hero-dots"></div>
+    <div class="pp-hero-content">
+      <div class="pp-avatar">JK</div>
+      <div class="pp-hero-info">
+        <h2 class="pp-hero-name">Jan Kowalski</h2>
+        <div class="pp-hero-meta">
+          <span>WSB Merito Warszawa</span>
+          <span class="dot">&middot;</span>
+          <span>Informatyka</span>
+          <span class="dot">&middot;</span>
+          <span>Semestr 3</span>
+        </div>
+        <div class="pp-career-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Cel: Frontend Developer
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STATS ROW ===== -->
+  <div class="pp-stats-row">
+    <div class="pp-stat-card green">
+      <div class="pp-stat-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="pp-stat-value">12</div>
+      <div class="pp-stat-label">Opanowane</div>
+      <div class="pp-stat-sub">60% wszystkich kompetencji</div>
+    </div>
+    <div class="pp-stat-card yellow">
+      <div class="pp-stat-icon yellow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="pp-stat-value">4</div>
+      <div class="pp-stat-label">W trakcie nauki</div>
+      <div class="pp-stat-sub">20% wszystkich kompetencji</div>
+    </div>
+    <div class="pp-stat-card red">
+      <div class="pp-stat-icon red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div class="pp-stat-value">4</div>
+      <div class="pp-stat-label">Brakuje</div>
+      <div class="pp-stat-sub">20% do uzupelnienia</div>
+    </div>
+  </div>
+
+  <!-- ===== COVERAGE BAR ===== -->
+  <div class="pp-coverage-card">
+    <div class="pp-coverage-header">
+      <div class="pp-coverage-left">
+        <div class="pp-coverage-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        </div>
+        <div>
+          <div class="pp-coverage-label">Pokrycie wymagan rynkowych</div>
+          <div class="pp-coverage-sublabel">Na podstawie 20 kluczowych kompetencji dla Frontend Developer</div>
+        </div>
+      </div>
+      <div class="pp-coverage-value" id="coverage-text">73%</div>
+    </div>
+    <div class="pp-progress-track">
+      <div class="pp-progress-fill" style="width: 0%;" id="progress-fill"></div>
+    </div>
+    <div class="pp-progress-markers">
+      <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+    </div>
+  </div>
+
+  <!-- ===== ACQUIRED COMPETENCIES ===== -->
+  <div class="pp-comp-section">
+    <div class="pp-comp-section-header">
+      <div class="pp-comp-section-title">
+        <span class="section-dot green"></span>
+        Opanowane kompetencje
+      </div>
+      <span class="pp-comp-count-badge green">12 kompetencji</span>
+    </div>
+    <div class="pp-comp-grid">
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">JavaScript</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge advanced"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Zaawansowany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:92%"></div></div><span class="pp-demand-label">92%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">React</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge advanced"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Zaawansowany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:88%"></div></div><span class="pp-demand-label">88%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">HTML5</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge advanced"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Zaawansowany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:95%"></div></div><span class="pp-demand-label">95%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">CSS3</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge advanced"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Zaawansowany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:93%"></div></div><span class="pp-demand-label">93%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Git</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge intermediate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg> Sredni</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:90%"></div></div><span class="pp-demand-label">90%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Responsive Design</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge intermediate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg> Sredni</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:85%"></div></div><span class="pp-demand-label">85%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">REST API</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge intermediate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg> Sredni</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:82%"></div></div><span class="pp-demand-label">82%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">npm / yarn</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:75%"></div></div><span class="pp-demand-label">75%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Algorytmy</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge intermediate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg> Sredni</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:70%"></div></div><span class="pp-demand-label">70%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Bazy danych SQL</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:68%"></div></div><span class="pp-demand-label">68%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Agile / Scrum</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:78%"></div></div><span class="pp-demand-label">78%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card acquired">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Linux</div>
+          <div class="pp-comp-status-icon acquired"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:60%"></div></div><span class="pp-demand-label">60%</span> popyt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== IN PROGRESS COMPETENCIES ===== -->
+  <div class="pp-comp-section">
+    <div class="pp-comp-section-header">
+      <div class="pp-comp-section-title">
+        <span class="section-dot yellow"></span>
+        W trakcie nauki
+      </div>
+      <span class="pp-comp-count-badge yellow">4 kompetencje</span>
+    </div>
+    <div class="pp-comp-grid">
+      <div class="pp-comp-card in-progress">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">TypeScript</div>
+          <div class="pp-comp-status-icon in-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge intermediate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg> Sredni</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:89%"></div></div><span class="pp-demand-label">89%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card in-progress">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Next.js</div>
+          <div class="pp-comp-status-icon in-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:76%"></div></div><span class="pp-demand-label">76%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card in-progress">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Testing (Jest)</div>
+          <div class="pp-comp-status-icon in-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:72%"></div></div><span class="pp-demand-label">72%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card in-progress">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">CI/CD</div>
+          <div class="pp-comp-status-icon in-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Podstawowy</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:65%"></div></div><span class="pp-demand-label">65%</span> popyt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MISSING COMPETENCIES ===== -->
+  <div class="pp-comp-section">
+    <div class="pp-comp-section-header">
+      <div class="pp-comp-section-title">
+        <span class="section-dot red"></span>
+        Brakujace kompetencje
+      </div>
+      <span class="pp-comp-count-badge red">4 kompetencje</span>
+    </div>
+    <div class="pp-comp-grid">
+      <div class="pp-comp-card missing">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Docker</div>
+          <div class="pp-comp-status-icon missing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/></svg> Wymagany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:74%"></div></div><span class="pp-demand-label">74%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card missing">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">GraphQL</div>
+          <div class="pp-comp-status-icon missing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/></svg> Wymagany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:58%"></div></div><span class="pp-demand-label">58%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card missing">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">AWS / Cloud</div>
+          <div class="pp-comp-status-icon missing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/></svg> Wymagany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:68%"></div></div><span class="pp-demand-label">68%</span> popyt</div>
+        </div>
+      </div>
+      <div class="pp-comp-card missing">
+        <div class="pp-comp-card-top">
+          <div class="pp-comp-card-name">Web Security</div>
+          <div class="pp-comp-status-icon missing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+        </div>
+        <div class="pp-comp-card-meta">
+          <span class="pp-level-badge basic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/></svg> Wymagany</span>
+          <div class="pp-demand-bar"><div class="pp-demand-track"><div class="pp-demand-fill" style="width:62%"></div></div><span class="pp-demand-label">62%</span> popyt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="pp-gen-footer">
+    <span class="pp-generated">Wygenerowano: <span>8 marca 2026</span></span>
+    <span class="pp-powered">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      SkillBridge AI
+    </span>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="pp-toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toast-text">Link skopiowany!</span>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('progress-fill').style.width = '73%';
+  }, 300);
+});
+
+function copyLink() {
+  const url = window.location.origin + '/passport/a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+  navigator.clipboard.writeText(url).then(() => showToast('Link skopiowany!')).catch(() => showToast('Link skopiowany!'));
+}
+
+function exportPDF() {
+  showToast('Generowanie PDF...');
+  setTimeout(() => showToast('PDF pobrany!'), 1500);
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+
+</body>
+</html>
