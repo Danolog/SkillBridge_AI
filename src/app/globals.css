@@ -43,6 +43,7 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
+	--font-heading: var(--font-nunito), "Nunito", sans-serif;
 }
 
 :root {
@@ -120,5 +121,349 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+	}
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+/* ============================================================
+   LANDING PAGE STYLES
+============================================================ */
+
+@keyframes blob-float {
+	0%,
+	100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-28px) scale(1.04);
+	}
+}
+
+@keyframes pulse-dot {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.5;
+		transform: scale(0.7);
+	}
+}
+
+@keyframes fade-up-in {
+	from {
+		opacity: 0;
+		transform: translateY(24px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Gradient text */
+.lp-grad-text {
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* Dot grid overlay */
+.lp-dot-grid {
+	position: relative;
+}
+.lp-dot-grid::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: radial-gradient(circle, rgba(99, 102, 241, 0.14) 1px, transparent 1px);
+	background-size: 30px 30px;
+	pointer-events: none;
+}
+
+/* Floating blobs */
+.lp-blob {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(72px);
+	pointer-events: none;
+	animation: blob-float 9s ease-in-out infinite;
+}
+
+/* Header */
+.lp-header {
+	background: rgba(11, 14, 20, 0.75);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	transition:
+		background 0.3s ease,
+		border-color 0.3s ease;
+}
+.lp-header.scrolled {
+	background: rgba(11, 14, 20, 0.95);
+	border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Nav link */
+.lp-nav-link {
+	color: rgba(248, 250, 252, 0.65);
+	transition:
+		color 0.2s,
+		background 0.2s;
+}
+.lp-nav-link:hover {
+	color: #f8fafc;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+/* Nav outlined button */
+.lp-nav-btn {
+	color: rgba(248, 250, 252, 0.85);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	transition: all 0.2s ease;
+}
+.lp-nav-btn:hover {
+	color: #f8fafc;
+	background: rgba(255, 255, 255, 0.09);
+	border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Badge dot pulse */
+.lp-badge-dot {
+	animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* CTA button glow */
+.lp-btn-cta {
+	background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+	box-shadow: 0 0 32px rgba(16, 185, 129, 0.45);
+	transition:
+		transform 0.25s ease,
+		box-shadow 0.25s ease;
+}
+.lp-btn-cta:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 0 48px rgba(16, 185, 129, 0.6);
+}
+
+/* Ghost button */
+.lp-btn-ghost {
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	transition: all 0.25s ease;
+}
+.lp-btn-ghost:hover {
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.38);
+	transform: translateY(-2px);
+}
+
+/* Value card hover + top border reveal */
+.lp-val-card {
+	position: relative;
+	overflow: hidden;
+	transition:
+		transform 0.28s ease,
+		box-shadow 0.28s ease,
+		border-color 0.28s ease;
+}
+.lp-val-card::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform 0.32s ease;
+}
+.lp-val-card:hover {
+	transform: translateY(-8px);
+	box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+	border-color: rgba(99, 102, 241, 0.18);
+}
+.lp-val-card:hover::after {
+	transform: scaleX(1);
+}
+
+/* Step card hover */
+.lp-step-card {
+	transition:
+		transform 0.28s ease,
+		box-shadow 0.28s ease;
+}
+.lp-step-card:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+}
+
+/* Steps connecting line */
+.lp-steps-line {
+	position: relative;
+}
+.lp-steps-line::before {
+	content: "";
+	position: absolute;
+	top: 28px;
+	left: calc(16.67% + 28px);
+	right: calc(16.67% + 28px);
+	height: 2px;
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+	opacity: 0.25;
+	z-index: 0;
+}
+
+/* Fade up animation */
+.fade-up {
+	opacity: 0;
+	transform: translateY(24px);
+}
+.fade-up.visible {
+	animation: fade-up-in 0.6s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+	.lp-steps-line::before {
+		display: none;
+	}
+}
+@media (max-width: 600px) {
+	.lp-stat-sep {
+		display: none;
+	}
+	.lp-nav-link {
+		display: none;
+	}
+}
+
+/* ============================================================
+   ONBOARDING WIZARD STYLES
+============================================================ */
+
+/* Wizard card */
+.ob-wizard-card {
+	background: rgba(255, 255, 255, 0.85);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border: 1px solid rgba(99, 102, 241, 0.08);
+	border-radius: 24px;
+	box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+	padding: 40px;
+	position: relative;
+	overflow: hidden;
+}
+.ob-wizard-card::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+}
+
+/* Progress bar fill */
+.ob-progress-fill {
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+	box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Active step dot */
+.ob-step-active {
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+}
+
+/* Primary button (gradient) — double class for specificity over shadcn */
+.ob-btn-primary.ob-btn-primary {
+	background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+	color: #ffffff;
+	border: none;
+	border-radius: 9999px;
+	font-family: var(--font-heading);
+	font-weight: 700;
+	box-shadow: 0 0 24px rgba(99, 102, 241, 0.3);
+	transition:
+		transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+		box-shadow 0.3s ease;
+}
+.ob-btn-primary.ob-btn-primary:hover:not(:disabled) {
+	transform: translateY(-2px);
+	box-shadow: 0 0 36px rgba(99, 102, 241, 0.4);
+}
+
+/* Accent button (emerald CTA) — double class for specificity */
+.ob-btn-accent.ob-btn-accent {
+	background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+	color: #ffffff;
+	border: none;
+	border-radius: 9999px;
+	font-family: var(--font-heading);
+	font-weight: 700;
+	box-shadow: 0 0 32px rgba(16, 185, 129, 0.4);
+	transition:
+		transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+		box-shadow 0.3s ease;
+}
+.ob-btn-accent.ob-btn-accent:hover:not(:disabled) {
+	transform: translateY(-2px);
+	box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+}
+
+/* Spinner */
+.ob-spinner {
+	animation: ob-spin 0.8s linear infinite;
+}
+@keyframes ob-spin {
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* Dots animation */
+.ob-dot {
+	animation: ob-dot-pulse 1.4s ease-in-out infinite;
+}
+.ob-dot:nth-child(2) {
+	animation-delay: 0.2s;
+}
+.ob-dot:nth-child(3) {
+	animation-delay: 0.4s;
+}
+@keyframes ob-dot-pulse {
+	0%,
+	80%,
+	100% {
+		opacity: 0.3;
+		transform: scale(0.8);
+	}
+	40% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Custom scrollbar for competency list */
+.ob-competency-scroll::-webkit-scrollbar {
+	width: 4px;
+}
+.ob-competency-scroll::-webkit-scrollbar-track {
+	background: transparent;
+}
+.ob-competency-scroll::-webkit-scrollbar-thumb {
+	background: rgba(99, 102, 241, 0.2);
+	border-radius: 9999px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+	.ob-wizard-card {
+		padding: 28px 20px;
 	}
 }

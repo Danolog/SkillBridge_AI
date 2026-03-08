@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillBridge AI — Onboarding Wizard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      --color-primary: #6366F1;
+      --color-primary-rgb: 99, 102, 241;
+      --color-secondary: #22D3EE;
+      --color-secondary-rgb: 34, 211, 238;
+      --color-accent: #10B981;
+      --color-accent-rgb: 16, 185, 129;
+
+      --color-dark: #0B0E14;
+      --color-dark-2: #161B22;
+      --color-dark-border: #30363D;
+
+      --color-bg: #FAFAFA;
+      --color-bg-2: #F1F5F9;
+      --color-surface: #FFFFFF;
+
+      --color-text: #0F172A;
+      --color-text-secondary: #475569;
+      --color-text-light: #94A3B8;
+
+      --color-error: #EF4444;
+      --color-error-rgb: 239, 68, 68;
+
+      --gradient-primary: linear-gradient(135deg, #6366F1 0%, #22D3EE 100%);
+      --gradient-accent: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+      --gradient-hero: linear-gradient(135deg, #0B0E14 0%, #1a1040 40%, #0e1628 100%);
+
+      --font-display: 'Nunito', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-pill: 9999px;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(99,102,241,0.12);
+      --shadow-lg: 0 8px 32px rgba(99,102,241,0.20);
+      --shadow-glow-emerald: 0 0 32px rgba(16,185,129,0.4);
+      --shadow-glow-primary: 0 0 24px rgba(99,102,241,0.30);
+
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 72px;
+      background: rgba(11, 14, 20, 0.95);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-icon svg { width: 20px; height: 20px; }
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-container {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 40px;
+    }
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .progress-line {
+      position: absolute;
+      top: 50%;
+      left: 24px;
+      right: 24px;
+      height: 3px;
+      background: var(--color-bg-2);
+      border-radius: var(--radius-pill);
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+    .progress-line-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-pill);
+      transition: width 0.5s var(--ease-spring);
+      box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.3);
+    }
+    .step-dot {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 16px;
+      z-index: 1;
+      transition: all 0.4s var(--ease-spring);
+      cursor: default;
+      position: relative;
+    }
+    .step-dot.active {
+      background: var(--gradient-primary);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-glow-primary);
+      transform: scale(1.1);
+    }
+    .step-dot.completed {
+      background: var(--color-accent);
+      color: #FFFFFF;
+      box-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.3);
+    }
+    .step-dot.upcoming {
+      background: var(--color-surface);
+      color: var(--color-text-light);
+      border: 2px solid var(--color-bg-2);
+    }
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+    }
+    .step-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-light);
+      text-align: center;
+      width: 80px;
+      transition: color 0.3s ease;
+    }
+    .step-label.active {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+    .step-label.completed {
+      color: var(--color-accent);
+    }
+
+    /* ===== CARD CONTAINER ===== */
+    .wizard-card {
+      width: 100%;
+      max-width: 560px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(var(--color-primary-rgb), 0.08);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 0.4s var(--ease-spring);
+    }
+    @keyframes cardIn {
+      0% { transform: translateY(12px) scale(0.98); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .wizard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 24px;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* ===== FORM ELEMENTS ===== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+    .form-label .required {
+      color: var(--color-error);
+      margin-left: 2px;
+    }
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--color-text);
+      background: var(--color-surface);
+      border: 1.5px solid rgba(var(--color-primary-rgb), 0.15);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--color-text-light);
+    }
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+    .form-textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: var(--color-text-light);
+      margin-top: 4px;
+    }
+    .form-error {
+      font-size: 12px;
+      color: var(--color-error);
+      margin-top: 4px;
+      display: none;
+    }
+    .form-error.visible {
+      display: block;
+    }
+
+    /* Custom input (Inne) */
+    .custom-input-wrapper {
+      margin-top: 8px;
+      display: none;
+    }
+    .custom-input-wrapper.visible {
+      display: block;
+      animation: slideDown 0.3s var(--ease-spring);
+    }
+    @keyframes slideDown {
+      0% { transform: translateY(-8px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Row layout */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.3s var(--ease-spring);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-glow-primary);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 36px rgba(var(--color-primary-rgb), 0.4);
+    }
+    .btn-accent {
+      background: var(--gradient-accent);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-glow-emerald);
+    }
+    .btn-accent:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(var(--color-accent-rgb), 0.5);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: 1.5px solid rgba(var(--color-primary-rgb), 0.2);
+    }
+    .btn-secondary:hover {
+      background: rgba(var(--color-primary-rgb), 0.05);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+      padding: 14px 16px;
+    }
+    .btn-ghost:hover {
+      color: var(--color-primary);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .btn-full {
+      width: 100%;
+    }
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+    .btn-icon-only {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+    }
+
+    /* Button row */
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 32px;
+      gap: 12px;
+    }
+
+    /* ===== FILE UPLOAD ===== */
+    .upload-area {
+      border: 2px dashed rgba(var(--color-primary-rgb), 0.2);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(var(--color-primary-rgb), 0.02);
+    }
+    .upload-area:hover {
+      border-color: var(--color-primary);
+      background: rgba(var(--color-primary-rgb), 0.05);
+    }
+    .upload-area.dragover {
+      border-color: var(--color-primary);
+      background: rgba(var(--color-primary-rgb), 0.08);
+      transform: scale(1.01);
+    }
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      background: rgba(var(--color-primary-rgb), 0.1);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--color-primary);
+    }
+    .upload-text {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    .upload-text strong {
+      color: var(--color-primary);
+    }
+    .upload-hint {
+      font-size: 12px;
+      color: var(--color-text-light);
+      margin-top: 6px;
+    }
+    .upload-file-info {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(var(--color-accent-rgb), 0.08);
+      border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+      border-radius: var(--radius-md);
+      margin-top: 12px;
+    }
+    .upload-file-info.visible {
+      display: flex;
+    }
+    .upload-file-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text);
+      flex: 1;
+    }
+    .upload-file-size {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--color-text-light);
+    }
+
+    /* ===== OR DIVIDER ===== */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .or-divider::before,
+    .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(var(--color-primary-rgb), 0.1);
+    }
+    .or-divider span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== LOADING STATE ===== */
+    .loading-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .loading-overlay.visible {
+      display: flex;
+    }
+    .loading-spinner {
+      width: 56px;
+      height: 56px;
+      border: 3px solid rgba(var(--color-primary-rgb), 0.15);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+    .loading-subtext {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    .loading-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 20px;
+    }
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Skeleton */
+    .skeleton-list {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .skeleton-list.visible {
+      display: flex;
+    }
+    .skeleton-item {
+      height: 44px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+      border-radius: var(--radius-md);
+    }
+    .skeleton-item:nth-child(2) { width: 90%; }
+    .skeleton-item:nth-child(3) { width: 80%; }
+    .skeleton-item:nth-child(4) { width: 95%; }
+    .skeleton-item:nth-child(5) { width: 70%; }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* ===== COMPETENCY LIST ===== */
+    .competency-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .competency-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: itemIn 0.3s var(--ease-spring);
+    }
+    @keyframes itemIn {
+      0% { transform: translateX(-8px); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    .competency-item .form-input {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    .competency-delete {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(var(--color-error-rgb), 0.08);
+      color: var(--color-error);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .competency-delete:hover {
+      background: rgba(var(--color-error-rgb), 0.15);
+      transform: scale(1.05);
+    }
+    .competency-count {
+      font-size: 13px;
+      color: var(--color-text-light);
+      font-family: var(--font-mono);
+      text-align: right;
+      margin-top: 4px;
+    }
+    .competency-count .count-number {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+    .add-competency-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: rgba(var(--color-primary-rgb), 0.04);
+      border: 1.5px dashed rgba(var(--color-primary-rgb), 0.2);
+      border-radius: var(--radius-md);
+      color: var(--color-primary);
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .add-competency-btn:hover {
+      background: rgba(var(--color-primary-rgb), 0.08);
+      border-color: var(--color-primary);
+    }
+
+    /* Scrollable competency list */
+    .competency-scroll {
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .competency-scroll::-webkit-scrollbar { width: 4px; }
+    .competency-scroll::-webkit-scrollbar-track { background: transparent; }
+    .competency-scroll::-webkit-scrollbar-thumb {
+      background: rgba(var(--color-primary-rgb), 0.2);
+      border-radius: var(--radius-pill);
+    }
+
+    /* ===== SUCCESS STATE ===== */
+    .success-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .success-overlay.visible {
+      display: flex;
+    }
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(var(--color-accent-rgb), 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      animation: successPop 0.5s var(--ease-spring);
+    }
+    @keyframes successPop {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .success-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke: var(--color-accent);
+    }
+
+    /* ===== STEP VISIBILITY ===== */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .main { padding: 24px 16px 40px; }
+      .wizard-card { padding: 28px 20px; }
+      .card-title { font-size: 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .step-dot { width: 40px; height: 40px; font-size: 14px; }
+      .step-label { font-size: 11px; width: 70px; }
+      .btn-row { flex-direction: column-reverse; }
+      .btn-row .btn { width: 100%; }
+      .btn-row .btn-ghost { order: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
+      <span class="logo-text">SkillBridge AI</span>
+    </a>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <!-- PROGRESS BAR -->
+    <div class="progress-container">
+      <div class="progress-steps">
+        <div class="progress-line">
+          <div class="progress-line-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-dot upcoming" id="dot2">2</div>
+        <div class="step-dot upcoming" id="dot3">3</div>
+      </div>
+      <div class="step-labels">
+        <span class="step-label active" id="label1">Profil</span>
+        <span class="step-label" id="label2">Sylabus</span>
+        <span class="step-label" id="label3">Kompetencje</span>
+      </div>
+    </div>
+
+    <!-- WIZARD CARD -->
+    <div class="wizard-card">
+
+      <!-- ===== STEP 1: PROFILE ===== -->
+      <div class="step active" id="step1">
+        <h2 class="card-title">Opowiedz nam o sobie</h2>
+        <p class="card-subtitle">Te informacje pomogą nam spersonalizować Twój Paszport Kompetencji i analizę luk.</p>
+
+        <div class="form-group">
+          <label class="form-label">Uczelnia <span class="required">*</span></label>
+          <select class="form-select" id="university">
+            <option value="" disabled selected>Wybierz uczelnię...</option>
+            <option>WSB Merito Gdańsk</option>
+            <option>WSB Merito Gdynia</option>
+            <option>WSB Merito Wrocław</option>
+            <option>WSB Merito Poznań</option>
+            <option>WSB Merito Warszawa</option>
+            <option>WSB Merito Bydgoszcz</option>
+            <option>WSB Merito Toruń</option>
+            <option>WSB Merito Łódź</option>
+            <option>WSB Merito Szczecin</option>
+            <option>WSB Merito Opole</option>
+            <option>WSB Merito Chorzów</option>
+            <option>WSB Merito Kraków</option>
+            <option>WSB Merito Rzeszów</option>
+            <option>WSB Merito Lublin</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kierunek studiów <span class="required">*</span></label>
+          <input type="text" class="form-input" id="fieldOfStudy" placeholder="np. Informatyka, Zarządzanie, Finanse...">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Semestr <span class="required">*</span></label>
+            <select class="form-select" id="semester">
+              <option value="" disabled selected>Wybierz...</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+              <option>7</option>
+              <option>8</option>
+              <option>9</option>
+              <option>10</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cel kariery <span class="required">*</span></label>
+            <select class="form-select" id="careerGoal">
+              <option value="" disabled selected>Wybierz...</option>
+              <option>Data Analyst</option>
+              <option>Data Scientist</option>
+              <option>Frontend Developer</option>
+              <option>Backend Developer</option>
+              <option>Full-stack Developer</option>
+              <option>UX/UI Designer</option>
+              <option>Project Manager</option>
+              <option>DevOps Engineer</option>
+              <option>Cybersecurity Analyst</option>
+              <option value="custom">Inne (wpisz)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="custom-input-wrapper" id="customGoalWrapper">
+          <div class="form-group">
+            <label class="form-label">Twój cel kariery <span class="required">*</span></label>
+            <input type="text" class="form-input" id="customGoal" placeholder="Wpisz swój cel kariery...">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <div></div>
+          <button class="btn btn-primary" onclick="goToStep(2)">
+            Dalej
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== STEP 2: SYLLABUS ===== -->
+      <div class="step" id="step2">
+        <h2 class="card-title">Wgraj swój sylabus</h2>
+        <p class="card-subtitle">Wklej treść sylabusa lub prześlij plik PDF. Nasza AI przeanalizuje go i wyciągnie Twoje kompetencje.</p>
+
+        <!-- Main form (hidden during loading) -->
+        <div id="syllabusForm">
+          <div class="form-group">
+            <label class="form-label">Treść sylabusa</label>
+            <textarea class="form-textarea" id="syllabusText" placeholder="Wklej tutaj treść sylabusa — listę przedmiotów, opis efektów kształcenia, zakres tematyczny..."></textarea>
+            <div class="form-hint">Minimum 100 znaków. Im więcej szczegółów, tym lepsza analiza.</div>
+          </div>
+
+          <div class="or-divider"><span>lub</span></div>
+
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <p class="upload-text"><strong>Kliknij, aby wybrać plik</strong> lub przeciągnij i upuść</p>
+            <p class="upload-hint">PDF, maksymalnie 10 MB</p>
+            <input type="file" id="fileInput" accept=".pdf" style="display:none">
+          </div>
+
+          <div class="upload-file-info" id="fileInfo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span class="upload-file-name" id="fileName">sylabus-informatyka.pdf</span>
+            <span class="upload-file-size" id="fileSize">2.4 MB</span>
+            <button class="competency-delete" onclick="removeFile()" style="width:28px;height:28px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="goToStep(1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              Wstecz
+            </button>
+            <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeSyllabus()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              </svg>
+              Analizuj sylabus
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div class="loading-overlay" id="loadingState">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Analizujemy Twój sylabus</p>
+          <p class="loading-subtext">Nasza AI wyciąga kompetencje z Twojego programu studiów.<br>To może potrwać do 30 sekund…</p>
+          <div class="loading-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="skeleton-list visible" style="margin-top:28px; max-width:360px;">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 3: COMPETENCIES ===== -->
+      <div class="step" id="step3">
+        <h2 class="card-title">Twoje kompetencje</h2>
+        <p class="card-subtitle">Przejrzyj wynik analizy AI. Możesz edytować, usuwać i dodawać kompetencje przed zapisaniem.</p>
+
+        <div class="competency-scroll">
+          <div class="competency-list" id="competencyList">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <div class="competency-count" id="competencyCount">
+          <span class="count-number">0</span> / 40 kompetencji
+        </div>
+
+        <button class="add-competency-btn" id="addCompetencyBtn" onclick="addCompetency()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Dodaj kompetencję
+        </button>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="goToStep(2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Wstecz
+          </button>
+          <button class="btn btn-accent" id="submitBtn" onclick="submitOnboarding()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Zatwierdź i utwórz Paszport
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SUCCESS STATE ===== -->
+      <div class="step" id="stepSuccess">
+        <div class="success-overlay visible">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6 9 17l-5-5"/>
+            </svg>
+          </div>
+          <h2 class="card-title" style="margin-bottom:8px;">Paszport Kompetencji utworzony!</h2>
+          <p class="card-subtitle" style="margin-bottom:24px;">Twoje kompetencje zostały zapisane. W tle generujemy Mapę Umiejętności i Analizę Luk.</p>
+          <button class="btn btn-primary" onclick="alert('→ Redirect to /dashboard')">
+            Przejdź do panelu
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ===== STATE =====
+    let currentStep = 1;
+    const sampleCompetencies = [
+      "Python", "SQL", "Analiza danych", "Statystyka opisowa",
+      "Machine Learning", "Pandas", "NumPy", "Matplotlib",
+      "Seaborn", "Jupyter Notebook", "Przetwarzanie danych",
+      "Regresja liniowa", "Klasyfikacja", "Scikit-learn",
+      "Wizualizacja danych", "ETL", "Bazy danych relacyjne",
+      "Praca zespołowa", "Prezentacja wyników", "Power BI",
+      "Myślenie analityczne", "Excel zaawansowany", "R",
+      "Komunikacja wyników"
+    ];
+
+    // ===== STEP NAVIGATION =====
+    function goToStep(step) {
+      if (step === currentStep) return;
+
+      // Hide all steps
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+      // Show target step
+      const targetStep = document.getElementById(`step${step}`);
+      if (targetStep) {
+        targetStep.classList.remove('active');
+        // Force reflow for animation
+        void targetStep.offsetWidth;
+        targetStep.classList.add('active');
+      }
+
+      // Update progress
+      updateProgress(step);
+      currentStep = step;
+    }
+
+    function updateProgress(step) {
+      // Progress line
+      const fill = document.getElementById('progressFill');
+      fill.style.width = step === 1 ? '0%' : step === 2 ? '50%' : '100%';
+
+      // Dots
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`dot${i}`);
+        const label = document.getElementById(`label${i}`);
+        dot.className = 'step-dot';
+        label.className = 'step-label';
+
+        if (i < step) {
+          dot.classList.add('completed');
+          dot.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+          label.classList.add('completed');
+        } else if (i === step) {
+          dot.classList.add('active');
+          dot.textContent = i;
+          label.classList.add('active');
+        } else {
+          dot.classList.add('upcoming');
+          dot.textContent = i;
+        }
+      }
+    }
+
+    // ===== CAREER GOAL — CUSTOM INPUT =====
+    document.getElementById('careerGoal').addEventListener('change', function() {
+      const wrapper = document.getElementById('customGoalWrapper');
+      if (this.value === 'custom') {
+        wrapper.classList.add('visible');
+        document.getElementById('customGoal').focus();
+      } else {
+        wrapper.classList.remove('visible');
+      }
+    });
+
+    // ===== FILE UPLOAD =====
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      if (file.type !== 'application/pdf') {
+        alert('Akceptujemy tylko pliki PDF');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Plik jest za duży. Maksymalny rozmiar to 10 MB.');
+        return;
+      }
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = (file.size / (1024*1024)).toFixed(1) + ' MB';
+      document.getElementById('fileInfo').classList.add('visible');
+      uploadArea.style.display = 'none';
+    }
+
+    function removeFile() {
+      fileInput.value = '';
+      document.getElementById('fileInfo').classList.remove('visible');
+      uploadArea.style.display = 'block';
+    }
+
+    // ===== ANALYZE SYLLABUS =====
+    function analyzeSyllabus() {
+      // Show loading
+      document.getElementById('syllabusForm').style.display = 'none';
+      document.getElementById('loadingState').classList.add('visible');
+
+      // Simulate AI response after 2.5s (demo)
+      setTimeout(() => {
+        document.getElementById('loadingState').classList.remove('visible');
+        renderCompetencies(sampleCompetencies);
+        goToStep(3);
+      }, 2500);
+    }
+
+    // ===== COMPETENCY LIST =====
+    function renderCompetencies(competencies) {
+      const list = document.getElementById('competencyList');
+      list.innerHTML = '';
+      competencies.forEach((name, i) => {
+        addCompetencyItem(name, i * 30); // stagger animation
+      });
+      updateCount();
+    }
+
+    function addCompetencyItem(name = '', delay = 0) {
+      const list = document.getElementById('competencyList');
+      const item = document.createElement('div');
+      item.className = 'competency-item';
+      if (delay > 0) {
+        item.style.animationDelay = `${delay}ms`;
+      }
+      item.innerHTML = `
+        <input type="text" class="form-input" value="${name}" placeholder="Nazwa kompetencji..." oninput="updateCount()">
+        <button class="competency-delete" onclick="removeCompetency(this)" title="Usuń">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      `;
+      list.appendChild(item);
+      updateCount();
+    }
+
+    function addCompetency() {
+      addCompetencyItem('');
+      // Scroll to bottom & focus
+      const scroll = document.querySelector('.competency-scroll');
+      scroll.scrollTop = scroll.scrollHeight;
+      const inputs = document.querySelectorAll('.competency-item .form-input');
+      inputs[inputs.length - 1].focus();
+    }
+
+    function removeCompetency(btn) {
+      const item = btn.closest('.competency-item');
+      item.style.opacity = '0';
+      item.style.transform = 'translateX(20px)';
+      item.style.transition = 'all 0.2s ease';
+      setTimeout(() => {
+        item.remove();
+        updateCount();
+      }, 200);
+    }
+
+    function updateCount() {
+      const items = document.querySelectorAll('.competency-item');
+      const filled = Array.from(items).filter(item => item.querySelector('.form-input').value.trim() !== '').length;
+      document.getElementById('competencyCount').innerHTML = `<span class="count-number">${filled}</span> / 40 kompetencji`;
+    }
+
+    // ===== SUBMIT =====
+    function submitOnboarding() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        Zapisywanie…
+      `;
+
+      // Simulate save
+      setTimeout(() => {
+        // Update progress to complete
+        document.getElementById('progressFill').style.width = '100%';
+        for (let i = 1; i <= 3; i++) {
+          const dot = document.getElementById(`dot${i}`);
+          dot.className = 'step-dot completed';
+          dot.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+          document.getElementById(`label${i}`).className = 'step-label completed';
+        }
+
+        // Show success
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('stepSuccess').classList.add('active');
+      }, 1500);
+    }
+
+    // ===== INIT: Show step 1 loading state toggle for demo =====
+    // Add click handler to loading state for demo (clicking exits loading)
+    document.getElementById('loadingState').addEventListener('click', function() {
+      this.classList.remove('visible');
+      document.getElementById('syllabusForm').style.display = 'block';
+    });
+  </script>
+
+</body>
+</html>
