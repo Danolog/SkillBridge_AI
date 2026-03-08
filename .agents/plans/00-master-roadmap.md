@@ -23,6 +23,36 @@
 
 ---
 
+## Mandatory Workflow Rules
+
+### UX/UI Design (before implementing any frontend feature)
+**Every feature that involves UI screens must start with the `/ux-ui-designer` skill.**
+
+Steps:
+1. Invoke `/ux-ui-designer` with the feature context before writing any frontend code
+2. The skill produces interactive HTML wireframes — review them in the browser
+3. Use the approved wireframes as the design spec when implementing components
+4. Do NOT write production UI code without an approved wireframe
+
+Applies to: Landing Page (02), Onboarding (03), Dashboard Layout (04), Skill Map (05), Gap Analysis (06), Micro-courses (07), Passport (08), Faculty Panel (09).
+
+### Testing (after every feature AND after every phase)
+**Every completed feature must be validated with the `/testing-loop` skill.**
+
+Steps after each feature:
+1. Run `pnpm build` — must pass with 0 errors
+2. Run `pnpm lint` — must pass with 0 warnings
+3. Invoke `/testing-loop` (Feature Testing Loop mode) for the just-completed feature
+4. Fix all failures before starting the next feature
+
+Steps after each phase (group of related features):
+1. Invoke `/testing-loop` (Pre-Production Testing mode) for a full audit
+2. Ensure CI/CD quality gate passes before marking the phase done
+
+**Never skip testing.** A feature is not "done" until `/testing-loop` passes.
+
+---
+
 ## Tech Stack Reference
 
 ### Framework
@@ -67,6 +97,8 @@ pnpm build              # TypeScript + Next.js compile check
 pnpm lint               # Biome linter
 pnpm db:push            # If schema changed
 ```
+
+> After running these commands, always invoke `/testing-loop` to complete the validation cycle.
 
 ---
 
