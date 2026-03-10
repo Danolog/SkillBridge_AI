@@ -15,9 +15,7 @@ export function GoogleButton() {
 				callbackURL: "/dashboard",
 			});
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Nie udało się zalogować przez Google",
-			);
+			toast.error(err instanceof Error ? err.message : "Nie udało się zalogować przez Google");
 			setLoading(false);
 		}
 	};

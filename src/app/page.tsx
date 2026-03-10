@@ -29,6 +29,12 @@ export default function Home() {
 						Jak to działa
 					</Link>
 					<Link
+						href="/faculty/login"
+						className="lp-nav-link rounded-full px-4 py-2 text-sm font-medium no-underline"
+					>
+						Panel wykładowcy
+					</Link>
+					<Link
 						href="/login"
 						className="lp-nav-btn rounded-full px-5 py-2 text-sm font-semibold no-underline"
 					>
@@ -284,10 +290,19 @@ export default function Home() {
 							SkillBridge AI
 						</span>
 					</Link>
-					<span className="text-[13px] text-[rgba(148,163,184,0.40)]">
-						© 2026 SkillBridge AI&nbsp;&middot;&nbsp;Projekt EduTech
-						Masters&nbsp;&middot;&nbsp;Grupa Merito
-					</span>
+					<div className="flex items-center gap-4">
+						<Link
+							href="/faculty/login"
+							className="text-[13px] text-[rgba(148,163,184,0.40)] no-underline transition-colors hover:text-[rgba(148,163,184,0.70)]"
+						>
+							Panel wykładowcy
+						</Link>
+						<span className="text-[13px] text-[rgba(148,163,184,0.20)]">&middot;</span>
+						<span className="text-[13px] text-[rgba(148,163,184,0.40)]">
+							© 2026 SkillBridge AI&nbsp;&middot;&nbsp;Projekt EduTech
+							Masters&nbsp;&middot;&nbsp;Grupa Merito
+						</span>
+					</div>
 				</div>
 			</footer>
 		</>
