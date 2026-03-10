@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth/client";
 
 export function GoogleButton() {
@@ -13,7 +14,10 @@ export function GoogleButton() {
 				provider: "google",
 				callbackURL: "/dashboard",
 			});
-		} catch {
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : "Nie udało się zalogować przez Google",
+			);
 			setLoading(false);
 		}
 	};

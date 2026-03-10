@@ -59,10 +59,7 @@ describe("calculateCoverage", () => {
 	});
 
 	it("includes gaps in denominator for market coverage", () => {
-		const comps = [
-			{ status: "acquired" as const },
-			{ status: "acquired" as const },
-		];
+		const comps = [{ status: "acquired" as const }, { status: "acquired" as const }];
 		// 2 acquired, 2 gaps → total = 4 → 2/4 = 50%
 		expect(calculateCoverage(comps, 2)).toBe(50);
 	});

@@ -53,7 +53,6 @@ export function FacultyLoginForm() {
 						onChange={(e) => setPassword(e.target.value)}
 						placeholder="Wprowadź hasło"
 						required
-						autoFocus
 					/>
 				</div>
 
@@ -61,7 +60,9 @@ export function FacultyLoginForm() {
 
 				<button type="submit" className="auth-btn-primary" disabled={loading}>
 					{loading ? (
-						<span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+						<span
+							style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+						>
 							<Loader2 size={16} className="animate-spin" />
 							Logowanie...
 						</span>

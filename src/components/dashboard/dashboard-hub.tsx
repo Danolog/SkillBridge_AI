@@ -104,7 +104,7 @@ function getMotivation(coverage: number, gapCount: number) {
 }
 
 export function DashboardHub(props: DashboardHubProps) {
-	const { user, student, competencyCount, gapCount, courseCount, marketCoverage } = props;
+	const { user, student, gapCount, marketCoverage } = props;
 
 	const initials = user.name
 		.split(" ")
@@ -206,9 +206,7 @@ export function DashboardHub(props: DashboardHubProps) {
 						<Rocket size={24} />
 					</div>
 					<div>
-						<div className="db-motivation-title">
-							Twoja droga do {student.careerGoal}
-						</div>
+						<div className="db-motivation-title">Twoja droga do {student.careerGoal}</div>
 						<div className="db-motivation-text">{motivation}</div>
 					</div>
 				</div>

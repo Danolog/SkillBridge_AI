@@ -93,7 +93,7 @@ export function GapCard({
 		} else {
 			el.style.maxHeight = "0px";
 		}
-	}, [expanded, whyText, loading]);
+	}, [expanded]);
 
 	const config = priorityConfig[priority];
 	const Icon = getCompetencyIcon(competencyName);
