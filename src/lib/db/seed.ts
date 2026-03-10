@@ -1,10 +1,11 @@
 import { config } from "dotenv";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 config({ path: ".env.local" });
 
-const { jobMarketData } = schema;
+const { jobMarketData, user, account, students, competencies, gaps, passports } = schema;
 const db = drizzle(process.env.DATABASE_URL ?? "", { schema });
 
 const DATA: Array<{
@@ -553,6 +554,156 @@ const DATA: Array<{
 	},
 ];
 
+// ── Demo Students ──
+
+const DEMO_STUDENTS = [
+	{
+		userId: "demo-user-anna",
+		name: "Anna Kowalska",
+		email: "anna.kowalska@demo.skillbridge.pl",
+		university: "WSB Merito Warszawa",
+		fieldOfStudy: "Informatyka",
+		semester: 4,
+		careerGoal: "Data Analyst",
+		acquired: [
+			"SQL",
+			"Excel/Arkusze kalkulacyjne",
+			"Statystyka",
+			"Myślenie analityczne",
+			"Komunikacja wyników",
+			"Python",
+		],
+		gaps: [
+			{ name: "Tableau/Power BI", priority: "critical" as const, marketPct: 61, hours: 8 },
+			{ name: "Pandas", priority: "important" as const, marketPct: 55, hours: 6 },
+			{
+				name: "Machine Learning (podstawy)",
+				priority: "nice_to_have" as const,
+				marketPct: 43,
+				hours: 15,
+			},
+			{ name: "Git/GitHub", priority: "important" as const, marketPct: 48, hours: 4 },
+		],
+	},
+	{
+		userId: "demo-user-michal",
+		name: "Michał Nowak",
+		email: "michal.nowak@demo.skillbridge.pl",
+		university: "WSB Merito Kraków",
+		fieldOfStudy: "Informatyka",
+		semester: 5,
+		careerGoal: "Frontend Developer",
+		acquired: ["HTML/CSS", "JavaScript", "Git", "Responsive Design", "Figma (podstawy)"],
+		gaps: [
+			{ name: "TypeScript", priority: "critical" as const, marketPct: 74, hours: 10 },
+			{ name: "React", priority: "critical" as const, marketPct: 82, hours: 12 },
+			{ name: "REST API", priority: "important" as const, marketPct: 71, hours: 6 },
+			{
+				name: "Testowanie (Jest/Vitest)",
+				priority: "important" as const,
+				marketPct: 52,
+				hours: 8,
+			},
+			{
+				name: "Optymalizacja wydajności",
+				priority: "nice_to_have" as const,
+				marketPct: 45,
+				hours: 10,
+			},
+		],
+	},
+	{
+		userId: "demo-user-kasia",
+		name: "Katarzyna Wiśniewska",
+		email: "katarzyna.wisniewska@demo.skillbridge.pl",
+		university: "WSB Merito Wrocław",
+		fieldOfStudy: "Grafika komputerowa",
+		semester: 3,
+		careerGoal: "UX/UI Designer",
+		acquired: [
+			"Figma",
+			"Wireframing",
+			"Prototypowanie",
+			"Komunikacja z zespołem",
+			"User Research",
+			"Architektura informacji",
+		],
+		gaps: [
+			{ name: "Design Systems", priority: "important" as const, marketPct: 65, hours: 8 },
+			{ name: "Testy użyteczności", priority: "important" as const, marketPct: 61, hours: 6 },
+			{
+				name: "HTML/CSS (podstawy)",
+				priority: "nice_to_have" as const,
+				marketPct: 48,
+				hours: 10,
+			},
+			{
+				name: "Dostępność (WCAG)",
+				priority: "nice_to_have" as const,
+				marketPct: 44,
+				hours: 5,
+			},
+		],
+	},
+	{
+		userId: "demo-user-piotr",
+		name: "Piotr Zieliński",
+		email: "piotr.zielinski@demo.skillbridge.pl",
+		university: "WSB Merito Poznań",
+		fieldOfStudy: "Informatyka",
+		semester: 6,
+		careerGoal: "Backend Developer",
+		acquired: [
+			"Node.js",
+			"SQL",
+			"REST API",
+			"Git",
+			"Python/Java",
+			"Docker",
+			"Bezpieczeństwo aplikacji",
+		],
+		gaps: [
+			{
+				name: "NoSQL (MongoDB/Redis)",
+				priority: "important" as const,
+				marketPct: 59,
+				hours: 8,
+			},
+			{ name: "Mikrousługi", priority: "nice_to_have" as const, marketPct: 48, hours: 12 },
+			{
+				name: "Cloud (AWS/GCP/Azure)",
+				priority: "critical" as const,
+				marketPct: 61,
+				hours: 15,
+			},
+		],
+	},
+	{
+		userId: "demo-user-zofia",
+		name: "Zofia Lewandowska",
+		email: "zofia.lewandowska@demo.skillbridge.pl",
+		university: "WSB Merito Gdańsk",
+		fieldOfStudy: "Zarządzanie",
+		semester: 3,
+		careerGoal: "Data Analyst",
+		acquired: ["Excel/Arkusze kalkulacyjne", "Statystyka", "Komunikacja wyników"],
+		gaps: [
+			{ name: "Python", priority: "critical" as const, marketPct: 78, hours: 20 },
+			{ name: "SQL", priority: "critical" as const, marketPct: 89, hours: 12 },
+			{ name: "Tableau/Power BI", priority: "critical" as const, marketPct: 61, hours: 8 },
+			{ name: "Pandas", priority: "important" as const, marketPct: 55, hours: 10 },
+			{
+				name: "Machine Learning (podstawy)",
+				priority: "nice_to_have" as const,
+				marketPct: 43,
+				hours: 15,
+			},
+			{ name: "Myślenie analityczne", priority: "important" as const, marketPct: 83, hours: 6 },
+			{ name: "Git/GitHub", priority: "important" as const, marketPct: 48, hours: 4 },
+		],
+	},
+];
+
 async function seed() {
 	console.log("Seeding job market data...");
 
@@ -570,8 +721,101 @@ async function seed() {
 	);
 
 	await db.insert(jobMarketData).values(rows);
-
 	console.log(`Seeded ${rows.length} job market records for ${DATA.length} career goals.`);
+
+	// ── Seed demo students ──
+	console.log("Seeding demo students...");
+
+	const now = new Date();
+
+	for (const demo of DEMO_STUDENTS) {
+		// Upsert user
+		await db
+			.insert(user)
+			.values({
+				id: demo.userId,
+				name: demo.name,
+				email: demo.email,
+				emailVerified: true,
+				createdAt: now,
+				updatedAt: now,
+			})
+			.onConflictDoNothing();
+
+		// Upsert account (credential provider, no real password — demo only)
+		await db
+			.insert(account)
+			.values({
+				id: `acc-${demo.userId}`,
+				accountId: demo.userId,
+				providerId: "credential",
+				userId: demo.userId,
+				createdAt: now,
+				updatedAt: now,
+			})
+			.onConflictDoNothing();
+
+		// Delete existing student data for this user (idempotent re-seed)
+		const existingStudent = await db.query.students.findFirst({
+			where: (s, { eq }) => eq(s.userId, demo.userId),
+		});
+		if (existingStudent) {
+			await db.delete(students).where(eq(students.userId, demo.userId));
+		}
+
+		// Insert student
+		const [newStudent] = await db
+			.insert(students)
+			.values({
+				userId: demo.userId,
+				university: demo.university,
+				fieldOfStudy: demo.fieldOfStudy,
+				semester: demo.semester,
+				careerGoal: demo.careerGoal,
+				onboardingCompleted: true,
+			})
+			.returning({ id: students.id });
+
+		const studentId = newStudent.id;
+
+		// Insert acquired competencies
+		if (demo.acquired.length > 0) {
+			await db.insert(competencies).values(
+				demo.acquired.map((name) => ({
+					studentId,
+					name,
+					status: "acquired" as const,
+				})),
+			);
+		}
+
+		// Insert gaps
+		if (demo.gaps.length > 0) {
+			await db.insert(gaps).values(
+				demo.gaps.map((g) => ({
+					studentId,
+					competencyName: g.name,
+					priority: g.priority,
+					marketPercentage: g.marketPct,
+					estimatedHours: g.hours,
+				})),
+			);
+		}
+
+		// Insert passport
+		const totalComps = demo.acquired.length + demo.gaps.length;
+		const coverage = Math.round((demo.acquired.length / totalComps) * 100);
+		await db.insert(passports).values({
+			studentId,
+			marketCoveragePercent: coverage,
+		});
+
+		console.log(
+			`  ✓ ${demo.name} (${demo.careerGoal}) — ${demo.acquired.length} kompetencji, ${demo.gaps.length} luk, ${coverage}% pokrycia`,
+		);
+	}
+
+	console.log(`\nSeeded ${DEMO_STUDENTS.length} demo students.`);
 	process.exit(0);
 }
 
