@@ -3,7 +3,8 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
-import { competencies, microCourses, passports, students } from "@/lib/db/schema";
+import { competencies, gaps, microCourses, passports, students } from "@/lib/db/schema";
+import { calculateCoverage } from "@/lib/passport-utils";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -66,14 +67,15 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
 	}
 
 	// Recalculate passport coverage
-	const allCompetencies = await db.query.competencies.findMany({
-		where: eq(competencies.studentId, student.id),
-	});
-	const total = allCompetencies.length;
-	const acquired = allCompetencies.filter(
-		(c) => c.status === "acquired" || c.status === "in_progress",
-	).length;
-	const coveragePercent = total > 0 ? Math.round((acquired / total) * 100) : 0;
+	const [allCompetencies, allGaps] = await Promise.all([
+		db.query.competencies.findMany({
+			where: eq(competencies.studentId, student.id),
+		}),
+		db.query.gaps.findMany({
+			where: eq(gaps.studentId, student.id),
+		}),
+	]);
+	const coveragePercent = calculateCoverage(allCompetencies, allGaps.length);
 
 	await db
 		.update(passports)

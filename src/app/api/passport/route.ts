@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
-import { competencies, passports, students } from "@/lib/db/schema";
+import { competencies, gaps, passports, students } from "@/lib/db/schema";
 import { calculateCoverage } from "@/lib/passport-utils";
 
 export async function GET() {
@@ -19,15 +19,20 @@ export async function GET() {
 		return NextResponse.json({ error: "Student not found" }, { status: 404 });
 	}
 
-	const studentCompetencies = await db.query.competencies.findMany({
-		where: eq(competencies.studentId, student.id),
-	});
+	const [studentCompetencies, studentGaps] = await Promise.all([
+		db.query.competencies.findMany({
+			where: eq(competencies.studentId, student.id),
+		}),
+		db.query.gaps.findMany({
+			where: eq(gaps.studentId, student.id),
+		}),
+	]);
 
 	let passport = await db.query.passports.findFirst({
 		where: eq(passports.studentId, student.id),
 	});
 
-	const coverage = calculateCoverage(studentCompetencies);
+	const coverage = calculateCoverage(studentCompetencies, studentGaps.length);
 
 	// Create or update passport
 	if (!passport) {

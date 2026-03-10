@@ -123,7 +123,7 @@ describe("generateMicroCourse", () => {
 		expect(call.prompt).toContain("Excel");
 	});
 
-	it("uses maxOutputTokens of 3000", async () => {
+	it("uses maxOutputTokens of 4096", async () => {
 		mockGenerateText.mockResolvedValue({
 			text: JSON.stringify(validResponse),
 		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
@@ -131,7 +131,7 @@ describe("generateMicroCourse", () => {
 		await generateMicroCourse("SQL", "Data Analyst", 3, []);
 
 		const call = mockGenerateText.mock.calls[0][0];
-		expect(call.maxOutputTokens).toBe(3000);
+		expect(call.maxOutputTokens).toBe(4096);
 	});
 
 	it("propagates AI SDK errors", async () => {

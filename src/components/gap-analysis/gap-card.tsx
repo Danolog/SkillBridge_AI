@@ -21,7 +21,7 @@ import {
 	TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type GapPriority = "critical" | "important" | "nice_to_have";
@@ -83,6 +83,17 @@ export function GapCard({
 	const [expanded, setExpanded] = useState(false);
 	const [whyText, setWhyText] = useState<string | null>(initialWhyImportant);
 	const [loading, setLoading] = useState(false);
+	const whySectionRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = whySectionRef.current;
+		if (!el) return;
+		if (expanded) {
+			el.style.maxHeight = `${el.scrollHeight}px`;
+		} else {
+			el.style.maxHeight = "0px";
+		}
+	}, [expanded, whyText, loading]);
 
 	const config = priorityConfig[priority];
 	const Icon = getCompetencyIcon(competencyName);
@@ -179,7 +190,7 @@ export function GapCard({
 			</div>
 
 			{/* Expandable why section */}
-			<div className={`ga-why-section ${expanded ? "open" : ""}`}>
+			<div ref={whySectionRef} className="ga-why-section">
 				<div className="ga-why-content">
 					<div className="ga-why-divider" />
 					{loading ? (

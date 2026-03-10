@@ -39,7 +39,10 @@ export function CourseList({ initialCourses, generateGapId }: CourseListProps) {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ gapId }),
 				});
-				if (!res.ok) throw new Error("Błąd generowania");
+				if (!res.ok) {
+					const errData = await res.json().catch(() => null);
+					throw new Error(errData?.error || "Błąd generowania");
+				}
 				const { course } = await res.json();
 				setCourses((prev) => {
 					if (prev.some((c) => c.id === course.id)) return prev;
@@ -47,8 +50,8 @@ export function CourseList({ initialCourses, generateGapId }: CourseListProps) {
 				});
 				toast.success("Mikro-kurs wygenerowany!");
 				router.push(`/micro-courses/${course.id}`);
-			} catch {
-				toast.error("Nie udało się wygenerować kursu");
+			} catch (err) {
+				toast.error(err instanceof Error ? err.message : "Nie udało się wygenerować kursu");
 			} finally {
 				setGenerating(false);
 			}

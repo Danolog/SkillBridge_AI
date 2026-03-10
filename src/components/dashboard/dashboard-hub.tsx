@@ -1,6 +1,18 @@
 "use client";
 
-import { ArrowRight, Award, BookOpen, Map as MapIcon, TriangleAlert } from "lucide-react";
+import {
+	ArrowRight,
+	Award,
+	BookOpen,
+	CheckCircle,
+	Flame,
+	Map as MapIcon,
+	Rocket,
+	Target,
+	TrendingUp,
+	TriangleAlert,
+	Zap,
+} from "lucide-react";
 import Link from "next/link";
 
 interface DashboardHubProps {
@@ -23,6 +35,7 @@ const tiles = [
 		title: "Skill Map",
 		icon: MapIcon,
 		colorClass: "db-tile-icon-indigo",
+		desc: "Wizualna mapa Twoich kompetencji",
 		getStat: (p: DashboardHubProps) => `${p.competencyCount} kompetencji`,
 	},
 	{
@@ -30,6 +43,7 @@ const tiles = [
 		title: "Gap Analysis",
 		icon: TriangleAlert,
 		colorClass: "db-tile-icon-amber",
+		desc: "Luki między Tobą a rynkiem pracy",
 		getStat: (p: DashboardHubProps) => `${p.gapCount} luk do zamknięcia`,
 	},
 	{
@@ -37,6 +51,7 @@ const tiles = [
 		title: "Mikro-kursy",
 		icon: BookOpen,
 		colorClass: "db-tile-icon-emerald",
+		desc: "AI kursy zamykające Twoje luki",
 		getStat: (p: DashboardHubProps) => `${p.courseCount} ukończone`,
 	},
 	{
@@ -44,12 +59,52 @@ const tiles = [
 		title: "Paszport",
 		icon: Award,
 		colorClass: "db-tile-icon-cyan",
+		desc: "Twój cyfrowy paszport kompetencji",
 		getStat: () => "Udostępnij",
 	},
 ];
 
+const statItems = [
+	{
+		key: "comp",
+		icon: CheckCircle,
+		getValue: (p: DashboardHubProps) => String(p.competencyCount),
+		label: "Kompetencji",
+		iconClass: "db-stat-icon-indigo",
+	},
+	{
+		key: "gaps",
+		icon: Target,
+		getValue: (p: DashboardHubProps) => String(p.gapCount),
+		label: "Luk",
+		iconClass: "db-stat-icon-amber",
+	},
+	{
+		key: "courses",
+		icon: Zap,
+		getValue: (p: DashboardHubProps) => String(p.courseCount),
+		label: "Kursów",
+		iconClass: "db-stat-icon-emerald",
+	},
+];
+
+function getCoverageLevel(coverage: number) {
+	if (coverage >= 70) return { label: "Zaawansowany", icon: Rocket };
+	if (coverage >= 40) return { label: "W drodze", icon: TrendingUp };
+	return { label: "Początkujący", icon: Flame };
+}
+
+function getMotivation(coverage: number, gapCount: number) {
+	if (coverage >= 70) return "Jesteś blisko! Jeszcze kilka kroków i Twój paszport będzie gotowy.";
+	if (gapCount > 10)
+		return "Masz sporo do nadrobienia, ale każdy krok się liczy. Zacznij od krytycznych luk!";
+	if (coverage >= 40)
+		return "Dobra robota! Jesteś na dobrej drodze. Zamknij kolejne luki, żeby się wyróżnić.";
+	return "Twoja przygoda się zaczyna! Sprawdź Gap Analysis i wygeneruj pierwszy mikro-kurs.";
+}
+
 export function DashboardHub(props: DashboardHubProps) {
-	const { user, student, marketCoverage } = props;
+	const { user, student, competencyCount, gapCount, courseCount, marketCoverage } = props;
 
 	const initials = user.name
 		.split(" ")
@@ -57,6 +112,10 @@ export function DashboardHub(props: DashboardHubProps) {
 		.join("")
 		.toUpperCase()
 		.slice(0, 2);
+
+	const level = getCoverageLevel(marketCoverage);
+	const LevelIcon = level.icon;
+	const motivation = getMotivation(marketCoverage, gapCount);
 
 	return (
 		<>
@@ -89,6 +148,33 @@ export function DashboardHub(props: DashboardHubProps) {
 				</div>
 			</div>
 
+			{/* Stats row */}
+			<div className="db-stats-grid">
+				{statItems.map((stat) => {
+					const Icon = stat.icon;
+					return (
+						<div key={stat.key} className="db-stat-card">
+							<div className={`db-stat-icon ${stat.iconClass}`}>
+								<Icon size={20} />
+							</div>
+							<div>
+								<div className="db-stat-value">{stat.getValue(props)}</div>
+								<div className="db-stat-label">{stat.label}</div>
+							</div>
+						</div>
+					);
+				})}
+				<div className="db-stat-card">
+					<div className="db-stat-icon db-stat-icon-gradient">
+						<LevelIcon size={20} />
+					</div>
+					<div>
+						<div className="db-stat-value-gradient">{level.label}</div>
+						<div className="db-stat-label">Twój poziom</div>
+					</div>
+				</div>
+			</div>
+
 			{/* Nav tiles */}
 			<h2 className="db-section-label">Twoje narzędzia</h2>
 
@@ -100,6 +186,7 @@ export function DashboardHub(props: DashboardHubProps) {
 						</div>
 						<div className="db-tile-content">
 							<div className="db-tile-title">{tile.title}</div>
+							<div className="db-tile-desc">{tile.desc}</div>
 							<div className="db-tile-stat">{tile.getStat(props)}</div>
 						</div>
 						<div className="db-tile-arrow">
@@ -107,6 +194,29 @@ export function DashboardHub(props: DashboardHubProps) {
 						</div>
 					</Link>
 				))}
+			</div>
+
+			{/* Motivation card */}
+			<div className="db-motivation">
+				<div className="db-motivation-glow-right" />
+				<div className="db-motivation-glow-left" />
+
+				<div className="db-motivation-content">
+					<div className="db-motivation-icon">
+						<Rocket size={24} />
+					</div>
+					<div>
+						<div className="db-motivation-title">
+							Twoja droga do {student.careerGoal}
+						</div>
+						<div className="db-motivation-text">{motivation}</div>
+					</div>
+				</div>
+
+				<Link href="/gap-analysis" className="db-motivation-btn">
+					Następny krok
+					<ArrowRight size={14} />
+				</Link>
 			</div>
 		</>
 	);

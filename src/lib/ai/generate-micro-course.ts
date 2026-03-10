@@ -28,7 +28,7 @@ export async function generateMicroCourse(
 ): Promise<{ title: string; content: MicroCourseContent }> {
 	const { text } = await generateText({
 		model: anthropic("claude-sonnet-4-6"),
-		maxOutputTokens: 3000,
+		maxOutputTokens: 4096,
 		prompt: `Jesteś ekspertem edukacji technicznej. Stwórz PRAKTYCZNY mikro-kurs dla studenta ${semester}. semestru, który chce zostać ${careerGoal}.
 
 Temat kursu: ${competencyName}
@@ -74,6 +74,16 @@ Zwróć TYLKO JSON (bez markdown code block):
 		.trim()
 		.replace(/^```(?:json)?\n?/, "")
 		.replace(/\n?```$/, "");
-	const result = JSON.parse(cleaned) as { title: string; content: MicroCourseContent };
-	return result;
+	try {
+		const result = JSON.parse(cleaned) as { title: string; content: MicroCourseContent };
+		return result;
+	} catch {
+		// Try to extract JSON object from the response
+		const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+		if (jsonMatch) {
+			const result = JSON.parse(jsonMatch[0]) as { title: string; content: MicroCourseContent };
+			return result;
+		}
+		throw new Error("AI zwróciło nieprawidłowy JSON");
+	}
 }

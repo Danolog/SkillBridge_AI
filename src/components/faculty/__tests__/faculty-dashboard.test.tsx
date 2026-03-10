@@ -75,7 +75,7 @@ describe("FacultyDashboard", () => {
 		render(<FacultyDashboard />);
 
 		await waitFor(() => {
-			expect(screen.getByText("25")).toBeInTheDocument();
+			expect(screen.getByText("Studentów w bazie")).toBeInTheDocument();
 		});
 
 		expect(screen.getByText("Docker")).toBeInTheDocument();

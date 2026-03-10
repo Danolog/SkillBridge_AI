@@ -2,7 +2,7 @@ import { count, desc, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { generateFacultySuggestions } from "@/lib/ai/generate-faculty-suggestions";
 import { db } from "@/lib/db";
-import { competencies, gaps, jobMarketData, students } from "@/lib/db/schema";
+import { gaps, jobMarketData, students } from "@/lib/db/schema";
 import { checkFacultyAuth } from "@/lib/faculty-auth";
 
 export const maxDuration = 30;
@@ -21,51 +21,51 @@ export async function GET() {
 		return NextResponse.json({ tooFewStudents: true, studentCount });
 	}
 
-	// Heatmap data: join competencies + students to get careerGoal context
-	const competencyData = await db
+	// Heatmap: for each market-required competency, calculate what % of students
+	// targeting that career goal actually have it covered.
+	// Source of truth: jobMarketData defines what's required, gaps defines what's missing.
+	// If a market competency has no gap entry for a student → student has it covered.
+
+	// 1. Count students per career goal
+	const allStudents = await db
+		.select({ id: students.id, careerGoal: students.careerGoal })
+		.from(students);
+	const studentsPerGoal = new Map<string, number>();
+	for (const s of allStudents) {
+		studentsPerGoal.set(s.careerGoal, (studentsPerGoal.get(s.careerGoal) || 0) + 1);
+	}
+
+	// 2. Count how many students are MISSING each competency per career goal
+	const gapData = await db
 		.select({
-			competencyName: competencies.name,
+			competencyName: gaps.competencyName,
 			careerGoal: students.careerGoal,
-			status: competencies.status,
+			missingCount: count(),
 		})
-		.from(competencies)
-		.innerJoin(students, eq(competencies.studentId, students.id));
+		.from(gaps)
+		.innerJoin(students, eq(gaps.studentId, students.id))
+		.groupBy(gaps.competencyName, students.careerGoal);
 
-	// Aggregate heatmap: for each (careerGoal, competencyName), compute coverage %
-	const heatmapMap = new Map<string, { total: number; acquired: number }>();
-	const careerGoalCounts = new Map<string, number>();
-
-	for (const row of competencyData) {
-		const key = `${row.careerGoal}|||${row.competencyName}`;
-		let entry = heatmapMap.get(key);
-		if (!entry) {
-			entry = { total: 0, acquired: 0 };
-			heatmapMap.set(key, entry);
-		}
-		entry.total++;
-		if (row.status === "acquired") {
-			entry.acquired++;
-		}
-
-		careerGoalCounts.set(row.careerGoal, (careerGoalCounts.get(row.careerGoal) || 0) + 1);
+	const gapMap = new Map<string, number>();
+	for (const row of gapData) {
+		gapMap.set(`${row.careerGoal}|||${row.competencyName}`, row.missingCount);
 	}
 
-	// Get job market data for requiredByPercent
+	// 3. Build heatmap from jobMarketData — only for career goals that have students
 	const allMarketData = await db.select().from(jobMarketData);
-	const marketMap = new Map<string, number>();
-	for (const m of allMarketData) {
-		marketMap.set(`${m.careerGoal}|||${m.competencyName}`, m.demandPercentage);
-	}
-
-	const heatmapData = Array.from(heatmapMap.entries()).map(([key, val]) => {
-		const [careerGoal, competencyName] = key.split("|||");
-		return {
-			competencyName,
-			careerGoal,
-			coveragePercent: Math.round((val.acquired / val.total) * 100),
-			requiredByPercent: marketMap.get(key) ?? 0,
-		};
-	});
+	const heatmapData = allMarketData
+		.filter((m) => studentsPerGoal.has(m.careerGoal))
+		.map((m) => {
+			const totalInGoal = studentsPerGoal.get(m.careerGoal) || 1;
+			const key = `${m.careerGoal}|||${m.competencyName}`;
+			const missing = gapMap.get(key) ?? 0;
+			return {
+				competencyName: m.competencyName,
+				careerGoal: m.careerGoal,
+				coveragePercent: Math.round(((totalInGoal - missing) / totalInGoal) * 100),
+				requiredByPercent: m.demandPercentage,
+			};
+		});
 
 	// Top missing competencies from gaps table
 	const topMissingRaw = await db

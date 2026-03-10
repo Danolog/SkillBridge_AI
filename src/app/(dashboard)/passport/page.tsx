@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { type PassportData, PassportView } from "@/components/passport/passport-view";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
-import { competencies, passports, students } from "@/lib/db/schema";
+import { competencies, gaps, passports, students } from "@/lib/db/schema";
 import { calculateCoverage } from "@/lib/passport-utils";
 
 export default async function PassportPage() {
@@ -16,11 +16,16 @@ export default async function PassportPage() {
 	});
 	if (!student) redirect("/onboarding");
 
-	const studentCompetencies = await db.query.competencies.findMany({
-		where: eq(competencies.studentId, student.id),
-	});
+	const [studentCompetencies, studentGaps] = await Promise.all([
+		db.query.competencies.findMany({
+			where: eq(competencies.studentId, student.id),
+		}),
+		db.query.gaps.findMany({
+			where: eq(gaps.studentId, student.id),
+		}),
+	]);
 
-	const coverage = calculateCoverage(studentCompetencies);
+	const coverage = calculateCoverage(studentCompetencies, studentGaps.length);
 
 	// Create or update passport
 	let passport = await db.query.passports.findFirst({

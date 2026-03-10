@@ -58,12 +58,24 @@ export async function POST(req: Request) {
 	const relatedNames = studentCompetencies.map((c) => c.name);
 
 	// Generate course via AI
-	const { title, content } = await generateMicroCourse(
-		gap.competencyName,
-		student.careerGoal,
-		student.semester,
-		relatedNames,
-	);
+	let title: string;
+	let content: Awaited<ReturnType<typeof generateMicroCourse>>["content"];
+	try {
+		const result = await generateMicroCourse(
+			gap.competencyName,
+			student.careerGoal,
+			student.semester,
+			relatedNames,
+		);
+		title = result.title;
+		content = result.content;
+	} catch (err) {
+		console.error("[micro-courses] AI generation failed:", err);
+		return NextResponse.json(
+			{ error: "Nie udało się wygenerować kursu. Spróbuj ponownie." },
+			{ status: 500 },
+		);
+	}
 
 	// Save to DB
 	const [course] = await db
