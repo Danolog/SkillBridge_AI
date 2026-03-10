@@ -25,39 +25,58 @@ function getCoverageColor(percent: number): string {
 }
 
 export function CompetencyHeatmap({ data }: { data: HeatmapItem[] }) {
-	// Group by competencyName, average coveragePercent across career goals
-	const grouped = new Map<string, { total: number; count: number }>();
+	// Group by competencyName — average coverage and max demand across career goals
+	const grouped = new Map<
+		string,
+		{ totalCoverage: number; maxDemand: number; count: number; goals: string[] }
+	>();
 	for (const item of data) {
-		const existing = grouped.get(item.competencyName) || { total: 0, count: 0 };
-		existing.total += item.coveragePercent;
+		const existing = grouped.get(item.competencyName) || {
+			totalCoverage: 0,
+			maxDemand: 0,
+			count: 0,
+			goals: [],
+		};
+		existing.totalCoverage += item.coveragePercent;
+		existing.maxDemand = Math.max(existing.maxDemand, item.requiredByPercent);
 		existing.count++;
+		existing.goals.push(item.careerGoal);
 		grouped.set(item.competencyName, existing);
 	}
 
 	const chartData = Array.from(grouped.entries())
 		.map(([name, val]) => ({
-			name: name.length > 20 ? `${name.slice(0, 18)}...` : name,
+			name: name.length > 22 ? `${name.slice(0, 20)}...` : name,
 			fullName: name,
-			coverage: Math.round(val.total / val.count),
+			coverage: Math.round(val.totalCoverage / val.count),
+			demand: val.maxDemand,
+			goals: val.goals,
 		}))
-		.sort((a, b) => a.coverage - b.coverage)
+		// Sort by market demand descending — show most important competencies first
+		.sort((a, b) => b.demand - a.demand)
 		.slice(0, 15);
 
 	if (chartData.length === 0) {
 		return (
-			<p className="text-muted-foreground text-center py-8">Brak danych do wyświetlenia wykresu.</p>
+			<p className="text-muted-foreground py-8 text-center">Brak danych do wyświetlenia wykresu.</p>
 		);
 	}
 
 	return (
 		<div>
-			<ResponsiveContainer width="100%" height={400}>
+			<ResponsiveContainer width="100%" height={Math.max(400, chartData.length * 32)}>
 				<BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 20 }}>
 					<CartesianGrid strokeDasharray="3 3" horizontal={false} />
 					<XAxis type="number" domain={[0, 100]} unit="%" />
-					<YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 12 }} />
+					<YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 12 }} />
 					<Tooltip
-						formatter={(value) => [`${value}%`, "Pokrycie"]}
+						formatter={(value, _name, props) => {
+							const item = props.payload;
+							return [
+								`${value}% pokrycia (zapotrzebowanie rynku: ${item.demand}%)`,
+								item.goals?.join(", ") ?? "",
+							];
+						}}
 						labelFormatter={(label) => {
 							const item = chartData.find((d) => d.name === label);
 							return item?.fullName ?? label;
@@ -70,17 +89,17 @@ export function CompetencyHeatmap({ data }: { data: HeatmapItem[] }) {
 					</Bar>
 				</BarChart>
 			</ResponsiveContainer>
-			<div className="flex items-center justify-center gap-6 mt-4 text-sm">
+			<div className="mt-4 flex items-center justify-center gap-6 text-sm">
 				<div className="flex items-center gap-1.5">
-					<span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#22c55e" }} />
+					<span className="h-3 w-3 rounded-sm" style={{ backgroundColor: "#22c55e" }} />
 					<span>&gt;70% (Dobry)</span>
 				</div>
 				<div className="flex items-center gap-1.5">
-					<span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#eab308" }} />
+					<span className="h-3 w-3 rounded-sm" style={{ backgroundColor: "#eab308" }} />
 					<span>40-70% (Średni)</span>
 				</div>
 				<div className="flex items-center gap-1.5">
-					<span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#ef4444" }} />
+					<span className="h-3 w-3 rounded-sm" style={{ backgroundColor: "#ef4444" }} />
 					<span>&lt;40% (Wymaga uwagi)</span>
 				</div>
 			</div>
