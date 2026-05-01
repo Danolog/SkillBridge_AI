@@ -68,10 +68,10 @@ describe("GapCard", () => {
 		expect(screen.getByText("78% ofert pracy")).toBeInTheDocument();
 	});
 
-	it("renders 'Zamknij lukę' link with correct href", () => {
+	it("renders 'Znajdź projekty' link with correct href", () => {
 		render(<GapCard {...defaultProps} />);
-		const link = screen.getByText("Zamknij lukę").closest("a");
-		expect(link).toHaveAttribute("href", "/micro-courses?generate=gap-1");
+		const link = screen.getByText("Znajdź projekty").closest("a");
+		expect(link).toHaveAttribute("href", "/projects?gapId=gap-1");
 	});
 
 	it("renders 'Dlaczego to ważne?' button", () => {

@@ -183,8 +183,8 @@ export function GapCard({
 					Dlaczego to ważne?
 					<ChevronDown size={12} className="ga-why-chevron" />
 				</button>
-				<Link href={`/micro-courses?generate=${id}`} className="ga-close-btn">
-					Zamknij lukę
+				<Link href={`/projects?gapId=${id}`} className="ga-close-btn">
+					Znajdź projekty
 					<ArrowRight size={14} />
 				</Link>
 			</div>
