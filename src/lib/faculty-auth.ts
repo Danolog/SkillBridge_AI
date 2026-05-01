@@ -16,8 +16,15 @@ export async function checkFacultyAuth(): Promise<boolean> {
 	if (!token) return false;
 
 	const tokenHash = hashToken(token);
-	const row = await db.query.facultySessions.findFirst({
-		where: and(eq(facultySessions.tokenHash, tokenHash), gt(facultySessions.expiresAt, new Date())),
-	});
-	return Boolean(row);
+	try {
+		const row = await db.query.facultySessions.findFirst({
+			where: and(
+				eq(facultySessions.tokenHash, tokenHash),
+				gt(facultySessions.expiresAt, new Date()),
+			),
+		});
+		return Boolean(row);
+	} catch {
+		return false;
+	}
 }
