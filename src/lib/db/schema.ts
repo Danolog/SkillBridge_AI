@@ -272,6 +272,21 @@ export const projectSources = pgTable("project_sources", {
 	lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
 });
 
+// Faculty sessions — DB-backed, replaces static cookie value.
+// Cookie carries random 256-bit token; DB stores its SHA-256 hash for lookup.
+export const facultySessions = pgTable(
+	"faculty_sessions",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		tokenHash: text("token_hash").notNull().unique(),
+		expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+		ipAddress: text("ip_address"),
+		userAgent: text("user_agent"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [index("idx_faculty_sessions_expires_at").on(table.expiresAt)],
+);
+
 // Relations
 
 export const studentsRelations = relations(students, ({ one, many }) => ({

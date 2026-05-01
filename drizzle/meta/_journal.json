@@ -15,6 +15,13 @@
       "when": 1777635175378,
       "tag": "0001_nebulous_dakota_north",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777658826626,
+      "tag": "0002_married_slayback",
+      "breakpoints": true
     }
   ]
 }

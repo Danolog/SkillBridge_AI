@@ -37,6 +37,12 @@ yarn-error.log*
 # E2E screenshots
 tests/e2e/screenshots/
 
+# Security audit reports (private)
+audit/
+
+# Local skill-creator state
+skills-lock.json
+
 # vercel
 .vercel
 
