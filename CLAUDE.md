@@ -22,7 +22,7 @@ SkillBridge AI is a Polish edtech platform that maps students' competencies (fro
 | `@ai-sdk/anthropic` | Anthropic provider for Claude |
 | Tailwind CSS v4 | Styling via `@tailwindcss/postcss` |
 | shadcn/ui | Component library in `src/components/ui/` |
-| Recharts 3.x | Charts (faculty heatmap) — planned |
+| Recharts 3.x | Charts (faculty heatmap) |
 | Zod 4.x | Schema validation |
 | Biome 2.x | Linting + formatting (replaces ESLint + Prettier) |
 | Vitest | Unit/component tests |
@@ -56,31 +56,29 @@ pnpm db:push       # push schema to DB (no migration files)
 pnpm db:studio     # Drizzle Studio UI
 pnpm db:generate   # generate migration files
 pnpm db:migrate    # run migrations
+pnpm db:seed       # seed demo data
 ```
 
 ---
 
 ## Implementation Status
 
-### ✅ Currently Implemented
+### Currently Implemented
 - Auth: login/signup pages, Google OAuth, Better Auth server + client
-- DB schema: Better Auth tables only (`user`, `session`, `account`, `verification`)
-- AI chat: `/api/chat` route + `/chat` page (streaming with Claude Sonnet 4.6)
-- Landing page (`/`) — minimal placeholder
-- UI components: `button`, `card`, `dialog`, `dropdown-menu`, `input`, `label`, `separator`, `sonner`, `tabs`, `textarea`, `avatar`
-- Biome config, Vitest config
-
-### 🔲 Planned (not yet built)
-- Dashboard layout with sidebar
-- Onboarding (3-step wizard + AI syllabus parser)
-- Skill Map (React Flow competency graph)
-- Gap Analysis
-- Micro-courses (AI-generated, step-by-step)
-- Competency Passport (shareable public page + PDF export)
-- Faculty Panel (shared password auth, aggregated heatmap)
-- Domain DB tables (students, competencies, skills, gaps, courses, etc.)
-- AI generation modules (`src/lib/ai/`)
-- Route protection in middleware
+- DB schema: Better Auth tables (`user`, `session`, `account`, `verification`) + domain tables (`students`, `competencies`, `gaps`, `skillMaps`, `microCourses`, `passports`, `jobMarketData`)
+- Landing page (`/`) — hero, value props, how it works, CTA, footer with faculty panel link
+- Dashboard: sidebar layout + hub with welcome card, stats, 4 nav tiles
+- Onboarding: 3-step wizard (profile + career goal + syllabus upload) + AI syllabus parser
+- Skill Map: React Flow competency graph with interactive nodes, detail panel, status coloring
+- Gap Analysis: prioritized gap list with ring charts, "Why important?" AI generation, expandable explanations
+- Micro-courses: AI-generated step-by-step courses with resources, exercises, completion tracking
+- Competency Passport: private view + public shareable link (UUID) + PDF export
+- Faculty Panel: shared password auth (`FACULTY_PASSWORD` cookie), heatmap dashboard (Recharts), top missing competencies, AI curriculum suggestions
+- AI modules: `parse-syllabus`, `generate-skill-map`, `generate-gaps`, `generate-why`, `generate-micro-course`, `generate-faculty-suggestions`
+- Route protection middleware for authenticated routes
+- Seed data: 15 demo students across 5 career paths, 90 job market records (9 careers x 10 competencies)
+- UI components: `button`, `card`, `dialog`, `dropdown-menu`, `input`, `label`, `select`, `separator`, `sonner`, `tabs`, `textarea`, `avatar`
+- Biome config, Vitest config with comprehensive test coverage
 
 ---
 
@@ -93,7 +91,7 @@ src/
 │   │   ├── layout.tsx
 │   │   ├── login/page.tsx
 │   │   └── signup/page.tsx
-│   ├── (dashboard)/             # [PLANNED] Authenticated app — sidebar layout
+│   ├── (dashboard)/             # Authenticated app — sidebar layout
 │   │   ├── layout.tsx           # Auth check + sidebar shell
 │   │   ├── dashboard/page.tsx   # Hub with 4 nav tiles
 │   │   ├── onboarding/page.tsx  # 3-step onboarding + syllabus parser
@@ -103,49 +101,58 @@ src/
 │   │   │   ├── page.tsx         # Course list
 │   │   │   └── [id]/page.tsx    # Single course view
 │   │   └── passport/page.tsx    # Competency passport
-│   ├── faculty/                 # [PLANNED] Faculty panel (shared password auth)
+│   ├── faculty/                 # Faculty panel (shared password auth)
 │   │   ├── login/page.tsx
 │   │   └── page.tsx
-│   ├── passport/[id]/page.tsx   # [PLANNED] PUBLIC passport (no login required)
+│   ├── passport/[id]/page.tsx   # PUBLIC passport (no login required)
 │   ├── chat/page.tsx            # Dev/demo AI chat page
 │   ├── api/
 │   │   ├── auth/[...path]/route.ts  # Better Auth handler
 │   │   ├── chat/route.ts            # AI streaming chat
-│   │   ├── onboarding/          # [PLANNED] Save student + competencies
-│   │   ├── syllabus/parse/      # [PLANNED] AI syllabus parser
-│   │   ├── skill-map/           # [PLANNED] Skill map CRUD
-│   │   ├── gaps/                # [PLANNED] Gap list + "why important" AI
-│   │   ├── micro-courses/       # [PLANNED] Course generation + completion
-│   │   ├── passport/            # [PLANNED] Passport data
-│   │   └── faculty/             # [PLANNED] Faculty login + dashboard data
+│   │   ├── onboarding/route.ts      # Save student + competencies
+│   │   ├── syllabus/parse/route.ts  # AI syllabus parser
+│   │   ├── skill-map/route.ts       # Skill map data
+│   │   ├── gaps/                    # Gap list + "why important" AI
+│   │   │   ├── route.ts
+│   │   │   └── [id]/why/route.ts
+│   │   ├── micro-courses/           # Course generation + completion
+│   │   │   ├── route.ts
+│   │   │   └── [id]/route.ts
+│   │   ├── passport/               # Passport data
+│   │   │   ├── route.ts
+│   │   │   └── [id]/route.ts
+│   │   └── faculty/                # Faculty login + dashboard data
+│   │       ├── login/route.ts
+│   │       └── dashboard/route.ts
 │   ├── globals.css
 │   ├── layout.tsx               # Root layout
 │   └── page.tsx                 # Landing page (public)
 ├── components/
 │   ├── auth/                    # Login/signup forms + Google button
 │   ├── ui/                      # shadcn/ui components
-│   ├── dashboard/               # [PLANNED] Sidebar, nav tiles, hub
-│   ├── onboarding/              # [PLANNED] 3-step wizard components
-│   ├── skill-map/               # [PLANNED] React Flow nodes, panels
-│   ├── gap-analysis/            # [PLANNED] Gap cards, list
-│   ├── micro-courses/           # [PLANNED] Course view, step accordion
-│   ├── passport/                # [PLANNED] Passport card, PDF export
-│   └── faculty/                 # [PLANNED] Faculty login form, heatmap
+│   ├── dashboard/               # Sidebar, nav tiles, hub
+│   ├── onboarding/              # 3-step wizard components
+│   ├── skill-map/               # React Flow nodes, panels
+│   ├── gap-analysis/            # Gap cards, list
+│   ├── micro-courses/           # Course view, step accordion
+│   ├── passport/                # Passport card, PDF export
+│   └── faculty/                 # Faculty login form, heatmap
 └── lib/
     ├── auth/
     │   ├── server.ts            # betterAuth instance (email+password + Google + dash)
     │   └── client.ts            # authClient (use client)
     ├── db/
     │   ├── index.ts             # db instance
-    │   └── schema.ts            # Better Auth tables (domain tables to be added)
-    ├── ai/                      # [PLANNED] AI generation modules
+    │   ├── schema.ts            # All DB tables and relations
+    │   └── seed.ts              # Demo data seeding
+    ├── ai/                      # AI generation modules
     │   ├── parse-syllabus.ts
     │   ├── generate-skill-map.ts
     │   ├── generate-gaps.ts
     │   ├── generate-why.ts      # "Why is this important?"
     │   ├── generate-micro-course.ts
     │   └── generate-faculty-suggestions.ts
-    ├── faculty-auth.ts          # [PLANNED] Cookie check for faculty panel
+    ├── faculty-auth.ts          # Cookie check for faculty panel
     └── utils.ts                 # cn() helper
 ```
 
@@ -276,7 +283,7 @@ pnpm db:push   # Only if schema.ts changed
 | `src/lib/auth/server.ts` | Better Auth instance — import `auth` from here |
 | `src/lib/auth/client.ts` | Client-side auth — import `authClient` from here |
 | `src/lib/db/index.ts` | Drizzle DB instance — import `db` from here |
-| `src/middleware.ts` | Next.js middleware — add route protection matchers here (currently no-op) |
+| `src/middleware.ts` | Next.js middleware — route protection matchers |
 | `drizzle.config.ts` | Drizzle Kit config (loads `.env.local` via dotenv) |
 | `.agents/plans/00-master-roadmap.md` | Implementation sequence and shared patterns |
 
