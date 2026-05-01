@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEMO_PROJECTS } from "../seed-projects";
 
 // Test seed data structure without DB connection
 // Import the DATA array from seed — we test the shape/content
@@ -91,6 +92,57 @@ describe("Seed data — salary ranges format", () => {
 		const regex = /^\d+-\d+ PLN$/;
 		for (const s of samples) {
 			expect(s, `"${s}" should match PLN format`).toMatch(regex);
+		}
+	});
+});
+
+describe("Seed data — projects", () => {
+	it("has exactly 20 projects", () => {
+		expect(DEMO_PROJECTS).toHaveLength(20);
+	});
+
+	it("each project has at least 2 competencies", () => {
+		for (const proj of DEMO_PROJECTS) {
+			expect(
+				proj.competencies.length,
+				`${proj.slug} should have >= 2 competencies`,
+			).toBeGreaterThanOrEqual(2);
+		}
+	});
+
+	it("has correct level distribution: 8 L1, 8 L2, 4 L3", () => {
+		const l1 = DEMO_PROJECTS.filter((p) => p.level === "L1").length;
+		const l2 = DEMO_PROJECTS.filter((p) => p.level === "L2").length;
+		const l3 = DEMO_PROJECTS.filter((p) => p.level === "L3").length;
+		expect(l1).toBe(8);
+		expect(l2).toBe(8);
+		expect(l3).toBe(4);
+	});
+
+	it("has correct source type distribution: 15 open_data, 5 oss", () => {
+		const openData = DEMO_PROJECTS.filter((p) => p.sourceType === "open_data").length;
+		const oss = DEMO_PROJECTS.filter((p) => p.sourceType === "oss").length;
+		expect(openData).toBe(15);
+		expect(oss).toBe(5);
+	});
+
+	it("each sourceUrl starts with https://", () => {
+		for (const proj of DEMO_PROJECTS) {
+			expect(proj.sourceUrl, `${proj.slug} sourceUrl should start with https://`).toMatch(
+				/^https:\/\//,
+			);
+		}
+	});
+
+	it("each project has a unique slug", () => {
+		const slugs = DEMO_PROJECTS.map((p) => p.slug);
+		expect(new Set(slugs).size).toBe(slugs.length);
+	});
+
+	it("each project has rubricJson with 3-5 criteria", () => {
+		for (const proj of DEMO_PROJECTS) {
+			expect(proj.rubricJson.length, `${proj.slug} rubric`).toBeGreaterThanOrEqual(3);
+			expect(proj.rubricJson.length, `${proj.slug} rubric`).toBeLessThanOrEqual(5);
 		}
 	});
 });

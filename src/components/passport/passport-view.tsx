@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { toast } from "sonner";
 import { CompetencyCard } from "./competency-badge";
 import { PdfExportButton } from "./pdf-export";
+import { type ProjectReceipt, ProjectReceipts } from "./project-receipts";
 
 export interface PassportData {
 	id: string;
@@ -22,6 +23,7 @@ export interface PassportData {
 		marketPercentage?: number | null;
 	}>;
 	generatedAt: string;
+	projectReceipts?: ProjectReceipt[];
 }
 
 function getInitials(name: string): string {
@@ -208,6 +210,10 @@ export function PassportView({ data }: { data: PassportData }) {
 							))}
 						</div>
 					</div>
+				)}
+
+				{data.projectReceipts && data.projectReceipts.length > 0 && (
+					<ProjectReceipts receipts={data.projectReceipts} />
 				)}
 
 				{/* Footer */}

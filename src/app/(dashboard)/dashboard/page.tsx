@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { DashboardHub } from "@/components/dashboard/dashboard-hub";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
-import { competencies, gaps, microCourses, passports, students } from "@/lib/db/schema";
+import { competencies, gaps, passports, projectSubmissions, students } from "@/lib/db/schema";
 
 export default async function DashboardPage() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -18,7 +18,10 @@ export default async function DashboardPage() {
 	const [competencyCount, gapCount, courseCount, passport] = await Promise.all([
 		db.select({ count: count() }).from(competencies).where(eq(competencies.studentId, student.id)),
 		db.select({ count: count() }).from(gaps).where(eq(gaps.studentId, student.id)),
-		db.select({ count: count() }).from(microCourses).where(eq(microCourses.studentId, student.id)),
+		db
+			.select({ count: count() })
+			.from(projectSubmissions)
+			.where(eq(projectSubmissions.studentId, student.id)),
 		db.query.passports.findFirst({
 			where: eq(passports.studentId, student.id),
 		}),

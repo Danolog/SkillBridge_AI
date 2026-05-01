@@ -2,6 +2,7 @@ import { ArrowRight, BarChart3, Check, CheckCircle, Clock, XCircle } from "lucid
 import Link from "next/link";
 import { CompetencyCard } from "./competency-badge";
 import type { PassportData } from "./passport-view";
+import { ProjectReceipts } from "./project-receipts";
 
 function getInitials(name: string): string {
 	return name
@@ -173,6 +174,10 @@ export function PassportPublic({ data }: { data: PassportData }) {
 							))}
 						</div>
 					</div>
+				)}
+
+				{data.projectReceipts && data.projectReceipts.length > 0 && (
+					<ProjectReceipts receipts={data.projectReceipts} />
 				)}
 
 				{/* Footer */}

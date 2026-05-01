@@ -100,11 +100,11 @@ describe("GapList", () => {
 		expect(screen.getByText("5h nauki")).toBeInTheDocument();
 	});
 
-	it("renders 'Zamknij lukę' links with correct hrefs", () => {
+	it("renders 'Znajdź projekty' links with correct hrefs", () => {
 		render(<GapList gaps={mockGaps} stats={defaultStats} />);
-		const closeLinks = screen.getAllByText("Zamknij lukę");
+		const closeLinks = screen.getAllByText("Znajdź projekty");
 		expect(closeLinks).toHaveLength(3);
-		expect(closeLinks[0].closest("a")).toHaveAttribute("href", "/micro-courses?generate=g1");
+		expect(closeLinks[0].closest("a")).toHaveAttribute("href", "/projects?gapId=g1");
 	});
 
 	it("renders 'Dlaczego to ważne?' buttons", () => {

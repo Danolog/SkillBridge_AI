@@ -1,14 +1,15 @@
 # SkillBridge AI
 
-Polish edtech platform that maps students' competencies (from university syllabus) to job market requirements, detects competency gaps, and generates personalized AI micro-courses. Built for the EduTech Masters competition by Grupa Merito (deadline: 19 March 2026).
+Polish edtech platform that maps students' competencies (from university syllabus) to job market requirements, detects competency gaps, and connects students with graduated real-world projects. Built for the EduTech Masters competition by Grupa Merito.
 
 ## Features
 
 - **Onboarding + Syllabus Parser** — 3-step wizard, AI parses university syllabus to extract competencies
 - **Skill Map** — React Flow graph visualizing competencies vs. job market requirements
 - **Gap Analysis** — AI detects missing skills with "why important" explanations
-- **Micro-Courses** — AI-generated personalized courses to close competency gaps
-- **Competency Passport** — Shareable public page with student's skill profile
+- **Project Marketplace** — Real-world projects graduated L1-L5 from open data and OSS. AI matchmaker recommends projects, generates personalized briefs with Learning Steps, and reviews submissions
+- **Verified Project Receipts** — AI-reviewed project submissions displayed in the Competency Passport with scores, artifact links, and feedback
+- **Competency Passport** — Shareable public page with student's skill profile and project receipts
 - **Faculty Panel** — Aggregated dashboard showing program vs. market alignment (anonymized)
 
 ## Tech Stack
@@ -45,10 +46,10 @@ Polish edtech platform that maps students' competencies (from university syllabu
 
    Fill in your database URL, Better Auth secret, and API keys.
 
-3. **Push the database schema:**
+3. **Run database migrations:**
 
    ```bash
-   pnpm db:push
+   pnpm db:migrate
    ```
 
 4. **Start the dev server:**

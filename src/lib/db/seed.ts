@@ -2,10 +2,21 @@ import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
+import { DEMO_PROJECTS } from "./seed-projects";
 
 config({ path: ".env.local" });
 
-const { jobMarketData, user, account, students, competencies, gaps, passports } = schema;
+const {
+	jobMarketData,
+	user,
+	account,
+	students,
+	competencies,
+	gaps,
+	passports,
+	projects,
+	projectCompetencies,
+} = schema;
 const db = drizzle(process.env.DATABASE_URL ?? "", { schema });
 
 const DATA: Array<{
@@ -1018,6 +1029,43 @@ async function seed() {
 	}
 
 	console.log(`\nSeeded ${DEMO_STUDENTS.length} demo students.`);
+
+	// ── Seed demo projects ──
+	console.log("\nSeeding demo projects...");
+
+	// Delete existing projects (cascade deletes competencies and submissions)
+	await db.delete(projectCompetencies);
+	await db.delete(projects);
+
+	for (const proj of DEMO_PROJECTS) {
+		const [newProject] = await db
+			.insert(projects)
+			.values({
+				slug: proj.slug,
+				title: proj.title,
+				description: proj.description,
+				level: proj.level,
+				estimatedHours: proj.estimatedHours,
+				sourceType: proj.sourceType,
+				sourceUrl: proj.sourceUrl,
+				rubricJson: proj.rubricJson,
+			})
+			.returning({ id: projects.id });
+
+		if (proj.competencies.length > 0) {
+			await db.insert(projectCompetencies).values(
+				proj.competencies.map((c) => ({
+					projectId: newProject.id,
+					competencyName: c.name,
+					role: c.role,
+				})),
+			);
+		}
+
+		console.log(`  ✓ ${proj.title} (${proj.level}, ${proj.sourceType})`);
+	}
+
+	console.log(`\nSeeded ${DEMO_PROJECTS.length} demo projects.`);
 	process.exit(0);
 }
 

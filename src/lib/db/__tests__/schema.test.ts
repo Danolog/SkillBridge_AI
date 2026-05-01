@@ -12,10 +12,21 @@ import {
 	microCourses,
 	microCoursesRelations,
 	passports,
+	projectCompetencies,
+	projectCompetenciesRelations,
+	projectCompetencyRoleEnum,
+	projectLevelEnum,
+	projectSources,
+	projectSourceTypeEnum,
+	projectSubmissions,
+	projectSubmissionsRelations,
+	projects,
+	projectsRelations,
 	session,
 	skillMaps,
 	students,
 	studentsRelations,
+	submissionStatusEnum,
 	user,
 	verification,
 } from "../schema";
@@ -159,5 +170,94 @@ describe("DB Schema — Relations", () => {
 
 	it("exports microCoursesRelations", () => {
 		expect(microCoursesRelations).toBeDefined();
+	});
+});
+
+describe("DB Schema — Project Marketplace enums", () => {
+	it("projectLevelEnum has 5 values (L1-L5)", () => {
+		const values = projectLevelEnum.enumValues;
+		expect(values).toHaveLength(5);
+		expect(values).toEqual(["L1", "L2", "L3", "L4", "L5"]);
+	});
+
+	it("projectSourceTypeEnum has 5 values", () => {
+		const values = projectSourceTypeEnum.enumValues;
+		expect(values).toHaveLength(5);
+		expect(values).toEqual(["open_data", "oss", "partner", "ngo", "faculty"]);
+	});
+
+	it("projectCompetencyRoleEnum has 2 values", () => {
+		const values = projectCompetencyRoleEnum.enumValues;
+		expect(values).toHaveLength(2);
+		expect(values).toEqual(["required", "acquired"]);
+	});
+
+	it("submissionStatusEnum has 4 values", () => {
+		const values = submissionStatusEnum.enumValues;
+		expect(values).toHaveLength(4);
+		expect(values).toEqual(["in_progress", "submitted", "verified", "rejected"]);
+	});
+});
+
+describe("DB Schema — Project Marketplace tables", () => {
+	it("projects table exists with correct SQL name", () => {
+		expect(projects).toBeDefined();
+		expect(getTableName(projects)).toBe("projects");
+	});
+
+	it("projectCompetencies table exists with correct SQL name", () => {
+		expect(projectCompetencies).toBeDefined();
+		expect(getTableName(projectCompetencies)).toBe("project_competencies");
+	});
+
+	it("projectSubmissions table exists with correct SQL name", () => {
+		expect(projectSubmissions).toBeDefined();
+		expect(getTableName(projectSubmissions)).toBe("project_submissions");
+	});
+
+	it("projectSources table exists with correct SQL name", () => {
+		expect(projectSources).toBeDefined();
+		expect(getTableName(projectSources)).toBe("project_sources");
+	});
+});
+
+describe("DB Schema — Project Marketplace columns", () => {
+	it("projects has required columns", () => {
+		const colNames = Object.keys(projects);
+		expect(colNames).toContain("id");
+		expect(colNames).toContain("slug");
+		expect(colNames).toContain("title");
+		expect(colNames).toContain("description");
+		expect(colNames).toContain("level");
+		expect(colNames).toContain("estimatedHours");
+		expect(colNames).toContain("sourceType");
+		expect(colNames).toContain("sourceUrl");
+		expect(colNames).toContain("rubricJson");
+		expect(colNames).toContain("status");
+	});
+
+	it("projectSubmissions has required columns", () => {
+		const colNames = Object.keys(projectSubmissions);
+		expect(colNames).toContain("id");
+		expect(colNames).toContain("studentId");
+		expect(colNames).toContain("projectId");
+		expect(colNames).toContain("repoUrl");
+		expect(colNames).toContain("score");
+		expect(colNames).toContain("status");
+		expect(colNames).toContain("aiReviewJson");
+	});
+});
+
+describe("DB Schema — Project Marketplace relations", () => {
+	it("exports projectsRelations", () => {
+		expect(projectsRelations).toBeDefined();
+	});
+
+	it("exports projectCompetenciesRelations", () => {
+		expect(projectCompetenciesRelations).toBeDefined();
+	});
+
+	it("exports projectSubmissionsRelations", () => {
+		expect(projectSubmissionsRelations).toBeDefined();
 	});
 });

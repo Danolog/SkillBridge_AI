@@ -1,8 +1,14 @@
 # SkillBridge AI — Product Requirements Document
 
+> **PIVOT NOTICE (May 2026):** Micro-courses have been replaced by the **Project Marketplace** —
+> real-world projects graduated L1-L5 from open data and OSS. AI now serves as matchmaker,
+> brief writer, and reviewer. Students earn **Verified Project Receipts** in their Passport.
+> See `docs/decisions/001-project-marketplace.md` for full decision document.
+> References to "mikro-kursy" below are historical and reflect the original design.
+
 ## 1. Executive Summary
 
-SkillBridge AI to platforma edtech, która w czasie rzeczywistym mapuje kompetencje studentów uczelni wyższych na wymagania rynku pracy, automatycznie wykrywa luki kompetencyjne i generuje spersonalizowane mikro-ścieżki nauki. Głównym użytkownikiem jest student (18–26 lat) sfrustrowany brakiem połączenia między programem studiów a oczekiwaniami pracodawców. Drugorzędnym użytkownikiem jest wykładowca/dziekan, który potrzebuje danych o aktualności swojego programu vs. rynek. Produkt powstaje w kontekście konkursowym (Grupa Merito — 14 uczelni, 100k+ studentów, 11 miast w Polsce) i łączy trzy elementy, których nikt dotąd nie połączył: przenośny Paszport Kompetencji (osobisty asset studenta), real-time market intelligence oparty o AI, oraz auto-generowane mikro-kursy zamykające luki kompetencyjne. Sukces MVP oznacza, że student przechodzi pełny flow od uploadu sylabusa do wygenerowania Paszportu Kompetencji i podzielenia się nim z potencjalnym pracodawcą.
+SkillBridge AI to platforma edtech, która w czasie rzeczywistym mapuje kompetencje studentów uczelni wyższych na wymagania rynku pracy, automatycznie wykrywa luki kompetencyjne i generuje spersonalizowane mikro-ścieżki nauki. Głównym użytkownikiem jest student (18–26 lat) sfrustrowany brakiem połączenia między programem studiów a oczekiwaniami pracodawców. Drugorzędnym użytkownikiem jest wykładowca/dziekan, który potrzebuje danych o aktualności swojego programu vs. rynek. Produkt powstaje w kontekście konkursowym (Grupa Merito — 14 uczelni, 100k+ studentów, 11 miast w Polsce) i łączy trzy elementy, których nikt dotąd nie połączył: przenośny Paszport Kompetencji (osobisty asset studenta), real-time market intelligence oparty o AI, oraz marketplace realnych projektów graduowanych L1-L5 (open data + OSS), recenzowanych przez AI, z Verified Project Receipts w Paszporcie Kompetencji. Sukces MVP oznacza, że student przechodzi pełny flow od uploadu sylabusa do wygenerowania Paszportu Kompetencji i podzielenia się nim z potencjalnym pracodawcą.
 
 ---
 
