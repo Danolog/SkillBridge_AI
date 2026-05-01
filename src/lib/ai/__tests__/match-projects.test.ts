@@ -1,0 +1,166 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("ai", () => ({
+	generateText: vi.fn(),
+}));
+
+vi.mock("@ai-sdk/anthropic", () => ({
+	anthropic: vi.fn(() => "mocked-model"),
+}));
+
+vi.mock("@/lib/db", () => ({
+	db: {
+		query: {
+			students: { findFirst: vi.fn() },
+			gaps: { findFirst: vi.fn() },
+			competencies: { findMany: vi.fn() },
+			projects: { findMany: vi.fn() },
+		},
+	},
+}));
+
+import { generateText } from "ai";
+import { db } from "@/lib/db";
+import { matchProjects } from "../match-projects";
+
+const mockGenerateText = vi.mocked(generateText);
+const mockStudents = vi.mocked(db.query.students.findFirst);
+const mockGaps = vi.mocked(db.query.gaps.findFirst);
+const mockCompetencies = vi.mocked(db.query.competencies.findMany);
+const mockProjects = vi.mocked(db.query.projects.findMany);
+
+const student = {
+	id: "student-1",
+	userId: "user-1",
+	careerGoal: "Data Analyst",
+	semester: 4,
+	university: "WSB",
+	fieldOfStudy: "IT",
+	onboardingCompleted: true,
+	syllabusText: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
+};
+
+const gap = {
+	id: "gap-1",
+	studentId: "student-1",
+	competencyName: "Pandas",
+	priority: "critical" as const,
+	marketPercentage: 55,
+	estimatedHours: 6,
+	whyImportant: null,
+	createdAt: new Date(),
+};
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	mockStudents.mockResolvedValue(student);
+	mockGaps.mockResolvedValue(gap);
+	mockCompetencies.mockResolvedValue([
+		{
+			id: "c1",
+			studentId: "student-1",
+			name: "Python",
+			status: "acquired",
+			marketPercentage: 78,
+			createdAt: new Date(),
+		},
+		{
+			id: "c2",
+			studentId: "student-1",
+			name: "SQL",
+			status: "acquired",
+			marketPercentage: 89,
+			createdAt: new Date(),
+		},
+	]);
+});
+
+describe("matchProjects", () => {
+	it("returns matched projects sorted by score", async () => {
+		mockProjects.mockResolvedValue([
+			{
+				id: "proj-1",
+				slug: "analiza-gus",
+				title: "Analiza GUS",
+				description: "Opis",
+				level: "L1",
+				estimatedHours: 3,
+				sourceType: "open_data",
+				sourceUrl: "https://bdl.stat.gov.pl",
+				partnerId: null,
+				exclusivity: false,
+				briefTemplate: null,
+				rubricJson: [],
+				status: "active",
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				competencies: [
+					{ id: "pc1", projectId: "proj-1", competencyName: "Python", role: "required" },
+					{ id: "pc2", projectId: "proj-1", competencyName: "Pandas", role: "required" },
+				],
+			},
+		]);
+
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify([
+				{ projectId: "proj-1", matchScore: 85, reasoning: "Idealny projekt do nauki Pandas" },
+			]),
+		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+
+		const results = await matchProjects("student-1", "gap-1", 5);
+
+		expect(results).toHaveLength(1);
+		expect(results[0].projectId).toBe("proj-1");
+		expect(results[0].matchScore).toBe(85);
+		expect(results[0].reasoning).toBe("Idealny projekt do nauki Pandas");
+	});
+
+	it("returns empty array when no projects exist", async () => {
+		mockProjects.mockResolvedValue([]);
+
+		const results = await matchProjects("student-1", "gap-1");
+		expect(results).toHaveLength(0);
+	});
+
+	it("throws when student not found", async () => {
+		mockStudents.mockResolvedValue(undefined);
+
+		await expect(matchProjects("unknown", "gap-1")).rejects.toThrow("Student not found");
+	});
+
+	it("falls back to keyword scoring when LLM returns garbage", async () => {
+		mockProjects.mockResolvedValue([
+			{
+				id: "proj-2",
+				slug: "demo",
+				title: "Demo",
+				description: "Opis",
+				level: "L1",
+				estimatedHours: 3,
+				sourceType: "open_data",
+				sourceUrl: "https://example.com",
+				partnerId: null,
+				exclusivity: false,
+				briefTemplate: null,
+				rubricJson: [],
+				status: "active",
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				competencies: [
+					{ id: "pc3", projectId: "proj-2", competencyName: "Pandas", role: "required" },
+				],
+			},
+		]);
+
+		mockGenerateText.mockResolvedValue({
+			text: "This is not valid JSON at all!!!",
+		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+
+		const results = await matchProjects("student-1", "gap-1");
+		expect(results).toHaveLength(1);
+		expect(results[0].projectId).toBe("proj-2");
+		expect(results[0].reasoning).toBe("Dopasowanie na podstawie kompetencji");
+	});
+});
