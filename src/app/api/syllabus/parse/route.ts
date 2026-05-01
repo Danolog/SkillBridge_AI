@@ -1,10 +1,16 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { parseSyllabus } from "@/lib/ai/parse-syllabus";
 import { auth } from "@/lib/auth/server";
 import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
+
+const SyllabusSchema = z.object({
+	syllabusText: z.string().min(100).max(50_000),
+	careerGoal: z.string().min(1).max(200),
+});
 
 export async function POST(req: Request) {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -15,22 +21,20 @@ export async function POST(req: Request) {
 	const rl = await applyRateLimit(rateLimiters.aiHeavy, `user:${session.user.id}`);
 	if (!rl.success) return rateLimitResponse(rl.reset);
 
-	const body = await req.json();
-	const { syllabusText, careerGoal } = body as {
-		syllabusText?: string;
-		careerGoal?: string;
-	};
-
-	if (!syllabusText || syllabusText.trim().length < 100) {
+	let raw: unknown;
+	try {
+		raw = await req.json();
+	} catch {
+		return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+	}
+	const parsed = SyllabusSchema.safeParse(raw);
+	if (!parsed.success) {
 		return NextResponse.json(
-			{ error: "Sylabus musi mieć co najmniej 100 znaków." },
+			{ error: "Invalid input", issues: parsed.error.flatten() },
 			{ status: 400 },
 		);
 	}
-
-	if (!careerGoal) {
-		return NextResponse.json({ error: "Cel kariery jest wymagany." }, { status: 400 });
-	}
+	const { syllabusText, careerGoal } = parsed.data;
 
 	try {
 		const competencies = await parseSyllabus(syllabusText, careerGoal);

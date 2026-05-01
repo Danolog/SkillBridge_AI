@@ -1,11 +1,17 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { generateMicroCourse } from "@/lib/ai/generate-micro-course";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { competencies, gaps, microCourses, students } from "@/lib/db/schema";
+import { logError } from "@/lib/log";
 import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
+
+const MicroCourseSchema = z.object({
+	gapId: z.string().uuid(),
+});
 
 export const maxDuration = 60;
 
@@ -32,8 +38,20 @@ export async function POST(req: Request) {
 	const rl = await applyRateLimit(rateLimiters.aiLight, `user:${session.user.id}`);
 	if (!rl.success) return rateLimitResponse(rl.reset);
 
-	const { gapId } = (await req.json()) as { gapId: string };
-	if (!gapId) return NextResponse.json({ error: "gapId is required" }, { status: 400 });
+	let raw: unknown;
+	try {
+		raw = await req.json();
+	} catch {
+		return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+	}
+	const parsed = MicroCourseSchema.safeParse(raw);
+	if (!parsed.success) {
+		return NextResponse.json(
+			{ error: "Invalid input", issues: parsed.error.flatten() },
+			{ status: 400 },
+		);
+	}
+	const { gapId } = parsed.data;
 
 	const student = await db.query.students.findFirst({
 		where: eq(students.userId, session.user.id),
@@ -74,7 +92,7 @@ export async function POST(req: Request) {
 		title = result.title;
 		content = result.content;
 	} catch (err) {
-		console.error("[micro-courses] AI generation failed:", err);
+		logError("micro-courses.generate", err, { studentId: student.id, gapId });
 		return NextResponse.json(
 			{ error: "Nie udało się wygenerować kursu. Spróbuj ponownie." },
 			{ status: 500 },

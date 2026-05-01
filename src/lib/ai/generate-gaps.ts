@@ -5,6 +5,7 @@ import { z } from "zod";
 import { sanitizeForPrompt } from "@/lib/ai/sanitize";
 import { db } from "@/lib/db";
 import { competencies, gaps, jobMarketData, passports } from "@/lib/db/schema";
+import { logError } from "@/lib/log";
 
 const GapResultSchema = z.object({
 	gaps: z.array(
@@ -105,7 +106,7 @@ Zasady:
 			})
 			.where(eq(passports.studentId, studentId));
 	} catch (err) {
-		console.error("[generate-gaps] failed:", { studentId, err });
+		logError("generate-gaps", err, { studentId });
 		throw err;
 	}
 }

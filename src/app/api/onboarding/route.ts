@@ -1,23 +1,25 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { generateGaps } from "@/lib/ai/generate-gaps";
 import { generateSkillMap } from "@/lib/ai/generate-skill-map";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { competencies, passports, students } from "@/lib/db/schema";
+import { logError } from "@/lib/log";
 import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
-interface OnboardingBody {
-	university: string;
-	fieldOfStudy: string;
-	semester: number;
-	careerGoal: string;
-	syllabusText: string;
-	competencies: string[];
-}
+const OnboardingSchema = z.object({
+	university: z.string().min(1).max(200),
+	fieldOfStudy: z.string().min(1).max(200),
+	semester: z.number().int().min(1).max(15),
+	careerGoal: z.string().min(1).max(200),
+	syllabusText: z.string().max(50_000).optional().default(""),
+	competencies: z.array(z.string().min(1).max(200)).min(1).max(100),
+});
 
 export async function POST(req: Request) {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -28,13 +30,21 @@ export async function POST(req: Request) {
 	const rl = await applyRateLimit(rateLimiters.aiHeavy, `user:${session.user.id}`);
 	if (!rl.success) return rateLimitResponse(rl.reset);
 
-	const body = (await req.json()) as OnboardingBody;
-	const { university, fieldOfStudy, semester, careerGoal, syllabusText } = body;
-	const competencyNames = body.competencies;
-
-	if (!university || !fieldOfStudy || !semester || !careerGoal || !competencyNames?.length) {
-		return NextResponse.json({ error: "Wszystkie pola są wymagane." }, { status: 400 });
+	let raw: unknown;
+	try {
+		raw = await req.json();
+	} catch {
+		return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
 	}
+	const parsed = OnboardingSchema.safeParse(raw);
+	if (!parsed.success) {
+		return NextResponse.json(
+			{ error: "Invalid input", issues: parsed.error.flatten() },
+			{ status: 400 },
+		);
+	}
+	const { university, fieldOfStudy, semester, careerGoal, syllabusText } = parsed.data;
+	const competencyNames = parsed.data.competencies;
 
 	const userId = session.user.id;
 
@@ -104,7 +114,7 @@ export async function POST(req: Request) {
 			generateSkillMap(studentId, competencyNames, careerGoal),
 		]);
 	} catch (err) {
-		console.error("[onboarding] AI generation failed:", { studentId, err });
+		logError("onboarding", err, { studentId });
 		return NextResponse.json({ success: true, studentId, aiGenerationFailed: true });
 	}
 

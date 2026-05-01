@@ -1,6 +1,8 @@
 import { count, desc, eq, sql } from "drizzle-orm";
+import { headers as nextHeaders } from "next/headers";
 import { NextResponse } from "next/server";
 import { generateFacultySuggestions } from "@/lib/ai/generate-faculty-suggestions";
+import { recordAudit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { gaps, jobMarketData, students } from "@/lib/db/schema";
 import { checkFacultyAuth } from "@/lib/faculty-auth";
@@ -12,6 +14,14 @@ export async function GET() {
 	if (!isAuth) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const h = await nextHeaders();
+	await recordAudit({
+		actorType: "faculty",
+		action: "faculty.dashboard.read",
+		ipAddress: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? null,
+		userAgent: h.get("user-agent"),
+	});
 
 	// Count total students
 	const [studentCountResult] = await db.select({ count: count() }).from(students);

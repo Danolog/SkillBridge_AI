@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { matchProjects } from "@/lib/ai/match-projects";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
@@ -9,6 +10,10 @@ import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limi
 
 export const maxDuration = 60;
 
+const RecommendQuerySchema = z.object({
+	gapId: z.string().uuid(),
+});
+
 export async function GET(req: NextRequest) {
 	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,8 +21,18 @@ export async function GET(req: NextRequest) {
 	const rl = await applyRateLimit(rateLimiters.aiLight, `user:${session.user.id}`);
 	if (!rl.success) return rateLimitResponse(rl.reset);
 
-	const gapId = req.nextUrl.searchParams.get("gapId");
-	if (!gapId) return NextResponse.json({ error: "gapId is required" }, { status: 400 });
+	const parsed = RecommendQuerySchema.safeParse({
+		gapId: req.nextUrl.searchParams.get("gapId"),
+	});
+	if (!parsed.success) {
+		return NextResponse.json(
+			{ error: "Invalid query", issues: parsed.error.flatten() },
+			{
+				status: 400,
+			},
+		);
+	}
+	const { gapId } = parsed.data;
 
 	const student = await db.query.students.findFirst({
 		where: eq(students.userId, session.user.id),

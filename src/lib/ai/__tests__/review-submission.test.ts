@@ -155,13 +155,7 @@ describe("reviewSubmission", () => {
 			text: JSON.stringify(validReview),
 		} as TextReturn);
 
-		await reviewSubmission(
-			"https://attacker.com/?x=github.com",
-			null,
-			rubric,
-			"Test",
-			"Desc",
-		);
+		await reviewSubmission("https://attacker.com/?x=github.com", null, rubric, "Test", "Desc");
 
 		expect(fetchSpy).not.toHaveBeenCalled();
 	});
@@ -179,9 +173,7 @@ describe("reviewSubmission", () => {
 	});
 
 	it("calls fetch for valid github.com URL with timeout signal", async () => {
-		const fetchSpy = vi
-			.fn()
-			.mockResolvedValue({ ok: false, json: async () => ({}) } as Response);
+		const fetchSpy = vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) } as Response);
 		vi.stubGlobal("fetch", fetchSpy);
 		mockGenerateText.mockResolvedValue({
 			text: JSON.stringify(validReview),

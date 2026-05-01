@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { reviewSubmission } from "@/lib/ai/review-submission";
 import { parseNotebookUrl, parseRepoUrl } from "@/lib/ai/sanitize";
+import { auditContextFromRequest, recordAudit } from "@/lib/audit";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { projectSubmissions, projects, students } from "@/lib/db/schema";
@@ -130,6 +131,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 				aiReviewJson: { review },
 			})
 			.returning();
+	}
+
+	if (status === "verified") {
+		await recordAudit({
+			actorType: "system",
+			actorId: student.id,
+			action: "submission.verified",
+			targetType: "submission",
+			targetId: submission.id,
+			...auditContextFromRequest(req),
+			metadata: {
+				score: review.score,
+				cheatRiskScore: review.cheatRiskScore,
+				projectId,
+			},
+		});
 	}
 
 	return NextResponse.json({ submission, review });

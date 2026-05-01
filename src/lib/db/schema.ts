@@ -287,6 +287,29 @@ export const facultySessions = pgTable(
 	(table) => [index("idx_faculty_sessions_expires_at").on(table.expiresAt)],
 );
 
+// Audit log — privileged actions and security-relevant events.
+export const auditLog = pgTable(
+	"audit_log",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		actorType: text("actor_type", {
+			enum: ["student", "faculty", "system", "anonymous"],
+		}).notNull(),
+		actorId: text("actor_id"),
+		action: text("action").notNull(),
+		targetType: text("target_type"),
+		targetId: text("target_id"),
+		ipAddress: text("ip_address"),
+		userAgent: text("user_agent"),
+		metadata: jsonb("metadata"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index("idx_audit_log_created_at").on(table.createdAt),
+		index("idx_audit_log_action").on(table.action),
+	],
+);
+
 // Relations
 
 export const studentsRelations = relations(students, ({ one, many }) => ({

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { skillMaps } from "@/lib/db/schema";
+import { logError } from "@/lib/log";
 
 const SkillMapSchema = z.object({
 	nodes: z.array(
@@ -76,7 +77,7 @@ Zasady:
 			});
 		}
 	} catch (err) {
-		console.error("[generate-skill-map] failed:", { studentId, err });
+		logError("generate-skill-map", err, { studentId });
 		throw err;
 	}
 }

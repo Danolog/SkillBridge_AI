@@ -5,6 +5,7 @@ import { generateSkillMap } from "@/lib/ai/generate-skill-map";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { skillMaps, students } from "@/lib/db/schema";
+import { logError } from "@/lib/log";
 import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -58,7 +59,7 @@ export async function POST() {
 	try {
 		await generateSkillMap(student.id, competencyNames, student.careerGoal);
 	} catch (err) {
-		console.error("[POST /api/skill-map] generation failed:", err);
+		logError("skill-map.generate", err, { studentId: student.id });
 		return NextResponse.json({ error: "Generation failed" }, { status: 500 });
 	}
 
