@@ -96,4 +96,105 @@ describe("reviewSubmission", () => {
 			reviewSubmission(null, "https://example.com", rubric, "Test", "Desc"),
 		).rejects.toThrow("AI zwróciło nieprawidłowy JSON");
 	});
+
+	it("throws when AI returns score outside 0-100", async () => {
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify({ ...validReview, score: 150 }),
+		} as TextReturn);
+
+		await expect(
+			reviewSubmission("https://github.com/user/repo", null, rubric, "Test", "Desc"),
+		).rejects.toThrow("AI zwróciło niezgodny ze schematem JSON");
+	});
+
+	it("throws when AI returns cheatRiskScore outside 0-1", async () => {
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify({ ...validReview, cheatRiskScore: 5 }),
+		} as TextReturn);
+
+		await expect(
+			reviewSubmission("https://github.com/user/repo", null, rubric, "Test", "Desc"),
+		).rejects.toThrow("AI zwróciło niezgodny ze schematem JSON");
+	});
+
+	it("throws when AI omits criteriaScores", async () => {
+		const { criteriaScores: _omitted, ...withoutCriteria } = validReview;
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify(withoutCriteria),
+		} as TextReturn);
+
+		await expect(
+			reviewSubmission("https://github.com/user/repo", null, rubric, "Test", "Desc"),
+		).rejects.toThrow("AI zwróciło niezgodny ze schematem JSON");
+	});
+
+	it("throws when AI returns empty criteriaScores array (min 1)", async () => {
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify({ ...validReview, criteriaScores: [] }),
+		} as TextReturn);
+
+		await expect(
+			reviewSubmission("https://github.com/user/repo", null, rubric, "Test", "Desc"),
+		).rejects.toThrow("AI zwróciło niezgodny ze schematem JSON");
+	});
+
+	it("throws when AI returns empty feedback (min 1 char)", async () => {
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify({ ...validReview, feedback: "" }),
+		} as TextReturn);
+
+		await expect(
+			reviewSubmission("https://github.com/user/repo", null, rubric, "Test", "Desc"),
+		).rejects.toThrow("AI zwróciło niezgodny ze schematem JSON");
+	});
+
+	it("does NOT call fetch for repoUrl with disallowed host (SSRF defense)", async () => {
+		const fetchSpy = vi.fn().mockRejectedValue(new Error("should not be called"));
+		vi.stubGlobal("fetch", fetchSpy);
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify(validReview),
+		} as TextReturn);
+
+		await reviewSubmission(
+			"https://attacker.com/?x=github.com",
+			null,
+			rubric,
+			"Test",
+			"Desc",
+		);
+
+		expect(fetchSpy).not.toHaveBeenCalled();
+	});
+
+	it("does NOT call fetch for AWS metadata URL (SSRF defense)", async () => {
+		const fetchSpy = vi.fn().mockRejectedValue(new Error("should not be called"));
+		vi.stubGlobal("fetch", fetchSpy);
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify(validReview),
+		} as TextReturn);
+
+		await reviewSubmission("http://169.254.169.254/", null, rubric, "Test", "Desc");
+
+		expect(fetchSpy).not.toHaveBeenCalled();
+	});
+
+	it("calls fetch for valid github.com URL with timeout signal", async () => {
+		const fetchSpy = vi
+			.fn()
+			.mockResolvedValue({ ok: false, json: async () => ({}) } as Response);
+		vi.stubGlobal("fetch", fetchSpy);
+		mockGenerateText.mockResolvedValue({
+			text: JSON.stringify(validReview),
+		} as TextReturn);
+
+		await reviewSubmission("https://github.com/user/repo", null, rubric, "Test", "Desc");
+
+		expect(fetchSpy).toHaveBeenCalledOnce();
+		const [url, init] = fetchSpy.mock.calls[0];
+		expect(url).toBe("https://api.github.com/repos/user/repo");
+		expect(init).toMatchObject({
+			headers: expect.objectContaining({ "user-agent": expect.any(String) }),
+		});
+		expect(init.signal).toBeInstanceOf(AbortSignal);
+	});
 });
