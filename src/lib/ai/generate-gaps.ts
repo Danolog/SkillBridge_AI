@@ -1,6 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { competencies, gaps, jobMarketData, passports } from "@/lib/db/schema";
@@ -85,7 +85,7 @@ Zasady:
 					status: update.status,
 					marketPercentage: update.marketPercentage,
 				})
-				.where(eq(competencies.name, update.name));
+				.where(and(eq(competencies.studentId, studentId), eq(competencies.name, update.name)));
 		}
 
 		// Update passport market coverage

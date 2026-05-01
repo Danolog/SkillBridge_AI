@@ -36,7 +36,7 @@ const tiles = [
 		icon: MapIcon,
 		colorClass: "db-tile-icon-indigo",
 		desc: "Wizualna mapa Twoich kompetencji",
-		getStat: (p: DashboardHubProps) => `${p.competencyCount} kompetencji`,
+		getStat: (p: DashboardHubProps) => `${p.competencyCount} masz • ${p.gapCount} brakuje`,
 	},
 	{
 		href: "/gap-analysis",
@@ -69,7 +69,7 @@ const statItems = [
 		key: "comp",
 		icon: CheckCircle,
 		getValue: (p: DashboardHubProps) => String(p.competencyCount),
-		label: "Kompetencji",
+		label: "Posiadane",
 		iconClass: "db-stat-icon-indigo",
 	},
 	{

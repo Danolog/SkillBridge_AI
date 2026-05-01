@@ -62,7 +62,7 @@ describe("DashboardHub", () => {
 
 	it("renders tile stats with correct counts", () => {
 		render(<DashboardHub {...defaultProps} />);
-		expect(screen.getByText("15 kompetencji")).toBeInTheDocument();
+		expect(screen.getByText("15 masz • 5 brakuje")).toBeInTheDocument();
 		expect(screen.getByText("5 luk do zamknięcia")).toBeInTheDocument();
 		expect(screen.getByText("2 ukończone")).toBeInTheDocument();
 		expect(screen.getByText("Udostępnij")).toBeInTheDocument();
