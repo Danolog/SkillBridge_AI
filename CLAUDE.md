@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Project Overview
 
-SkillBridge AI is a Polish edtech platform that maps students' competencies (from their university syllabus) to job market requirements, detects competency gaps, and generates personalized AI micro-courses. Built for the EduTech Masters competition by Grupa Merito (deadline: 19 March 2026). Students get a shareable Competency Passport; faculty get an aggregated dashboard showing program vs. market alignment.
+SkillBridge AI is a Polish edtech platform that maps students' competencies (from their university syllabus) to job market requirements, detects competency gaps, and connects students with graduated real-world projects. AI serves as matchmaker, brief writer, and reviewer — students earn Verified Project Receipts in their Competency Passport. Built for the EduTech Masters competition by Grupa Merito (deadline: 19 March 2026). Students get a shareable Competency Passport; faculty get an aggregated dashboard showing program vs. market alignment.
 
 ---
 
@@ -65,18 +65,22 @@ pnpm db:seed       # seed demo data
 
 ### Currently Implemented
 - Auth: login/signup pages, Google OAuth, Better Auth server + client
-- DB schema: Better Auth tables (`user`, `session`, `account`, `verification`) + domain tables (`students`, `competencies`, `gaps`, `skillMaps`, `microCourses`, `passports`, `jobMarketData`)
+- DB schema: Better Auth tables + domain tables (`students`, `competencies`, `gaps`, `skillMaps`, `microCourses`, `passports`, `jobMarketData`) + project marketplace tables (`projects`, `projectCompetencies`, `projectSubmissions`, `projectSources`)
 - Landing page (`/`) — hero, value props, how it works, CTA, footer with faculty panel link
 - Dashboard: sidebar layout + hub with welcome card, stats, 4 nav tiles
 - Onboarding: 3-step wizard (profile + career goal + syllabus upload) + AI syllabus parser
 - Skill Map: React Flow competency graph with interactive nodes, detail panel, status coloring
 - Gap Analysis: prioritized gap list with ring charts, "Why important?" AI generation, expandable explanations
-- Micro-courses: AI-generated step-by-step courses with resources, exercises, completion tracking
-- Competency Passport: private view + public shareable link (UUID) + PDF export
+- Project Marketplace: catalog with filters, personalized AI briefs, submission with AI review, Verified Project Receipts
+- AI matchmaker: keyword overlap + Haiku LLM rerank (`match-projects.ts`)
+- Project brief generator with inline Learning Steps (`generate-brief.ts`)
+- Submission review with cheat detection (`review-submission.ts`)
+- Competency Passport: private view + public shareable link (UUID) + PDF export + Verified Project Receipts
 - Faculty Panel: shared password auth (`FACULTY_PASSWORD` cookie), heatmap dashboard (Recharts), top missing competencies, AI curriculum suggestions
-- AI modules: `parse-syllabus`, `generate-skill-map`, `generate-gaps`, `generate-why`, `generate-micro-course`, `generate-faculty-suggestions`
+- AI modules: `parse-syllabus`, `generate-skill-map`, `generate-gaps`, `generate-why`, `generate-micro-course` (deprecated — `generateLearningSteps` extracted), `generate-faculty-suggestions`, `match-projects`, `generate-brief`, `review-submission`
 - Route protection middleware for authenticated routes
-- Seed data: 15 demo students across 5 career paths, 90 job market records (9 careers x 10 competencies)
+- Seed data: 15 demo students across 5 career paths, 90 job market records, 20 demo projects (L1-L3)
+- Drizzle migrations as source of truth (in `drizzle/`)
 - UI components: `button`, `card`, `dialog`, `dropdown-menu`, `input`, `label`, `select`, `separator`, `sonner`, `tabs`, `textarea`, `avatar`
 - Biome config, Vitest config with comprehensive test coverage
 
@@ -100,6 +104,9 @@ src/
 │   │   ├── micro-courses/
 │   │   │   ├── page.tsx         # Course list
 │   │   │   └── [id]/page.tsx    # Single course view
+│   │   ├── projects/
+│   │   │   ├── page.tsx         # Project catalog with filters
+│   │   │   └── [id]/page.tsx    # Project detail + brief + submission
 │   │   └── passport/page.tsx    # Competency passport
 │   ├── faculty/                 # Faculty panel (shared password auth)
 │   │   ├── login/page.tsx
@@ -150,8 +157,11 @@ src/
     │   ├── generate-skill-map.ts
     │   ├── generate-gaps.ts
     │   ├── generate-why.ts      # "Why is this important?"
-    │   ├── generate-micro-course.ts
-    │   └── generate-faculty-suggestions.ts
+    │   ├── generate-micro-course.ts  # @deprecated, Learning Steps extracted
+    │   ├── generate-faculty-suggestions.ts
+    │   ├── match-projects.ts    # Hybrid matchmaker (Haiku)
+    │   ├── generate-brief.ts    # Personalized project brief (Sonnet)
+    │   └── review-submission.ts # AI submission review (Sonnet)
     ├── faculty-auth.ts          # Cookie check for faculty panel
     └── utils.ts                 # cn() helper
 ```
@@ -304,13 +314,16 @@ pnpm db:migrate  # Apply migrations
 | Micro-courses | `.agents/plans/07-micro-courses.md` |
 | Competency Passport + PDF | `.agents/plans/08-passport.md` |
 | Faculty Panel | `.agents/plans/09-faculty-panel.md` |
+| Project Marketplace | `.agents/plans/10-project-marketplace.md` |
 | Product requirements | `.claude/PRD.md` |
+| Project Marketplace pivot | `docs/decisions/001-project-marketplace.md` |
 
 ---
 
 ## Notes
 
-- **AI model**: always use `anthropic("claude-sonnet-4-6")` — no other model
+- **AI models**: `anthropic("claude-sonnet-4-6")` for quality generation (briefs, reviews); `anthropic("claude-haiku-4-5-20251001")` for matchmaker only
+- **Project Marketplace**: replaces micro-courses as primary learning modality. `microCourses` table is deprecated (read-only, no new entries)
 - **Drizzle migrations**: use `pnpm db:generate` after schema changes, `pnpm db:migrate` to apply. Migrations in `drizzle/` are source of truth. `db:push` is deprecated.
 - **No SSR for browser-only libs**: `jsPDF`, `html2canvas`, `@xyflow/react` — must be `"use client"` and dynamically imported if needed
 - **Faculty auth**: separate from Better Auth — uses `FACULTY_PASSWORD` env var + `faculty_session` HttpOnly cookie
