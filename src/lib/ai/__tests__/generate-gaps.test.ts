@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("ai", () => ({
-	generateText: vi.fn(),
+	generateObject: vi.fn(),
 }));
 
 vi.mock("@ai-sdk/anthropic", () => ({
@@ -29,11 +29,11 @@ vi.mock("@/lib/db", () => ({
 	},
 }));
 
-import { generateText } from "ai";
+import { generateObject } from "ai";
 import { db } from "@/lib/db";
 import { generateGaps } from "../generate-gaps";
 
-const mockGenerateText = vi.mocked(generateText);
+const mockGenerateObject = vi.mocked(generateObject);
 const mockFindMany = vi.mocked(db.query.jobMarketData.findMany);
 const mockInsert = vi.mocked(db.insert);
 const mockUpdate = vi.mocked(db.update);
@@ -41,10 +41,15 @@ const mockDelete = vi.mocked(db.delete);
 
 const validResponse = {
 	gaps: [
-		{ name: "Docker", priority: "critical", marketPercentage: 70, estimatedHours: 20 },
-		{ name: "Kubernetes", priority: "important", marketPercentage: 50, estimatedHours: 30 },
+		{ name: "Docker", priority: "critical" as const, marketPercentage: 70, estimatedHours: 20 },
+		{
+			name: "Kubernetes",
+			priority: "important" as const,
+			marketPercentage: 50,
+			estimatedHours: 30,
+		},
 	],
-	competencyUpdates: [{ name: "Python", status: "acquired", marketPercentage: 80 }],
+	competencyUpdates: [{ name: "Python", status: "acquired" as const, marketPercentage: 80 }],
 	marketCoveragePercent: 45,
 };
 
@@ -52,9 +57,9 @@ describe("generateGaps", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockFindMany.mockResolvedValue([]);
-		mockGenerateText.mockResolvedValue({
-			text: JSON.stringify(validResponse),
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+		mockGenerateObject.mockResolvedValue({
+			object: validResponse,
+		} as Awaited<ReturnType<typeof generateObject>>);
 		mockInsert.mockReturnValue({ values: vi.fn() } as never);
 		mockUpdate.mockReturnValue({
 			set: vi.fn(() => ({ where: vi.fn() })),
@@ -80,9 +85,9 @@ describe("generateGaps", () => {
 	});
 
 	it("still deletes when AI returns zero gaps (avoids stale leftovers)", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: JSON.stringify({ ...validResponse, gaps: [] }),
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+		mockGenerateObject.mockResolvedValue({
+			object: { ...validResponse, gaps: [] },
+		} as Awaited<ReturnType<typeof generateObject>>);
 
 		await generateGaps("student-1", ["Python"], "Data Analyst");
 
@@ -118,19 +123,18 @@ describe("generateGaps", () => {
 		);
 	});
 
-	it("strips markdown code fences from AI output", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: `\`\`\`json\n${JSON.stringify(validResponse)}\n\`\`\``,
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+	it("passes schema and prompt with competencies and career goal", async () => {
+		await generateGaps("student-1", ["Python", "SQL"], "Data Engineer");
 
-		await expect(
-			generateGaps("student-1", ["Python"], "Data Analyst"),
-		).resolves.toBeUndefined();
-		expect(mockInsert).toHaveBeenCalled();
+		const call = mockGenerateObject.mock.calls[0][0];
+		expect(call.schema).toBeDefined();
+		expect(call.prompt).toContain("Python");
+		expect(call.prompt).toContain("SQL");
+		expect(call.prompt).toContain("Data Engineer");
 	});
 
 	it("propagates AI SDK errors", async () => {
-		mockGenerateText.mockRejectedValue(new Error("rate limit"));
+		mockGenerateObject.mockRejectedValue(new Error("rate limit"));
 		await expect(generateGaps("student-1", ["Python"], "Data Analyst")).rejects.toThrow(
 			"rate limit",
 		);

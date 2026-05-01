@@ -108,13 +108,38 @@ export function OnboardingWizard({ user: _user }: OnboardingWizardProps) {
 				const data = await res.json();
 				throw new Error(data.error || "Błąd zapisu");
 			}
-			toast.success("Paszport Kompetencji utworzony!");
-			router.push("/dashboard");
+			const data = (await res.json()) as { aiGenerationFailed?: boolean };
+			if (data.aiGenerationFailed) {
+				toast.warning(
+					"Profil zapisany, ale generacja Skill Map nie powiodła się. Spróbuj ponownie ze strony Skill Map.",
+				);
+				router.push("/skill-map");
+			} else {
+				toast.success("Paszport Kompetencji utworzony!");
+				router.push("/dashboard");
+			}
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Nie udało się zapisać danych.");
 			setSubmitting(false);
 		}
 	};
+
+	if (submitting) {
+		return (
+			<div className="flex min-h-[calc(100vh-72px)] flex-col items-center justify-center px-5 py-10 gap-6">
+				<div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center">
+					<BookOpen className="h-8 w-8 text-indigo-500 animate-pulse" />
+				</div>
+				<div className="text-center max-w-md">
+					<h2 className="font-heading text-2xl font-extrabold mb-2">Analizujemy Twój profil…</h2>
+					<p className="text-sm text-muted-foreground">
+						AI porównuje Twoje kompetencje z wymaganiami rynku i buduje Skill Map. To zajmie 15-30
+						sekund.
+					</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex min-h-[calc(100vh-72px)] flex-col items-center px-5 py-10">

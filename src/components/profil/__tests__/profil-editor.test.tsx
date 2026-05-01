@@ -64,9 +64,7 @@ describe("ProfilEditor — prefill", () => {
 
 	it("treats unknown career goal as custom and prefills the custom input", () => {
 		render(
-			<ProfilEditor
-				initial={{ ...baseInitial, careerGoal: "AI Researcher (niestandardowy)" }}
-			/>,
+			<ProfilEditor initial={{ ...baseInitial, careerGoal: "AI Researcher (niestandardowy)" }} />,
 		);
 		const customInput = screen.getByPlaceholderText(
 			"Wpisz swój cel kariery...",

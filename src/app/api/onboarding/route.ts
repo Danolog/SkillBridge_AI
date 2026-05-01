@@ -91,9 +91,18 @@ export async function POST(req: Request) {
 		await db.insert(passports).values({ studentId });
 	}
 
-	// Fire-and-forget: generate gaps + skill map in background
-	generateGaps(studentId, competencyNames, careerGoal).catch(console.error);
-	generateSkillMap(studentId, competencyNames, careerGoal).catch(console.error);
+	// Synchronous AI generation — Vercel serverless terminates the function after the response,
+	// so fire-and-forget would lose the work. Awaiting also lets us tell the client whether the
+	// skill map is ready or whether they need to retry from /skill-map.
+	try {
+		await Promise.all([
+			generateGaps(studentId, competencyNames, careerGoal),
+			generateSkillMap(studentId, competencyNames, careerGoal),
+		]);
+	} catch (err) {
+		console.error("[onboarding] AI generation failed:", { studentId, err });
+		return NextResponse.json({ success: true, studentId, aiGenerationFailed: true });
+	}
 
 	return NextResponse.json({ success: true, studentId });
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("ai", () => ({
-	generateText: vi.fn(),
+	generateObject: vi.fn(),
 }));
 
 vi.mock("@ai-sdk/anthropic", () => ({
@@ -26,11 +26,11 @@ vi.mock("@/lib/db", () => ({
 	},
 }));
 
-import { generateText } from "ai";
+import { generateObject } from "ai";
 import { db } from "@/lib/db";
 import { generateSkillMap } from "../generate-skill-map";
 
-const mockGenerateText = vi.mocked(generateText);
+const mockGenerateObject = vi.mocked(generateObject);
 const mockFindFirst = vi.mocked(db.query.skillMaps.findFirst);
 const mockInsert = vi.mocked(db.insert);
 const mockUpdate = vi.mocked(db.update);
@@ -41,7 +41,7 @@ const validResponse = {
 			id: "skill-1",
 			data: {
 				label: "Python",
-				status: "acquired",
+				status: "acquired" as const,
 				category: "programming",
 				marketPercentage: 55,
 			},
@@ -52,7 +52,7 @@ const validResponse = {
 			id: "skill-2",
 			data: {
 				label: "Docker",
-				status: "missing",
+				status: "missing" as const,
 				category: "devops",
 				marketPercentage: 58,
 			},
@@ -69,9 +69,9 @@ describe("generateSkillMap", () => {
 	});
 
 	it("generates skill map and inserts when none exists", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: JSON.stringify(validResponse),
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+		mockGenerateObject.mockResolvedValue({
+			object: validResponse,
+		} as Awaited<ReturnType<typeof generateObject>>);
 
 		mockFindFirst.mockResolvedValue(undefined);
 
@@ -80,7 +80,7 @@ describe("generateSkillMap", () => {
 
 		await generateSkillMap("student-1", ["Python", "SQL"], "Full-stack Developer");
 
-		expect(mockGenerateText).toHaveBeenCalledOnce();
+		expect(mockGenerateObject).toHaveBeenCalledOnce();
 		expect(mockInsert).toHaveBeenCalled();
 		expect(mockValues).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -92,9 +92,9 @@ describe("generateSkillMap", () => {
 	});
 
 	it("updates existing skill map", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: JSON.stringify(validResponse),
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+		mockGenerateObject.mockResolvedValue({
+			object: validResponse,
+		} as Awaited<ReturnType<typeof generateObject>>);
 
 		mockFindFirst.mockResolvedValue({
 			id: "map-1",
@@ -120,50 +120,25 @@ describe("generateSkillMap", () => {
 		);
 	});
 
-	it("strips markdown code blocks from AI response", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: `\`\`\`json\n${JSON.stringify(validResponse)}\n\`\`\``,
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
-
-		mockFindFirst.mockResolvedValue(undefined);
-		const mockValues = vi.fn();
-		mockInsert.mockReturnValue({ values: mockValues } as never);
-
-		await generateSkillMap("student-1", ["Python"], "Data Analyst");
-
-		expect(mockValues).toHaveBeenCalledWith(
-			expect.objectContaining({
-				nodes: validResponse.nodes,
-			}),
-		);
-	});
-
-	it("includes competencies and career goal in prompt", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: JSON.stringify(validResponse),
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
+	it("passes schema and prompt with competencies and career goal", async () => {
+		mockGenerateObject.mockResolvedValue({
+			object: validResponse,
+		} as Awaited<ReturnType<typeof generateObject>>);
 
 		mockFindFirst.mockResolvedValue(undefined);
 		mockInsert.mockReturnValue({ values: vi.fn() } as never);
 
 		await generateSkillMap("student-1", ["React", "TypeScript"], "Frontend Developer");
 
-		const call = mockGenerateText.mock.calls[0][0];
+		const call = mockGenerateObject.mock.calls[0][0];
+		expect(call.schema).toBeDefined();
 		expect(call.prompt).toContain("React");
 		expect(call.prompt).toContain("TypeScript");
 		expect(call.prompt).toContain("Frontend Developer");
 	});
 
-	it("throws on invalid JSON response", async () => {
-		mockGenerateText.mockResolvedValue({
-			text: "Not valid JSON at all",
-		} as ReturnType<typeof generateText> extends Promise<infer T> ? T : never);
-
-		await expect(generateSkillMap("student-1", ["Python"], "Data Analyst")).rejects.toThrow();
-	});
-
 	it("propagates AI SDK errors", async () => {
-		mockGenerateText.mockRejectedValue(new Error("API rate limit exceeded"));
+		mockGenerateObject.mockRejectedValue(new Error("API rate limit exceeded"));
 
 		await expect(generateSkillMap("student-1", ["Python"], "Data Analyst")).rejects.toThrow(
 			"API rate limit exceeded",
