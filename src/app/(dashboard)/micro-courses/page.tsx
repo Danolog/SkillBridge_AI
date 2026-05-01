@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CourseList } from "@/components/micro-courses/course-list";
 import type { MicroCourseContent } from "@/lib/ai/generate-micro-course";
@@ -36,6 +37,12 @@ export default async function MicroCoursesPage({ searchParams }: PageProps) {
 
 	return (
 		<>
+			<div className="mc-deprecation-banner">
+				<p>
+					Ta funkcja została przeniesiona. Sprawdź <Link href="/projects">Projekty</Link> — realne
+					projekty dopasowane do Twoich luk kompetencyjnych.
+				</p>
+			</div>
 			<div className="mc-page-header">
 				<h1 className="mc-page-title">Mikro-kursy</h1>
 				<p className="mc-page-desc">

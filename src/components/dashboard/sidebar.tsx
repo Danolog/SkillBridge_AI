@@ -2,7 +2,7 @@
 
 import {
 	Award,
-	BookOpen,
+	FolderKanban,
 	LayoutDashboard,
 	LogOut,
 	Map as MapIcon,
@@ -19,7 +19,7 @@ const navItems = [
 	{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 	{ href: "/skill-map", label: "Skill Map", icon: MapIcon },
 	{ href: "/gap-analysis", label: "Gap Analysis", icon: TriangleAlert },
-	{ href: "/micro-courses", label: "Mikro-kursy", icon: BookOpen },
+	{ href: "/projects", label: "Projekty", icon: FolderKanban },
 	{ href: "/passport", label: "Paszport", icon: Award },
 ];
 

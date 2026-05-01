@@ -47,7 +47,7 @@ describe("Sidebar", () => {
 		expect(screen.getByText("Dashboard")).toBeInTheDocument();
 		expect(screen.getByText("Skill Map")).toBeInTheDocument();
 		expect(screen.getByText("Gap Analysis")).toBeInTheDocument();
-		expect(screen.getByText("Mikro-kursy")).toBeInTheDocument();
+		expect(screen.getByText("Projekty")).toBeInTheDocument();
 		expect(screen.getByText("Paszport")).toBeInTheDocument();
 	});
 
@@ -83,7 +83,7 @@ describe("Sidebar", () => {
 		expect(hrefs).toContain("/dashboard");
 		expect(hrefs).toContain("/skill-map");
 		expect(hrefs).toContain("/gap-analysis");
-		expect(hrefs).toContain("/micro-courses");
+		expect(hrefs).toContain("/projects");
 		expect(hrefs).toContain("/passport");
 	});
 });

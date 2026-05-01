@@ -3,9 +3,9 @@
 import {
 	ArrowRight,
 	Award,
-	BookOpen,
 	CheckCircle,
 	Flame,
+	FolderKanban,
 	Map as MapIcon,
 	Rocket,
 	Target,
@@ -47,11 +47,11 @@ const tiles = [
 		getStat: (p: DashboardHubProps) => `${p.gapCount} luk do zamknięcia`,
 	},
 	{
-		href: "/micro-courses",
-		title: "Mikro-kursy",
-		icon: BookOpen,
+		href: "/projects",
+		title: "Projekty",
+		icon: FolderKanban,
 		colorClass: "db-tile-icon-emerald",
-		desc: "AI kursy zamykające Twoje luki",
+		desc: "Realne projekty dopasowane do Twoich luk",
 		getStat: (p: DashboardHubProps) => `${p.courseCount} ukończone`,
 	},
 	{
