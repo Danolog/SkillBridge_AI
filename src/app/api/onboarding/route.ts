@@ -6,6 +6,7 @@ import { generateSkillMap } from "@/lib/ai/generate-skill-map";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { competencies, passports, students } from "@/lib/db/schema";
+import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -23,6 +24,9 @@ export async function POST(req: Request) {
 	if (!session) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const rl = await applyRateLimit(rateLimiters.aiHeavy, `user:${session.user.id}`);
+	if (!rl.success) return rateLimitResponse(rl.reset);
 
 	const body = (await req.json()) as OnboardingBody;
 	const { university, fieldOfStudy, semester, careerGoal, syllabusText } = body;

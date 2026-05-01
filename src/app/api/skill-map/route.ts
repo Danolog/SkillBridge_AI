@@ -5,6 +5,7 @@ import { generateSkillMap } from "@/lib/ai/generate-skill-map";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { skillMaps, students } from "@/lib/db/schema";
+import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -40,6 +41,9 @@ export async function POST() {
 	if (!session) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const rl = await applyRateLimit(rateLimiters.aiLight, `user:${session.user.id}`);
+	if (!rl.success) return rateLimitResponse(rl.reset);
 
 	const student = await db.query.students.findFirst({
 		where: eq(students.userId, session.user.id),

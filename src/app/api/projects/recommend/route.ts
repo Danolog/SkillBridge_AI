@@ -5,12 +5,16 @@ import { matchProjects } from "@/lib/ai/match-projects";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { students } from "@/lib/db/schema";
+import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
 	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+	const rl = await applyRateLimit(rateLimiters.aiLight, `user:${session.user.id}`);
+	if (!rl.success) return rateLimitResponse(rl.reset);
 
 	const gapId = req.nextUrl.searchParams.get("gapId");
 	if (!gapId) return NextResponse.json({ error: "gapId is required" }, { status: 400 });

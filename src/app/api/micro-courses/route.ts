@@ -5,6 +5,7 @@ import { generateMicroCourse } from "@/lib/ai/generate-micro-course";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { competencies, gaps, microCourses, students } from "@/lib/db/schema";
+import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -27,6 +28,9 @@ export async function GET() {
 export async function POST(req: Request) {
 	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+	const rl = await applyRateLimit(rateLimiters.aiLight, `user:${session.user.id}`);
+	if (!rl.success) return rateLimitResponse(rl.reset);
 
 	const { gapId } = (await req.json()) as { gapId: string };
 	if (!gapId) return NextResponse.json({ error: "gapId is required" }, { status: 400 });

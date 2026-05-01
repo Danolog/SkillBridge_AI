@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { facultySessions } from "@/lib/db/schema";
 import { FACULTY_COOKIE_NAME, hashToken } from "@/lib/faculty-auth";
+import { applyRateLimit, getClientIp, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
@@ -23,6 +24,9 @@ export async function POST(req: Request) {
 	if (expectedOrigin && origin && origin !== expectedOrigin) {
 		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 	}
+
+	const rl = await applyRateLimit(rateLimiters.facultyLogin, getClientIp(req));
+	if (!rl.success) return rateLimitResponse(rl.reset);
 
 	let body: unknown;
 	try {

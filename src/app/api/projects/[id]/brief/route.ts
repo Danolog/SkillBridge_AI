@@ -5,12 +5,16 @@ import { generateProjectBrief } from "@/lib/ai/generate-brief";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { projectSubmissions, students } from "@/lib/db/schema";
+import { applyRateLimit, rateLimiters, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
 	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+	const rl = await applyRateLimit(rateLimiters.aiHeavy, `user:${session.user.id}`);
+	if (!rl.success) return rateLimitResponse(rl.reset);
 
 	const { id: projectId } = await params;
 
