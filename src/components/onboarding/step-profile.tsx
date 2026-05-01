@@ -27,7 +27,7 @@ const UNIVERSITIES = [
 	"WSB Merito Lublin",
 ];
 
-const CAREER_GOALS = [
+export const CAREER_GOALS = [
 	"Data Analyst",
 	"Data Scientist",
 	"Frontend Developer",

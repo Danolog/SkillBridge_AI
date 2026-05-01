@@ -23,5 +23,6 @@ export const config = {
 		"/micro-courses/:path*",
 		"/projects/:path*",
 		"/passport",
+		"/profil/:path*",
 	],
 };

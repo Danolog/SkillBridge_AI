@@ -8,6 +8,7 @@ import {
 	Map as MapIcon,
 	Menu,
 	TriangleAlert,
+	UserCircle,
 	X,
 } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +22,7 @@ const navItems = [
 	{ href: "/gap-analysis", label: "Gap Analysis", icon: TriangleAlert },
 	{ href: "/projects", label: "Projekty", icon: FolderKanban },
 	{ href: "/passport", label: "Paszport", icon: Award },
+	{ href: "/profil", label: "Profil", icon: UserCircle },
 ];
 
 interface SidebarProps {

@@ -72,7 +72,8 @@ Zasady:
 		.replace(/\n?```$/, "");
 	const result = JSON.parse(cleaned) as GapResult;
 
-	// Save gaps
+	// Save gaps (idempotent — wipe existing first so re-running on profile edit doesn't duplicate)
+	await db.delete(gaps).where(eq(gaps.studentId, studentId));
 	if (result.gaps.length > 0) {
 		await db.insert(gaps).values(
 			result.gaps.map((g) => ({
