@@ -52,10 +52,10 @@ pnpm test:coverage # vitest with coverage
 pnpm test:e2e      # bash-based E2E scripts (requires pnpm dev running)
 
 # Database
-pnpm db:push       # push schema to DB (no migration files)
+pnpm db:generate   # generate migration files (after schema.ts changes)
+pnpm db:migrate    # run migrations (source of truth)
+pnpm db:push       # push schema to DB (deprecated — use migrations)
 pnpm db:studio     # Drizzle Studio UI
-pnpm db:generate   # generate migration files
-pnpm db:migrate    # run migrations
 pnpm db:seed       # seed demo data
 ```
 
@@ -270,7 +270,8 @@ Run after every feature:
 ```bash
 pnpm build     # TypeScript + Next.js compile — must pass with 0 errors
 pnpm lint      # Biome — must pass with 0 warnings
-pnpm db:push   # Only if schema.ts changed
+pnpm db:generate # If schema.ts changed — generates migration
+pnpm db:migrate  # Apply migrations
 ```
 
 ---
@@ -310,7 +311,7 @@ pnpm db:push   # Only if schema.ts changed
 ## Notes
 
 - **AI model**: always use `anthropic("claude-sonnet-4-6")` — no other model
-- **DB push over migrations**: use `pnpm db:push` in development (no migration files needed until production)
+- **Drizzle migrations**: use `pnpm db:generate` after schema changes, `pnpm db:migrate` to apply. Migrations in `drizzle/` are source of truth. `db:push` is deprecated.
 - **No SSR for browser-only libs**: `jsPDF`, `html2canvas`, `@xyflow/react` — must be `"use client"` and dynamically imported if needed
 - **Faculty auth**: separate from Better Auth — uses `FACULTY_PASSWORD` env var + `faculty_session` HttpOnly cookie
 - **Polish UI**: all user-facing text is in Polish (labels, toasts, error messages, AI outputs)
