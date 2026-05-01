@@ -516,4 +516,282 @@ export const DEMO_PROJECTS: DemoProject[] = [
 			{ name: "Cloud (AWS/GCP/Azure)", role: "acquired" },
 		],
 	},
+	// ── Data Scientist / ML (7 projects: 2 L1, 3 L2, 2 L3) ──
+	{
+		slug: "eda-titanic-pandas-numpy",
+		title: "Eksploracyjna analiza danych Titanic (Pandas + NumPy)",
+		description:
+			"Pobierz klasyczny dataset Titanic z Kaggle. Wczytaj go za pomocą Pandas, przeprowadź czyszczenie i imputację braków, policz statystyki przeżywalności wg klas i płci. Wygeneruj wykresy w Matplotlib i Seaborn.",
+		level: "L1",
+		estimatedHours: 5,
+		sourceType: "open_data",
+		sourceUrl: "https://www.kaggle.com/c/titanic/data",
+		rubricJson: [
+			{
+				criterion: "Wczytanie i czyszczenie danych",
+				weight: 25,
+				description: "Imputacja braków, kasty typów, podstawowa walidacja",
+			},
+			{
+				criterion: "Analiza eksploracyjna",
+				weight: 35,
+				description: "Min. 5 wykresów (Matplotlib/Seaborn) z opisami",
+			},
+			{
+				criterion: "Operacje NumPy",
+				weight: 20,
+				description: "Min. 3 operacje wektorowe / agregacje na ndarray",
+			},
+			{
+				criterion: "Wnioski",
+				weight: 20,
+				description: "Min. 5 wniosków popartych statystykami",
+			},
+		],
+		competencies: [
+			{ name: "Python", role: "required" },
+			{ name: "Pandas", role: "required" },
+			{ name: "NumPy", role: "required" },
+			{ name: "Matplotlib", role: "required" },
+			{ name: "Seaborn", role: "required" },
+			{ name: "Statystyka", role: "acquired" },
+		],
+	},
+	{
+		slug: "klasyfikator-iris-scikit-learn",
+		title: "Pierwszy model ML: klasyfikator gatunków irysów (Scikit-learn)",
+		description:
+			"Zbuduj klasyfikator gatunków irysów na podstawie datasetu UCI Iris. Wytrenuj 3 modele (Logistic Regression, Random Forest, KNN), porównaj accuracy na train/test split i confusion matrix.",
+		level: "L1",
+		estimatedHours: 4,
+		sourceType: "open_data",
+		sourceUrl: "https://archive.ics.uci.edu/dataset/53/iris",
+		rubricJson: [
+			{
+				criterion: "Podział train/test i preprocessing",
+				weight: 25,
+				description: "Standaryzacja, train_test_split z stratify",
+			},
+			{
+				criterion: "Trzy modele Scikit-learn",
+				weight: 35,
+				description: "LogisticRegression, RandomForest, KNN — każdy fit i predict",
+			},
+			{
+				criterion: "Ewaluacja",
+				weight: 25,
+				description: "Accuracy + classification_report + confusion matrix",
+			},
+			{
+				criterion: "Interpretacja wyników",
+				weight: 15,
+				description: "Krótka analiza dlaczego dany model wygrał",
+			},
+		],
+		competencies: [
+			{ name: "Python", role: "required" },
+			{ name: "Scikit-learn", role: "required" },
+			{ name: "Machine Learning", role: "required" },
+			{ name: "Pandas", role: "required" },
+		],
+	},
+	{
+		slug: "predykcja-churn-feature-engineering",
+		title: "Predykcja odejścia klientów telco (Feature Engineering + ML)",
+		description:
+			"Zbuduj model przewidujący churn klientów na podstawie Telco Customer Churn (Kaggle). Skup się na feature engineeringu — kodowanie zmiennych kategorycznych, binning, interakcje cech, scaling. Porównaj 2 modele Scikit-learn z baseline.",
+		level: "L2",
+		estimatedHours: 12,
+		sourceType: "open_data",
+		sourceUrl: "https://www.kaggle.com/datasets/blastchar/telco-customer-churn",
+		rubricJson: [
+			{
+				criterion: "Feature engineering",
+				weight: 35,
+				description: "One-hot/target encoding, binning, min. 3 nowe cechy interakcyjne",
+			},
+			{
+				criterion: "Modele i tuning",
+				weight: 30,
+				description: "Min. 2 modele Scikit-learn + GridSearchCV",
+			},
+			{
+				criterion: "Ewaluacja",
+				weight: 20,
+				description: "ROC-AUC, precision/recall, krzywa PR, wykresy w Matplotlib",
+			},
+			{
+				criterion: "Wersjonowanie i powtarzalność",
+				weight: 15,
+				description: "Repo Git z requirements.txt i README",
+			},
+		],
+		competencies: [
+			{ name: "Scikit-learn", role: "required" },
+			{ name: "Feature Engineering", role: "required" },
+			{ name: "Pandas", role: "required" },
+			{ name: "NumPy", role: "required" },
+			{ name: "Machine Learning", role: "required" },
+			{ name: "Matplotlib", role: "required" },
+			{ name: "Git/GitHub", role: "acquired" },
+		],
+	},
+	{
+		slug: "klasyfikator-mnist-tensorflow",
+		title: "Sieć neuronowa do rozpoznawania cyfr MNIST (TensorFlow)",
+		description:
+			"Zbuduj prostą sieć neuronową w TensorFlow/Keras klasyfikującą ręcznie pisane cyfry z datasetu MNIST. Przetestuj 2 architektury (MLP vs CNN), porównaj accuracy i zwizualizuj błędne predykcje.",
+		level: "L2",
+		estimatedHours: 10,
+		sourceType: "open_data",
+		sourceUrl: "https://yann.lecun.com/exdb/mnist/",
+		rubricJson: [
+			{
+				criterion: "Przygotowanie danych",
+				weight: 15,
+				description: "Normalizacja pikseli, reshape, podział train/val/test",
+			},
+			{
+				criterion: "Architektura MLP",
+				weight: 25,
+				description: "Sekwencyjny model z min. 2 warstwami Dense + Dropout",
+			},
+			{
+				criterion: "Architektura CNN",
+				weight: 30,
+				description: "Conv2D + MaxPooling + Dense, training z early stopping",
+			},
+			{
+				criterion: "Analiza wyników",
+				weight: 30,
+				description: "Confusion matrix + galeria błędnych predykcji w Matplotlib",
+			},
+		],
+		competencies: [
+			{ name: "Python", role: "required" },
+			{ name: "TensorFlow", role: "required" },
+			{ name: "Deep Learning", role: "required" },
+			{ name: "NumPy", role: "required" },
+			{ name: "Matplotlib", role: "acquired" },
+		],
+	},
+	{
+		slug: "pipeline-ml-git-dvc",
+		title: "End-to-end ML pipeline z wersjonowaniem (Git + DVC)",
+		description:
+			"Zbuduj reprodukowalny pipeline ML: pobranie danych, czyszczenie, feature engineering, trening, ewaluacja. Wersjonuj kod w Git i dane/modele w DVC. Wszystko jako repozytorium gotowe do uruchomienia jednym `dvc repro`.",
+		level: "L2",
+		estimatedHours: 14,
+		sourceType: "oss",
+		sourceUrl: "https://github.com/iterative/example-versioning",
+		rubricJson: [
+			{
+				criterion: "Struktura repo i Git workflow",
+				weight: 25,
+				description: "Branche feature/main, min. 5 commitów z konkretnymi zmianami",
+			},
+			{
+				criterion: "DVC pipeline",
+				weight: 35,
+				description: "dvc.yaml z min. 3 stages, dvc repro działa end-to-end",
+			},
+			{
+				criterion: "Modelowanie i ewaluacja",
+				weight: 25,
+				description: "Model Scikit-learn + metryki w pliku JSON",
+			},
+			{
+				criterion: "Dokumentacja",
+				weight: 15,
+				description: "README z opisem pipeline i instrukcją uruchomienia",
+			},
+		],
+		competencies: [
+			{ name: "Git/GitHub", role: "required" },
+			{ name: "Scikit-learn", role: "required" },
+			{ name: "Feature Engineering", role: "required" },
+			{ name: "Machine Learning", role: "required" },
+			{ name: "Python", role: "required" },
+		],
+	},
+	{
+		slug: "sentiment-pytorch-cloud-deploy",
+		title: "Klasyfikacja sentymentu recenzji (PyTorch + deployment Cloud)",
+		description:
+			"Zbuduj model klasyfikacji sentymentu recenzji filmowych w PyTorch (LSTM lub fine-tune BERT z HuggingFace). Wystaw model jako REST API i zdeployuj na AWS Lambda lub Google Cloud Run. Udokumentuj koszt inferencji i latency.",
+		level: "L3",
+		estimatedHours: 25,
+		sourceType: "oss",
+		sourceUrl: "https://huggingface.co/datasets/imdb",
+		rubricJson: [
+			{
+				criterion: "Model PyTorch",
+				weight: 30,
+				description: "LSTM lub BERT fine-tune, training loop z DataLoader",
+			},
+			{
+				criterion: "REST API",
+				weight: 20,
+				description: "FastAPI/Flask endpoint /predict z walidacją inputu",
+			},
+			{
+				criterion: "Deployment Cloud",
+				weight: 30,
+				description: "AWS Lambda lub GCP Cloud Run, działa publiczny URL",
+			},
+			{
+				criterion: "Komunikacja wyników",
+				weight: 20,
+				description: "Raport: latency, koszt, accuracy, decyzje architektoniczne",
+			},
+		],
+		competencies: [
+			{ name: "PyTorch", role: "required" },
+			{ name: "Deep Learning", role: "required" },
+			{ name: "Cloud (AWS/GCP/Azure)", role: "required" },
+			{ name: "Python", role: "required" },
+			{ name: "Komunikacja wyników", role: "required" },
+			{ name: "Git/GitHub", role: "acquired" },
+		],
+	},
+	{
+		slug: "raport-ml-prezentacja-stakeholder",
+		title: "Case study ML: predykcja + raport biznesowy + prezentacja",
+		description:
+			"Wybierz dataset biznesowy (np. House Prices z Kaggle). Zbuduj model regresyjny, ale 70% pracy to komunikacja: napisz raport (markdown/PDF) z wnioskami dla nietechnicznego stakeholdera, przygotuj 10-slide deck i nagraj 5-minutową prezentację.",
+		level: "L3",
+		estimatedHours: 18,
+		sourceType: "open_data",
+		sourceUrl: "https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques",
+		rubricJson: [
+			{
+				criterion: "Model i wyniki",
+				weight: 25,
+				description: "Min. 2 modele Scikit-learn + cross-validation + RMSE",
+			},
+			{
+				criterion: "Wizualizacje",
+				weight: 25,
+				description: "Min. 6 wykresów Matplotlib/Seaborn skierowanych do biznesu",
+			},
+			{
+				criterion: "Raport biznesowy",
+				weight: 30,
+				description: "Markdown/PDF: streszczenie, kluczowe insighty, rekomendacje",
+			},
+			{
+				criterion: "Prezentacja",
+				weight: 20,
+				description: "10-slide deck + nagranie 5 min — bez żargonu technicznego",
+			},
+		],
+		competencies: [
+			{ name: "Komunikacja wyników", role: "required" },
+			{ name: "Machine Learning", role: "required" },
+			{ name: "Wizualizacja danych", role: "required" },
+			{ name: "Matplotlib", role: "required" },
+			{ name: "Seaborn", role: "required" },
+			{ name: "Pandas", role: "required" },
+		],
+	},
 ];

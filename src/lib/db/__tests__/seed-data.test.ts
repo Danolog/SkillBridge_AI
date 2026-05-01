@@ -97,8 +97,8 @@ describe("Seed data — salary ranges format", () => {
 });
 
 describe("Seed data — projects", () => {
-	it("has exactly 20 projects", () => {
-		expect(DEMO_PROJECTS).toHaveLength(20);
+	it("has exactly 27 projects", () => {
+		expect(DEMO_PROJECTS).toHaveLength(27);
 	});
 
 	it("each project has at least 2 competencies", () => {
@@ -110,20 +110,20 @@ describe("Seed data — projects", () => {
 		}
 	});
 
-	it("has correct level distribution: 8 L1, 8 L2, 4 L3", () => {
+	it("has correct level distribution: 10 L1, 11 L2, 6 L3", () => {
 		const l1 = DEMO_PROJECTS.filter((p) => p.level === "L1").length;
 		const l2 = DEMO_PROJECTS.filter((p) => p.level === "L2").length;
 		const l3 = DEMO_PROJECTS.filter((p) => p.level === "L3").length;
-		expect(l1).toBe(8);
-		expect(l2).toBe(8);
-		expect(l3).toBe(4);
+		expect(l1).toBe(10);
+		expect(l2).toBe(11);
+		expect(l3).toBe(6);
 	});
 
-	it("has correct source type distribution: 15 open_data, 5 oss", () => {
+	it("has correct source type distribution: 20 open_data, 7 oss", () => {
 		const openData = DEMO_PROJECTS.filter((p) => p.sourceType === "open_data").length;
 		const oss = DEMO_PROJECTS.filter((p) => p.sourceType === "oss").length;
-		expect(openData).toBe(15);
-		expect(oss).toBe(5);
+		expect(openData).toBe(20);
+		expect(oss).toBe(7);
 	});
 
 	it("each sourceUrl starts with https://", () => {
