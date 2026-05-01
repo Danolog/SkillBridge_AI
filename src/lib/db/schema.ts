@@ -72,6 +72,30 @@ export const competencyStatusEnum = pgEnum("competency_status", [
 
 export const gapPriorityEnum = pgEnum("gap_priority", ["critical", "important", "nice_to_have"]);
 
+// Project Marketplace enums
+
+export const projectLevelEnum = pgEnum("project_level", ["L1", "L2", "L3", "L4", "L5"]);
+
+export const projectSourceTypeEnum = pgEnum("project_source_type", [
+	"open_data",
+	"oss",
+	"partner",
+	"ngo",
+	"faculty",
+]);
+
+export const projectCompetencyRoleEnum = pgEnum("project_competency_role", [
+	"required",
+	"acquired",
+]);
+
+export const submissionStatusEnum = pgEnum("submission_status", [
+	"in_progress",
+	"submitted",
+	"verified",
+	"rejected",
+]);
+
 export const students = pgTable(
 	"students",
 	{
@@ -178,6 +202,76 @@ export const jobMarketData = pgTable(
 	(table) => [index("idx_job_market_career_goal").on(table.careerGoal)],
 );
 
+// Project Marketplace tables
+
+export const projects = pgTable(
+	"projects",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		slug: text("slug").notNull().unique(),
+		title: text("title").notNull(),
+		description: text("description").notNull(),
+		level: projectLevelEnum("level").notNull(),
+		estimatedHours: integer("estimated_hours").notNull(),
+		sourceType: projectSourceTypeEnum("source_type").notNull(),
+		sourceUrl: text("source_url"),
+		partnerId: text("partner_id"),
+		exclusivity: boolean("exclusivity").notNull().default(false),
+		briefTemplate: text("brief_template"),
+		rubricJson: jsonb("rubric_json").notNull().default([]),
+		status: text("status").notNull().default("active"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [index("idx_projects_slug").on(table.slug)],
+);
+
+export const projectCompetencies = pgTable(
+	"project_competencies",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		projectId: uuid("project_id")
+			.notNull()
+			.references(() => projects.id, { onDelete: "cascade" }),
+		competencyName: text("competency_name").notNull(),
+		role: projectCompetencyRoleEnum("role").notNull().default("required"),
+	},
+	(table) => [index("idx_project_competencies_project_id").on(table.projectId)],
+);
+
+export const projectSubmissions = pgTable(
+	"project_submissions",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		studentId: uuid("student_id")
+			.notNull()
+			.references(() => students.id, { onDelete: "cascade" }),
+		projectId: uuid("project_id")
+			.notNull()
+			.references(() => projects.id, { onDelete: "cascade" }),
+		repoUrl: text("repo_url"),
+		notebookUrl: text("notebook_url"),
+		additionalUrls: jsonb("additional_urls").notNull().default([]),
+		submittedAt: timestamp("submitted_at", { withTimezone: true }),
+		aiReviewJson: jsonb("ai_review_json"),
+		score: integer("score"),
+		status: submissionStatusEnum("status").notNull().default("in_progress"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index("idx_project_submissions_student").on(table.studentId),
+		index("idx_project_submissions_project").on(table.projectId),
+	],
+);
+
+export const projectSources = pgTable("project_sources", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	type: projectSourceTypeEnum("type").notNull(),
+	url: text("url").notNull(),
+	lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+});
+
 // Relations
 
 export const studentsRelations = relations(students, ({ one, many }) => ({
@@ -187,6 +281,7 @@ export const studentsRelations = relations(students, ({ one, many }) => ({
 	skillMap: one(skillMaps, { fields: [students.id], references: [skillMaps.studentId] }),
 	microCourses: many(microCourses),
 	passport: one(passports, { fields: [students.id], references: [passports.studentId] }),
+	projectSubmissions: many(projectSubmissions),
 }));
 
 export const competenciesRelations = relations(competencies, ({ one }) => ({
@@ -205,4 +300,29 @@ export const microCoursesRelations = relations(microCourses, ({ one }) => ({
 
 export const passportsRelations = relations(passports, ({ one }) => ({
 	student: one(students, { fields: [passports.studentId], references: [students.id] }),
+}));
+
+// Project Marketplace relations
+
+export const projectsRelations = relations(projects, ({ many }) => ({
+	competencies: many(projectCompetencies),
+	submissions: many(projectSubmissions),
+}));
+
+export const projectCompetenciesRelations = relations(projectCompetencies, ({ one }) => ({
+	project: one(projects, {
+		fields: [projectCompetencies.projectId],
+		references: [projects.id],
+	}),
+}));
+
+export const projectSubmissionsRelations = relations(projectSubmissions, ({ one }) => ({
+	student: one(students, {
+		fields: [projectSubmissions.studentId],
+		references: [students.id],
+	}),
+	project: one(projects, {
+		fields: [projectSubmissions.projectId],
+		references: [projects.id],
+	}),
 }));
