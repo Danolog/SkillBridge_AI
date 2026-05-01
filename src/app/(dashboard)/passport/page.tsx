@@ -1,10 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { type PassportData, PassportView } from "@/components/passport/passport-view";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
-import { competencies, gaps, passports, students } from "@/lib/db/schema";
+import { competencies, gaps, passports, projectSubmissions, students } from "@/lib/db/schema";
 import { calculateCoverage } from "@/lib/passport-utils";
 
 export default async function PassportPage() {
@@ -47,6 +47,26 @@ export default async function PassportPage() {
 		passport = updated;
 	}
 
+	const verifiedSubmissions = await db.query.projectSubmissions.findMany({
+		where: and(
+			eq(projectSubmissions.studentId, student.id),
+			eq(projectSubmissions.status, "verified"),
+		),
+		with: { project: true },
+	});
+
+	const projectReceipts = verifiedSubmissions.map((s) => ({
+		projectTitle: s.project.title,
+		projectLevel: s.project.level,
+		score: s.score ?? 0,
+		verifiedAt: (s.submittedAt ?? s.createdAt).toISOString(),
+		repoUrl: s.repoUrl,
+		notebookUrl: s.notebookUrl,
+		feedback: (s.aiReviewJson as Record<string, unknown>)?.review
+			? ((s.aiReviewJson as Record<string, Record<string, unknown>>).review.feedback as string)
+			: null,
+	}));
+
 	const passportData: PassportData = {
 		id: passport.id,
 		student: {
@@ -63,6 +83,7 @@ export default async function PassportPage() {
 			marketPercentage: c.marketPercentage,
 		})),
 		generatedAt: passport.updatedAt.toISOString(),
+		projectReceipts,
 	};
 
 	return <PassportView data={passportData} />;
