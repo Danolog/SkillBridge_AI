@@ -21,6 +21,7 @@ export const config = {
 		"/skill-map/:path*",
 		"/gap-analysis/:path*",
 		"/micro-courses/:path*",
+		"/projects/:path*",
 		"/passport",
 	],
 };
