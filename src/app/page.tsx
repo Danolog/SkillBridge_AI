@@ -17,7 +17,7 @@ export default function Home() {
 						<BrainCircuit className="h-5 w-5 text-white" strokeWidth={1.8} />
 					</div>
 					<span className="lp-grad-text font-heading text-lg font-extrabold tracking-tight">
-						SkillBridge AI
+						SkillBridge
 					</span>
 				</Link>
 
@@ -70,7 +70,7 @@ export default function Home() {
 
 				{/* Subtitle */}
 				<p className="relative z-[2] mb-12 max-w-[580px] text-[clamp(16px,1.8vw,20px)] leading-[1.75] text-[rgba(148,163,184,0.88)]">
-					SkillBridge AI analizuje Twój program studiów, identyfikuje luki kompetencyjne i generuje
+					SkillBridge analizuje Twój program studiów, identyfikuje luki kompetencyjne i generuje
 					spersonalizowane mikro-kursy. Twoja droga do wymarzonej pracy zaczyna się tutaj.
 				</p>
 
@@ -128,7 +128,7 @@ export default function Home() {
 				<div className="mx-auto max-w-[1160px]">
 					<div className="mb-16 text-center">
 						<span className="mb-4 inline-block rounded-full border border-[rgba(99,102,241,0.22)] bg-[rgba(99,102,241,0.10)] px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#6366F1]">
-							Dlaczego SkillBridge AI?
+							Dlaczego SkillBridge?
 						</span>
 						<h2 className="mb-4 font-heading text-[clamp(28px,4vw,48px)] leading-[1.15] font-black tracking-tight text-[#0F172A]">
 							Trzy filary Twojego sukcesu
@@ -287,7 +287,7 @@ export default function Home() {
 							<BrainCircuit className="h-[15px] w-[15px] text-white" strokeWidth={1.8} />
 						</div>
 						<span className="font-heading text-sm font-bold text-[rgba(248,250,252,0.50)]">
-							SkillBridge AI
+							SkillBridge
 						</span>
 					</Link>
 					<div className="flex items-center gap-4">
@@ -299,7 +299,7 @@ export default function Home() {
 						</Link>
 						<span className="text-[13px] text-[rgba(148,163,184,0.20)]">&middot;</span>
 						<span className="text-[13px] text-[rgba(148,163,184,0.40)]">
-							© 2026 SkillBridge AI&nbsp;&middot;&nbsp;Projekt EduTech
+							© 2026 SkillBridge&nbsp;&middot;&nbsp;Projekt EduTech
 							Masters&nbsp;&middot;&nbsp;Grupa Merito
 						</span>
 					</div>

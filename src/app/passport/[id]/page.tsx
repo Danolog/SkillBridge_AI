@@ -28,7 +28,7 @@ export async function generateMetadata({
 		: null;
 
 	return {
-		title: `Paszport Kompetencji — ${studentUser?.name ?? "Student"} | SkillBridge AI`,
+		title: `Paszport Kompetencji — ${studentUser?.name ?? "Student"} | SkillBridge`,
 		description: `Paszport kompetencji: ${student?.careerGoal ?? ""}. Pokrycie rynkowe: ${passport.marketCoveragePercent}%`,
 	};
 }

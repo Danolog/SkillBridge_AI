@@ -30,7 +30,7 @@ export function PassportPublic({ data }: { data: PassportData }) {
 			{/* Top Bar */}
 			<div className="pp-public-topbar">
 				<div className="pp-public-topbar-icon">S</div>
-				<span className="pp-public-topbar-text">SkillBridge AI</span>
+				<span className="pp-public-topbar-text">SkillBridge</span>
 			</div>
 
 			<div className="pp-public-content">
@@ -185,7 +185,7 @@ export function PassportPublic({ data }: { data: PassportData }) {
 					<span className="pp-generated">
 						Wygenerowano: <span>{formattedDate}</span>
 					</span>
-					<span className="pp-powered">SkillBridge AI</span>
+					<span className="pp-powered">SkillBridge</span>
 				</div>
 
 				{/* CTA */}
@@ -206,7 +206,7 @@ export function PassportPublic({ data }: { data: PassportData }) {
 			{/* Bottom Bar */}
 			<div className="pp-public-bottom">
 				<p className="pp-public-bottom-text">
-					Powered by <Link href="/">SkillBridge AI</Link> &middot; Platforma mapowania kompetencji
+					Powered by <Link href="/">SkillBridge</Link> &middot; Platforma mapowania kompetencji
 					dla studentow
 				</p>
 			</div>

@@ -105,7 +105,7 @@ export function FacultyDashboard() {
 									</div>
 									<h2 className="fc-empty-title">Za mało danych</h2>
 									<p className="fc-empty-text">
-										Zachęć studentów do korzystania z SkillBridge AI.
+										Zachęć studentów do korzystania z SkillBridge.
 										<br />
 										Minimum 3 studentów potrzebne do generowania raportu.
 									</p>
@@ -287,7 +287,7 @@ function FacultyHeader({ onLogout }: { onLogout: () => void }) {
 					</div>
 					<div>
 						<div className="fc-header-title">Panel Uczelni</div>
-						<div className="fc-header-subtitle">SkillBridge AI</div>
+						<div className="fc-header-subtitle">SkillBridge</div>
 					</div>
 				</div>
 				<button type="button" className="fc-logout-btn" onClick={onLogout}>

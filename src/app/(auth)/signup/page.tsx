@@ -6,7 +6,7 @@ export default function SignupPage() {
 	return (
 		<>
 			<h1 className="auth-title">Utwórz konto</h1>
-			<p className="auth-subtitle">Dołącz do SkillBridge AI</p>
+			<p className="auth-subtitle">Dołącz do SkillBridge</p>
 
 			<GoogleButton />
 

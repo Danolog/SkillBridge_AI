@@ -22,7 +22,7 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-	title: "SkillBridge AI — Twój Paszport Kompetencji",
+	title: "SkillBridge — Twój Paszport Kompetencji",
 	description: "Platforma AI mapująca kompetencje studentów na wymagania rynku pracy.",
 };
 

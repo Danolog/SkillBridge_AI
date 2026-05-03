@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 				<div className="auth-logo-icon">
 					<BrainCircuit size={20} strokeWidth={1.8} />
 				</div>
-				<span className="auth-logo-text">SkillBridge AI</span>
+				<span className="auth-logo-text">SkillBridge</span>
 			</Link>
 
 			{/* Card */}

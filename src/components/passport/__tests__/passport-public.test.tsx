@@ -73,10 +73,10 @@ describe("PassportPublic", () => {
 		expect(screen.getByText("Zweryfikowany")).toBeInTheDocument();
 	});
 
-	it("renders SkillBridge AI topbar", () => {
+	it("renders SkillBridge topbar", () => {
 		const { container } = render(<PassportPublic data={mockData} />);
 		const topbarText = container.querySelector(".pp-public-topbar-text");
-		expect(topbarText).toHaveTextContent("SkillBridge AI");
+		expect(topbarText).toHaveTextContent("SkillBridge");
 	});
 
 	it("renders topbar icon S", () => {

@@ -221,7 +221,7 @@ export function PassportView({ data }: { data: PassportData }) {
 					<span className="pp-generated">
 						Wygenerowano: <span>{formattedDate}</span>
 					</span>
-					<span className="pp-powered">SkillBridge AI</span>
+					<span className="pp-powered">SkillBridge</span>
 				</div>
 			</div>
 		</>

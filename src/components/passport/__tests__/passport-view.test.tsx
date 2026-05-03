@@ -163,9 +163,9 @@ describe("PassportView", () => {
 		expect(screen.getByText(/Wygenerowano:/)).toBeInTheDocument();
 	});
 
-	it("renders SkillBridge AI in footer", () => {
+	it("renders SkillBridge in footer", () => {
 		render(<PassportView data={mockData} />);
-		expect(screen.getByText("SkillBridge AI")).toBeInTheDocument();
+		expect(screen.getByText("SkillBridge")).toBeInTheDocument();
 	});
 
 	it("renders Eksportuj PDF button", () => {

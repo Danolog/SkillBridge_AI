@@ -38,7 +38,7 @@ const user = {
 describe("Sidebar", () => {
 	it("renders logo text", () => {
 		render(<Sidebar user={user} />);
-		const logos = screen.getAllByText("SkillBridge AI");
+		const logos = screen.getAllByText("SkillBridge");
 		expect(logos.length).toBeGreaterThan(0);
 	});
 

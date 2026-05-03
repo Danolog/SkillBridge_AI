@@ -63,7 +63,7 @@ export function Sidebar({ user }: SidebarProps) {
 				>
 					<Menu size={24} />
 				</button>
-				<span className="db-mobile-logo">SkillBridge AI</span>
+				<span className="db-mobile-logo">SkillBridge</span>
 			</div>
 
 			{/* Mobile overlay */}
@@ -90,7 +90,7 @@ export function Sidebar({ user }: SidebarProps) {
 							stroke="currentColor"
 							strokeWidth="2"
 							role="img"
-							aria-label="SkillBridge AI logo"
+							aria-label="SkillBridge logo"
 						>
 							<path
 								strokeLinecap="round"
@@ -99,7 +99,7 @@ export function Sidebar({ user }: SidebarProps) {
 							/>
 						</svg>
 					</div>
-					<span className="db-sidebar-logo-text">SkillBridge AI</span>
+					<span className="db-sidebar-logo-text">SkillBridge</span>
 					{/* Mobile close button */}
 					<button
 						type="button"
