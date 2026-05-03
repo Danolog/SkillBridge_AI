@@ -58,9 +58,10 @@ describe("ProjectReceipts", () => {
 		expect(screen.getByText("2 projektów")).toBeInTheDocument();
 	});
 
-	it("renders repo link when available", () => {
+	it("renders repo link as github.com/user/repo with the GitHub URL", () => {
 		render(<ProjectReceipts receipts={mockReceipts} />);
-		expect(screen.getByText("Repozytorium")).toBeInTheDocument();
+		const link = screen.getByText(/github\.com\/user\/repo/).closest("a");
+		expect(link).toHaveAttribute("href", "https://github.com/user/repo");
 	});
 
 	it("renders notebook link when available", () => {

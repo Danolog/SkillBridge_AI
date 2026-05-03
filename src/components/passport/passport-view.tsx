@@ -22,6 +22,7 @@ export interface PassportData {
 		status: "acquired" | "in_progress" | "missing";
 		marketPercentage?: number | null;
 	}>;
+	gapCount: number;
 	generatedAt: string;
 	projectReceipts?: ProjectReceipt[];
 }
@@ -40,8 +41,7 @@ export function PassportView({ data }: { data: PassportData }) {
 
 	const acquired = data.competencies.filter((c) => c.status === "acquired");
 	const inProgress = data.competencies.filter((c) => c.status === "in_progress");
-	const missing = data.competencies.filter((c) => c.status === "missing");
-	const total = data.competencies.length;
+	const totalRequired = data.competencies.length + data.gapCount;
 
 	const copyLink = async () => {
 		const publicUrl = `${window.location.origin}/passport/${data.id}`;
@@ -105,7 +105,8 @@ export function PassportView({ data }: { data: PassportData }) {
 						<div className="pp-stat-value">{acquired.length}</div>
 						<div className="pp-stat-label">Opanowane</div>
 						<div className="pp-stat-sub">
-							{total > 0 ? Math.round((acquired.length / total) * 100) : 0}% wszystkich kompetencji
+							{totalRequired > 0 ? Math.round((acquired.length / totalRequired) * 100) : 0}% wymagań
+							rynku
 						</div>
 					</div>
 					<div className="pp-stat-card yellow">
@@ -115,18 +116,19 @@ export function PassportView({ data }: { data: PassportData }) {
 						<div className="pp-stat-value">{inProgress.length}</div>
 						<div className="pp-stat-label">W trakcie nauki</div>
 						<div className="pp-stat-sub">
-							{total > 0 ? Math.round((inProgress.length / total) * 100) : 0}% wszystkich
-							kompetencji
+							{totalRequired > 0 ? Math.round((inProgress.length / totalRequired) * 100) : 0}%
+							wymagań rynku
 						</div>
 					</div>
 					<div className="pp-stat-card red">
 						<div className="pp-stat-icon red">
 							<XCircle size={24} />
 						</div>
-						<div className="pp-stat-value">{missing.length}</div>
+						<div className="pp-stat-value">{data.gapCount}</div>
 						<div className="pp-stat-label">Brakuje</div>
 						<div className="pp-stat-sub">
-							{total > 0 ? Math.round((missing.length / total) * 100) : 0}% do uzupelnienia
+							{totalRequired > 0 ? Math.round((data.gapCount / totalRequired) * 100) : 0}% do
+							uzupelnienia
 						</div>
 					</div>
 				</div>
@@ -141,7 +143,7 @@ export function PassportView({ data }: { data: PassportData }) {
 							<div>
 								<div className="pp-coverage-label">Pokrycie wymagan rynkowych</div>
 								<div className="pp-coverage-sublabel">
-									Na podstawie {total} kluczowych kompetencji dla {data.student.careerGoal}
+									Na podstawie {totalRequired} kluczowych kompetencji dla {data.student.careerGoal}
 								</div>
 							</div>
 						</div>
@@ -188,24 +190,6 @@ export function PassportView({ data }: { data: PassportData }) {
 						</div>
 						<div className="pp-comp-grid">
 							{inProgress.map((c) => (
-								<CompetencyCard key={c.name} {...c} />
-							))}
-						</div>
-					</div>
-				)}
-
-				{/* Missing */}
-				{missing.length > 0 && (
-					<div className="pp-comp-section">
-						<div className="pp-comp-section-header">
-							<div className="pp-comp-section-title">
-								<span className="section-dot red" />
-								Brakujace kompetencje
-							</div>
-							<span className="pp-comp-count-badge red">{missing.length} kompetencje</span>
-						</div>
-						<div className="pp-comp-grid">
-							{missing.map((c) => (
 								<CompetencyCard key={c.name} {...c} />
 							))}
 						</div>

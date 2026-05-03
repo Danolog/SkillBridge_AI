@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { competencies, passports, students, user } from "@/lib/db/schema";
+import { competencies, gaps, passports, students, user } from "@/lib/db/schema";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
@@ -25,9 +25,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 		where: eq(user.id, student.userId),
 	});
 
-	const studentCompetencies = await db.query.competencies.findMany({
-		where: eq(competencies.studentId, student.id),
-	});
+	const [studentCompetencies, studentGaps] = await Promise.all([
+		db.query.competencies.findMany({
+			where: eq(competencies.studentId, student.id),
+		}),
+		db.query.gaps.findMany({
+			where: eq(gaps.studentId, student.id),
+		}),
+	]);
 
 	return NextResponse.json({
 		id: passport.id,
@@ -44,6 +49,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 			status: c.status,
 			marketPercentage: c.marketPercentage,
 		})),
+		gapCount: studentGaps.length,
 		generatedAt: passport.updatedAt.toISOString(),
 	});
 }

@@ -1,10 +1,11 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PassportPublic } from "@/components/passport/passport-public";
 import type { PassportData } from "@/components/passport/passport-view";
 import { db } from "@/lib/db";
-import { competencies, passports, students, user } from "@/lib/db/schema";
+import { competencies, gaps, passports, projectSubmissions, students, user } from "@/lib/db/schema";
+import { calculateCoverage } from "@/lib/passport-utils";
 
 export async function generateMetadata({
 	params,
@@ -50,9 +51,33 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 		where: eq(user.id, student.userId),
 	});
 
-	const studentCompetencies = await db.query.competencies.findMany({
-		where: eq(competencies.studentId, student.id),
-	});
+	const [studentCompetencies, studentGaps, verifiedSubmissions] = await Promise.all([
+		db.query.competencies.findMany({
+			where: eq(competencies.studentId, student.id),
+		}),
+		db.query.gaps.findMany({
+			where: eq(gaps.studentId, student.id),
+		}),
+		db.query.projectSubmissions.findMany({
+			where: and(
+				eq(projectSubmissions.studentId, student.id),
+				eq(projectSubmissions.status, "verified"),
+			),
+			with: { project: true },
+		}),
+	]);
+
+	const projectReceipts = verifiedSubmissions.map((s) => ({
+		projectTitle: s.project.title,
+		projectLevel: s.project.level,
+		score: s.score ?? 0,
+		verifiedAt: (s.submittedAt ?? s.createdAt).toISOString(),
+		repoUrl: s.repoUrl,
+		notebookUrl: s.notebookUrl,
+		feedback: (s.aiReviewJson as Record<string, unknown>)?.review
+			? ((s.aiReviewJson as Record<string, Record<string, unknown>>).review.feedback as string)
+			: null,
+	}));
 
 	const data: PassportData = {
 		id: passport.id,
@@ -63,13 +88,15 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 			semester: student.semester,
 			careerGoal: student.careerGoal,
 		},
-		marketCoveragePercent: passport.marketCoveragePercent,
+		marketCoveragePercent: calculateCoverage(studentCompetencies, studentGaps.length),
 		competencies: studentCompetencies.map((c) => ({
 			name: c.name,
 			status: c.status,
 			marketPercentage: c.marketPercentage,
 		})),
+		gapCount: studentGaps.length,
 		generatedAt: passport.updatedAt.toISOString(),
+		projectReceipts,
 	};
 
 	return <PassportPublic data={data} />;

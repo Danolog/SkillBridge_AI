@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeForPrompt } from "@/lib/ai/sanitize";
 import { db } from "@/lib/db";
-import { competencies, gaps, jobMarketData, passports } from "@/lib/db/schema";
+import { competencies, gaps, jobMarketData } from "@/lib/db/schema";
 import { logError } from "@/lib/log";
 
 const GapResultSchema = z.object({
@@ -23,7 +23,6 @@ const GapResultSchema = z.object({
 			marketPercentage: z.number(),
 		}),
 	),
-	marketCoveragePercent: z.number(),
 });
 
 export async function generateGaps(
@@ -68,7 +67,6 @@ Zasady:
 - "important": 40-60% demand
 - "nice_to_have": <40% demand
 - competencyUpdates: aktualizuj status i marketPercentage dla kompetencji studenta
-- marketCoveragePercent: jaki % wymagań rynkowych student już pokrywa
 - 8-20 gaps, 15-40 competencyUpdates`,
 		});
 
@@ -96,15 +94,6 @@ Zasady:
 				})
 				.where(and(eq(competencies.studentId, studentId), eq(competencies.name, update.name)));
 		}
-
-		// Update passport market coverage
-		await db
-			.update(passports)
-			.set({
-				marketCoveragePercent: result.marketCoveragePercent,
-				updatedAt: new Date(),
-			})
-			.where(eq(passports.studentId, studentId));
 	} catch (err) {
 		logError("generate-gaps", err, { studentId });
 		throw err;

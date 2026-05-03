@@ -82,6 +82,7 @@ export default async function PassportPage() {
 			status: c.status,
 			marketPercentage: c.marketPercentage,
 		})),
+		gapCount: studentGaps.length,
 		generatedAt: passport.updatedAt.toISOString(),
 		projectReceipts,
 	};

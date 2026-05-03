@@ -29,6 +29,7 @@ const mockData = {
 		{ name: "TypeScript", status: "in_progress" as const, marketPercentage: 75 },
 		{ name: "Python", status: "missing" as const, marketPercentage: 40 },
 	],
+	gapCount: 1,
 	generatedAt: "2026-03-08T12:00:00.000Z",
 };
 
@@ -101,19 +102,28 @@ describe("PassportView", () => {
 		expect(screen.getByText("Brakuje")).toBeInTheDocument();
 	});
 
-	it("renders all competency names", () => {
+	it("renders names of acquired and in-progress competencies", () => {
 		render(<PassportView data={mockData} />);
 		expect(screen.getByText("JavaScript")).toBeInTheDocument();
 		expect(screen.getByText("React")).toBeInTheDocument();
 		expect(screen.getByText("TypeScript")).toBeInTheDocument();
-		expect(screen.getByText("Python")).toBeInTheDocument();
 	});
 
-	it("renders section headers for each competency group", () => {
+	it("renders section headers for acquired and in-progress groups", () => {
 		render(<PassportView data={mockData} />);
 		expect(screen.getByText("Opanowane kompetencje")).toBeInTheDocument();
 		expect(screen.getAllByText(/W trakcie nauki/).length).toBeGreaterThan(0);
-		expect(screen.getByText("Brakujace kompetencje")).toBeInTheDocument();
+	});
+
+	it("does not render a list section for missing competencies (only stat card count)", () => {
+		render(<PassportView data={mockData} />);
+		expect(screen.queryByText("Brakujace kompetencje")).not.toBeInTheDocument();
+	});
+
+	it("renders gap count from data.gapCount in the stat card", () => {
+		const data = { ...mockData, gapCount: 14 };
+		render(<PassportView data={data} />);
+		expect(screen.getByText("14")).toBeInTheDocument();
 	});
 
 	it("renders Kopiuj link button", () => {
@@ -182,17 +192,8 @@ describe("PassportView", () => {
 		expect(screen.queryByText("Opanowane kompetencje")).not.toBeInTheDocument();
 	});
 
-	it("does not render missing section when no missing competencies", () => {
-		const data = {
-			...mockData,
-			competencies: [{ name: "JavaScript", status: "acquired" as const, marketPercentage: 85 }],
-		};
-		render(<PassportView data={data} />);
-		expect(screen.queryByText("Brakujace kompetencje")).not.toBeInTheDocument();
-	});
-
 	it("handles empty competencies array", () => {
-		const data = { ...mockData, competencies: [], marketCoveragePercent: 0 };
+		const data = { ...mockData, competencies: [], gapCount: 0, marketCoveragePercent: 0 };
 		const { container } = render(<PassportView data={data} />);
 		const coverageValue = container.querySelector(".pp-coverage-value");
 		expect(coverageValue).toHaveTextContent("0%");

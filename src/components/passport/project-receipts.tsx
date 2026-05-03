@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, ChevronDown, ExternalLink } from "lucide-react";
+import { Award, ChevronDown, ExternalLink, Github } from "lucide-react";
 import { useState } from "react";
 
 export interface ProjectReceipt {
@@ -11,6 +11,12 @@ export interface ProjectReceipt {
 	repoUrl?: string | null;
 	notebookUrl?: string | null;
 	feedback?: string | null;
+}
+
+function shortenRepoUrl(url: string): string {
+	const match = url.match(/github\.com\/([^/]+\/[^/?#]+)/i);
+	if (!match) return url;
+	return `github.com/${match[1].replace(/\.git$/, "")}`;
 }
 
 export function ProjectReceipts({ receipts }: { receipts: ProjectReceipt[] }) {
@@ -53,7 +59,7 @@ function ReceiptCard({ receipt }: { receipt: ProjectReceipt }) {
 			<div className="pp-receipt-links">
 				{receipt.repoUrl && (
 					<a href={receipt.repoUrl} target="_blank" rel="noopener noreferrer">
-						<ExternalLink size={12} /> Repozytorium
+						<Github size={12} /> {shortenRepoUrl(receipt.repoUrl)}
 					</a>
 				)}
 				{receipt.notebookUrl && (

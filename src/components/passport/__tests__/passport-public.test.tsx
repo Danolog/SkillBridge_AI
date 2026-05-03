@@ -34,6 +34,7 @@ const mockData = {
 		{ name: "Spring", status: "in_progress" as const, marketPercentage: 70 },
 		{ name: "Docker", status: "missing" as const, marketPercentage: 65 },
 	],
+	gapCount: 1,
 	generatedAt: "2026-03-08T12:00:00.000Z",
 };
 
@@ -95,11 +96,10 @@ describe("PassportPublic", () => {
 		expect(fill).toHaveStyle({ width: "60%" });
 	});
 
-	it("renders all competency names", () => {
+	it("renders names of acquired and in-progress competencies", () => {
 		render(<PassportPublic data={mockData} />);
 		expect(screen.getByText("Java")).toBeInTheDocument();
 		expect(screen.getByText("Spring")).toBeInTheDocument();
-		expect(screen.getByText("Docker")).toBeInTheDocument();
 	});
 
 	it("renders acquired section header", () => {
@@ -112,9 +112,15 @@ describe("PassportPublic", () => {
 		expect(screen.getAllByText(/W trakcie nauki/).length).toBeGreaterThan(0);
 	});
 
-	it("renders missing section", () => {
+	it("does not render a list section for missing competencies (only stat card count)", () => {
 		render(<PassportPublic data={mockData} />);
-		expect(screen.getByText("Brakujace kompetencje")).toBeInTheDocument();
+		expect(screen.queryByText("Brakujace kompetencje")).not.toBeInTheDocument();
+	});
+
+	it("renders gap count from data.gapCount in the stat card", () => {
+		const data = { ...mockData, gapCount: 14 };
+		render(<PassportPublic data={data} />);
+		expect(screen.getByText("14")).toBeInTheDocument();
 	});
 
 	it("renders stat cards with correct counts", () => {
@@ -167,17 +173,8 @@ describe("PassportPublic", () => {
 		expect(screen.queryByText("Opanowane kompetencje")).not.toBeInTheDocument();
 	});
 
-	it("does not render missing section when none missing", () => {
-		const data = {
-			...mockData,
-			competencies: [{ name: "Java", status: "acquired" as const, marketPercentage: 80 }],
-		};
-		render(<PassportPublic data={data} />);
-		expect(screen.queryByText("Brakujace kompetencje")).not.toBeInTheDocument();
-	});
-
 	it("handles empty competencies gracefully", () => {
-		const data = { ...mockData, competencies: [], marketCoveragePercent: 0 };
+		const data = { ...mockData, competencies: [], gapCount: 0, marketCoveragePercent: 0 };
 		const { container } = render(<PassportPublic data={data} />);
 		const coverageValue = container.querySelector(".pp-coverage-value");
 		expect(coverageValue).toHaveTextContent("0%");

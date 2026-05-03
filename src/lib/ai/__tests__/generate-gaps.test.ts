@@ -50,7 +50,6 @@ const validResponse = {
 		},
 	],
 	competencyUpdates: [{ name: "Python", status: "acquired" as const, marketPercentage: 80 }],
-	marketCoveragePercent: 45,
 };
 
 describe("generateGaps", () => {
@@ -107,7 +106,7 @@ describe("generateGaps", () => {
 		expect(inserted.every((row) => row.studentId === "student-42")).toBe(true);
 	});
 
-	it("updates passport market coverage from AI output", async () => {
+	it("does not write marketCoveragePercent — passport coverage is owned by passport route", async () => {
 		const setSpy = vi.fn(() => ({ where: vi.fn() }));
 		mockUpdate.mockReturnValue({ set: setSpy } as never);
 
@@ -117,10 +116,7 @@ describe("generateGaps", () => {
 			const arg = call[0] as Record<string, unknown>;
 			return "marketCoveragePercent" in arg;
 		});
-		expect(passportUpdate).toBeDefined();
-		expect((passportUpdate?.[0] as { marketCoveragePercent: number }).marketCoveragePercent).toBe(
-			45,
-		);
+		expect(passportUpdate).toBeUndefined();
 	});
 
 	it("passes schema and prompt with competencies and career goal", async () => {
